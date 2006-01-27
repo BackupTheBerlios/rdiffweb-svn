@@ -11,7 +11,7 @@ if __name__ == "__main__":
       if os.getuid() != 0:
          print "Error: rdiffWeb must be run as root."
       else:
-         print """Error: rdiffWeb has been installed, but no configuration file exists. \nPlease run 'rdiffweb-config' to configure rdiffWeb."""
+         print """Error: rdiffWeb has been installed, but no configuration file exists. \nPlease run 'rdiff-web-config' to configure rdiffWeb."""
       import sys
       sys.exit(2)
 

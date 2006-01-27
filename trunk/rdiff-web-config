@@ -38,7 +38,7 @@ def addConfigFileLine(lineText):
 def fileSetup():
    print "File backend chosen.\n"
    #TODO: load default answers from existing config file, if any
-   if not os.access("/etc/rdiffweb/rdw.conf", os.F_OK):
+   if os.access("/etc/rdiffweb/rdw.conf", os.F_OK):
       os.unlink("/etc/rdiffweb/rdw.conf")
    addConfigFileLine("UserDB=File")
    print "A username and password will be required to log in."
