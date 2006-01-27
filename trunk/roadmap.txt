@@ -1,14 +1,14 @@
 Roadmap
 
-Version 0.1 - (3 weeks)
+Version 0.1 - (3 weeks) - released
 New interface design implemented, if somewhat rough
 Bug hunt
  * Security review - done
   * Each entry point
   * SQL injection
   * file access/permissions
- * Fix mysql connection problem - done - needs testing
- * Fix sporadic restore problems - done - needs testing
+ * Fix mysql connection problem - done
+ * Fix sporadic restore problems - done
  * Better error handling - done
 Installer - done
 
