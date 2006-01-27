@@ -1,0 +1,54 @@
+#!/usr/bin/python
+
+import cherrypy
+import rdiffWeb.rdw_config
+
+if __name__ == "__main__":
+
+   # First make sure we have a valid config file.  If not, tell the user to run the config script
+   if not rdiffWeb.rdw_config.getConfigFile():
+      import os
+      if os.getuid() != 0:
+         print "Error: rdiffWeb must be run as root."
+      else:
+         print """Error: rdiffWeb has been installed, but no configuration file exists. \nPlease run 'rdiffweb-config' to configure rdiffWeb."""
+      import sys
+      sys.exit(2)
+
+   # We import the rdiffWeb modules now instead of at the top of the file because it needs to access
+   # the config file, and the config file may not exist
+
+   import rdiffWeb.page_admin
+   import rdiffWeb.page_browse
+   import rdiffWeb.page_history
+   import rdiffWeb.page_locations
+   import rdiffWeb.page_recent
+   import rdiffWeb.page_restore
+
+   # OK, we're good to go.  Start the server.
+   server = rdiffWeb.page_locations.rdiffLocationsPage()
+
+   settings = {
+      'sessionFilter.on' : True,
+      'server' : {
+         'socketPort' : rdiffWeb.rdw_config.getConfigSetting("ServerName")
+      },
+      '/static' : {
+         'staticFilter.on' : True,
+         'staticFilter.dir': "static",
+         'sessionAuthenticateFilter.on' : False
+      },
+      '/': {
+         'sessionAuthenticateFilter.on' : True,
+         'sessionAuthenticateFilter.checkLoginAndPassword' : server.checkAuthentication
+      }
+   }
+   cherrypy.config.update(settings)
+   cherrypy.root = rdiffWeb.page_locations.rdiffLocationsPage()
+   cherrypy.root.browse = rdiffWeb.page_browse.rdiffBrowsePage()
+   cherrypy.root.restore = rdiffWeb.page_restore.rdiffRestorePage()
+   cherrypy.root.history = rdiffWeb.page_history.rdiffHistoryPage()
+   cherrypy.root.recent = rdiffWeb.page_recent.rdiffRecentPage()
+   cherrypy.root.admin = rdiffWeb.page_admin.rdiffAdminPage()
+   cherrypy.server.start()
+

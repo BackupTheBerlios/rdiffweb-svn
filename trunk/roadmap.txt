@@ -1,0 +1,45 @@
+Roadmap
+
+Version 0.1 - (3 weeks)
+New interface design implemented, if somewhat rough
+Bug hunt
+ * Security review - done
+  * Each entry point
+  * SQL injection
+  * file access/permissions
+ * Fix mysql connection problem - done - needs testing
+ * Fix sporadic restore problems - done - needs testing
+ * Better error handling - done
+Installer - done
+
+Version 0.2 - (2 weeks)
+Move toward unix project
+ * Daemon support
+   * Init script
+ * Packaging
+   * tar.gz
+
+Version 0.3 - (3 weeks)
+Status page
+RSS feed
+HTML interface cleanup
+ * Cute icons beside backups in locations page and history page
+
+Version 0.4 - (3 weeks)
+Folder restore support
+
+Version 0.5 - (2 weeks)
+ * Rewrite admin tools
+ * admin page should query user db module to determine module's capabilities and structure page based on those abilities
+
+
+More stuff?  Ideas?
+
+* rpm
+* deb
+* ebuild?
+* Logging options
+* Debug/devel commandline options
+* Ability to run as another user
+
+

@@ -1,0 +1,58 @@
+<!--StartDelete-->
+<html>
+<head>
+   <link rel="stylesheet" href="main.css" type="text/css" />
+</head>
+<body>
+<!--EndDelete-->
+<script type="text/javascript" language="javascript" src="/static/revisions_popup.js"></script>
+
+<h2>^title$</h2>
+<p>
+   <!--StartRepeat:parentDirs--> / <!--StartIncludeIf:parentPath--><a href=^parentPath$><!--EndIncludeIf:parentPath-->^parentDir$<!--StartIncludeIf:parentPath--></a><!--EndIncludeIf:parentPath--><!--EndRepeat:parentDirs-->
+</p>
+
+<table id="PopupTable">
+<thead>
+   <tr>
+      <td>Name</td>
+      <td>Size</td>
+      <td>Last Revision</td>
+   </tr>
+</thead>
+<tbody>
+   <!--StartRepeat:files-->
+   <!--StartIncludeIf:exists--><tr><!--EndIncludeIf:exists--><!--StartDeleteIf:exists--><tr style="color: #999" ><!--EndDeleteIf:exists-->
+      <td><a href="^fileRestoreUrl$">^filename$</a></td>
+      <td>^size$</td>
+      <td>^date$</td>
+   
+   <!-- ENTRIES WITH REVISIONS -->
+      <!--StartIncludeIf:hasPrevRevisions-->
+      <td>
+         <a class="PopupLink" href="javascript:void 0">Previous Revisions</a>
+      </td>
+      <td class="FlyoutContainer">
+         <div>
+         <table>
+            <!--StartRepeat:changeDates-->
+               <tr><td><a href="^changeDateUrl$">^changeDateStr$</a></td></tr>
+            <!--EndRepeat:changeDates-->
+         </table>
+         </div>
+      </td>
+      <!--EndIncludeIf:hasPrevRevisions-->
+   
+   
+   <!-- ENTRIES WITH NO REVISIONS -->
+      <!--StartIncludeIf:showNoRevisionsText-->
+      <td class="FlyoutContainer">
+         No Previous Revisions
+      </td>
+      <!--EndIncludeIf:showNoRevisionsText-->
+   
+      </tr>
+   <!--EndRepeat:files-->
+</tbody>
+</table>
+
