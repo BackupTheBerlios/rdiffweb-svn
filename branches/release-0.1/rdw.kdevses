@@ -1,0 +1,50 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!DOCTYPE KDevPrjSession>
+<KDevPrjSession>
+ <DocsAndViews NumberOfDocuments="13" >
+  <Doc0 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/roadmap.txt" >
+   <View0 line="1" Type="Source" />
+  </Doc0>
+  <Doc1 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/rdw_config.py" >
+   <View0 line="6" Type="Source" />
+  </Doc1>
+  <Doc2 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffweb-config" >
+   <View0 line="17" Type="Source" />
+  </Doc2>
+  <Doc3 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffweb" >
+   <View0 line="27" Type="Source" />
+  </Doc3>
+  <Doc4 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/page_browse.py" >
+   <View0 line="67" Type="Source" />
+  </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/page_restore.py" >
+   <View0 line="40" Type="Source" />
+  </Doc5>
+  <Doc6 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/rdw_helpers.py" >
+   <View0 line="19" Type="Source" />
+  </Doc6>
+  <Doc7 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/page_locations.py" >
+   <View0 line="27" Type="Source" />
+  </Doc7>
+  <Doc8 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/page_history.py" >
+   <View0 line="15" Type="Source" />
+  </Doc8>
+  <Doc9 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/page_main.py" >
+   <View0 line="31" Type="Source" />
+  </Doc9>
+  <Doc10 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/librdiff.py" >
+   <View0 line="0" Type="Source" />
+  </Doc10>
+  <Doc11 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/rdw_spider_repos.py" >
+   <View0 line="28" Type="Source" />
+  </Doc11>
+  <Doc12 NumberOfViews="1" URL="file:///home/joshn/projects/rdw/rdiffWeb/static/revisions_popup.js" >
+   <View0 line="10" Type="Source" />
+  </Doc12>
+ </DocsAndViews>
+ <pluginList>
+  <kdevbookmarks>
+   <bookmarks/>
+  </kdevbookmarks>
+ </pluginList>
+</KDevPrjSession>

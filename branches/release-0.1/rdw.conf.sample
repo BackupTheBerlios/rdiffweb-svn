@@ -1,0 +1,6 @@
+ServerName=localhost
+UserDB=file
+Username=user
+Password=pass
+UserRoot=/var/repos
+UserRepoPaths=/home_backup

@@ -1,0 +1,198 @@
+#!/usr/bin/python
+
+import os
+import sys
+import stat
+import rdiffWeb.rdw_config
+import rdiffWeb.db_mysql
+import rdiffWeb.rdw_spider_repos
+
+# legalOptions should be a list of legal values.  An empty list means all values are legal
+def promptUser(promptText, legalOptions, defaultOption, isNumericOption):
+   if defaultOption:
+      promptText = promptText + " [%s]" % str(defaultOption)
+   response = raw_input(promptText + ": ")
+   if not response:
+      return defaultOption
+
+   option = None
+   while True:
+      try:
+         if isNumericOption:
+            option = int(response)
+         else:
+            option = response
+         if legalOptions and not option in legalOptions:
+            raise ValueError
+         break
+      except ValueError:
+         response = raw_input(""""%s" is not a valid option.  Please enter your choice again: """ % response)
+
+   return option
+
+def addConfigFileLine(lineText):
+   if not os.access("/etc/rdiffweb", os.F_OK):
+      os.mkdir("/etc/rdiffweb", stat.S_IRWXU)
+   open("/etc/rdiffweb/rdw.conf", "a").write(lineText+"\n")
+
+def fileSetup():
+   print "File backend chosen.\n"
+   #TODO: load default answers from existing config file, if any
+   if os.access("/etc/rdiffweb/rdw.conf", os.F_OK):
+      os.unlink("/etc/rdiffweb/rdw.conf")
+   addConfigFileLine("UserDB=File")
+   print "A username and password will be required to log in."
+   username = promptUser("Enter the username", [], "", False)
+   addConfigFileLine("Username="+username)
+   password = promptUser("Enter the password", [], "", False)
+   addConfigFileLine("Password="+password)
+   addConfigFileLine("UserRoot=/") # For the file backend, just sent the user root to "/"; it's too confusing to try to explain
+
+   repositories = []
+   newRepo = ""
+   print "Finally, backup locations must be entered.  A backup location is the path to an rdiff-backup repository. \
+For example: /var/backups/nightly or /home/bill/backup.  Multiple backup locations may be entered.  Enter only \
+one backup location at a time; I will continue to prompt for more backup locations until a blank location is entered."
+   while not repositories or newRepo:
+      newRepo = promptUser("Enter backup location", [], "", False)
+      if not newRepo:
+         if not repositories:
+            print "At least one backup location must be entered."
+      else:
+         if not os.access(newRepo, os.F_OK):
+            response = promptUser("The backup location entered does not exist.  Are you sure you want to add it?", ["yes", "no"], "no", False)
+            if response == "no":
+               continue
+
+         repositories.append(newRepo)
+   reposString = "|".join(repositories)
+   addConfigFileLine("UserRepoPaths="+reposString)
+
+def executeQuery(sqlConnection, query, *args):
+   cursor = sqlConnection.cursor()
+   cursor.execute(query, *args)
+   results = cursor.fetchall()
+   return results
+
+def listDatabases(sqlConnection):
+   results = executeQuery(sqlConnection, "show databases")
+   databases = [ x[0] for x in results]
+   return databases
+
+def mysqlSetup():
+   print "MySQL backend chosen.\n"
+   # TODO: load default answers from existing config file, if any
+   try:
+      import MySQLdb
+   except ImportError:
+      print "Unable to load MySQLdb module.  Please install this module and try again."
+      sys.exit(2)
+
+   sqlHost = "localhost"
+   sqlUser = ""
+   sqlPassword = ""
+   sqlDatabase = ""
+   if os.access("/etc/rdiffweb/rdw.conf", os.F_OK):
+      try:
+         sqlHost = rdiffWeb.rdw_config.getConfigSetting("sqlHost")
+         sqlUser = rdiffWeb.rdw_config.getConfigSetting("sqlUsername")
+         sqlPassword = rdiffWeb.rdw_config.getConfigSetting("sqlPassword")
+      except rdiffWeb.rdw_config.SettingsError:
+         pass
+      os.unlink("/etc/rdiffweb/rdw.conf")
+   addConfigFileLine("UserDB=MySQL")
+   print "First, a connection to the MySQL server must be specified.  This includes host, username and password."
+
+   import MySQLdb
+   sqlConnection = None
+   while not sqlConnection:
+      sqlHost = promptUser("Enter the sql hostname", [], sqlHost, False)
+      sqlUser = promptUser("Enter the username", [], sqlUser, False)
+      sqlPassword = promptUser("Enter the password", [], sqlPassword, False)
+
+      # We try to connect to the database specified.  Catch the most common errors, and just
+      # let the rest crash out.  The user will have to fix the less common ones on their own.
+      try:
+         sqlConnection = MySQLdb.connect(host=sqlHost, user=sqlUser, passwd=sqlPassword)
+      except MySQLdb.OperationalError, error:
+         if error[0] == 2002:
+            print "It appears that MySQL is not running on the specified host. Please try again."
+            continue
+         if error[0] == 1045:
+            print "Authentication failed using the specified username/password. Please try again."
+            continue
+         raise error
+
+   addConfigFileLine("sqlHost="+sqlHost)
+   addConfigFileLine("sqlUsername="+sqlUser)
+   addConfigFileLine("sqlPassword="+sqlPassword)
+
+   while not sqlDatabase or sqlDatabase in listDatabases(sqlConnection):
+      if not sqlDatabase:
+         sqlDatabase = promptUser("Enter the name of the database", [], "rdiffweb", False)
+      else:
+         userPrompt = "The database '%s' already exists.  If you to continue, the database will be deleted and recreated, losing all data.  If you do not continue, you will be prompted for another database name.  Do you want to continue?" % sqlDatabase
+         response = promptUser(userPrompt, ["yes", "no"], "no", False)
+         if response == "yes":
+            executeQuery(sqlConnection, "drop database "+sqlDatabase)
+         else:
+            sqlDatabase = ""
+
+   executeQuery(sqlConnection, "create database "+sqlDatabase)
+   executeQuery(sqlConnection, "use "+sqlDatabase)
+
+   addConfigFileLine("sqlDatabase="+sqlDatabase)
+
+   mysqlUserDb = rdiffWeb.db_mysql.mysqlUserDB()
+   for createStatement in mysqlUserDb._getCreateStatements():
+      executeQuery(sqlConnection, createStatement)
+   
+   mysqlUserDb = rdiffWeb.db_mysql.mysqlUserDB()
+
+   print "\nYou must now add the first user account.  This user will have admin privileges, and therefore will have the ability to add/delete other users."
+   username = promptUser("Enter the username", [], "", False)
+   password = promptUser("Enter the password", [], "", False)
+   mysqlUserDb.addUser(username)
+   mysqlUserDb.setUserPassword(username, password)
+   print "\nEach user has a user root directory.  This root directory acts much as the system root directory.  All backup repositories must be within this directory.\nExamples: /var/backup/repos"
+   userRoot = ""
+   while True:
+      userRoot = promptUser("Enter the root directory for '%s'" % username, [], "", False)
+      if not os.access(userRoot, os.F_OK):
+         if promptUser("The entered directory does not exist.  Do you want to continue?", ["yes", "no"], "no", False) == "yes":
+            break
+      break
+   mysqlUserDb.setUserInfo(username, userRoot, True)
+   print "User added successfully."
+
+   prompt = "\nDo you want me to automatically search the user's root directory for backup repositories?"
+   response = promptUser(prompt, ["yes", "no"], "yes", False)
+   if response == "yes":
+      try:
+         repos = rdiffWeb.rdw_spider_repos.findReposForUsers(username, mysqlUserDb)
+      except OSError, error:
+         print "Unable to search repository: " + str(error)
+      else:
+         print "Repository search complete."
+
+if __name__ == "__main__":
+   # Because this script manipulates files in the /etc directory, it must be run as root.  Validate
+   # that we're being run as root, before the user has spent a lot of time entering data.
+   if os.getuid() != 0:
+      print "Error: this script must be run as root."
+      sys.exit(2)
+
+   print "Welcome to the rdiffWeb configuration script.\n"
+   backend = promptUser("""First, a configuration backend must be chosen.  There are two options: file and mysql.
+The file backend is simpler to set up, but is limited to a single user, and backup locations must be specified by hand (or by using this script).
+The mysql backend allows multiple users, automatic backup location spidering and storing of additional user data, but requires a MySQL server and the mysql-python package.
+Enter 1 for file, or 2 for mysql""", [1,2], 1, True)
+   print ""
+
+   if backend == 1:
+      fileSetup()
+   else:
+      mysqlSetup()
+
+   print "Configuration complete!"
+
