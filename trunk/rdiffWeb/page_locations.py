@@ -11,13 +11,13 @@ class rdiffLocationsPage(page_main.rdiffPage):
       repoList = []
       for userRepo in self.userDB.getUserRepoPaths(self.getUsername()):
          try:
-            repoHistory = librdiff.getBackupHistory(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), userRepo), 1)
+            repoHistory = librdiff.getLastBackupHistoryEntry(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), userRepo))
          except librdiff.FileError:
             repoSize = "0"
             repoDate = "Error"
          else:
-            repoSize = rdw_helpers.formatFileSizeStr(repoHistory[0].size)
-            repoDate = repoHistory[0].date.getDisplayString()
+            repoSize = rdw_helpers.formatFileSizeStr(repoHistory.size)
+            repoDate = repoHistory.date.getDisplayString()
          repoList.append({ "repoName" : userRepo,
                            "repoSize" : repoSize,
                            "repoDate" : repoDate,

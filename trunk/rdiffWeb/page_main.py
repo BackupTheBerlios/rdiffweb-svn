@@ -56,13 +56,13 @@ class rdiffPage:
       return self.compileTemplate("page_end.html")
 
    def writeTopLinks(self):
-      pages = [("recent", "Recent Backups"), ("doLogout", "Log out")]
+      pages = [("/status/", "Backup Status"), ("/doLogout", "Log out")]
       if self.userDB.userIsAdmin(self.getUsername()):
          pages.append(("admin", "Admin"))
       links = []
       for page in pages:
          (url, title) = page
-         links.append({"linkText" : title, "title": title, "linkUrl" : "/"+url})
+         links.append({"linkText" : title, "title": title, "linkUrl" : url})
       return self.compileTemplate("nav_bar.html", topLinks=links)
 
    def writeErrorPage(self, error):

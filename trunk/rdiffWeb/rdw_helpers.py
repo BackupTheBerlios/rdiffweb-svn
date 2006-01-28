@@ -68,7 +68,17 @@ class rdwTime:
       self.timeInSeconds = 0
       self.tzOffset = 0
 
-   def loadFromString(self, timeString):
+   def initFromCurrentUTC(self):
+      self.timeInSeconds = time.time()
+      self.tzOffset = 0
+
+   def initFromMidnightUTC(self, daysFromToday):
+      self.timeInSeconds = time.time()
+      self.timeInSeconds -= self.timeInSeconds % (24*60*60)
+      self.timeInSeconds += daysFromToday * 24*60*60
+      self.tzOffset = 0
+
+   def initFromString(self, timeString):
       try:
          date, daytime = timeString[:19].split("T")
          year, month, day = map(int, date.split("-"))
@@ -88,8 +98,20 @@ class rdwTime:
       except (TypeError, ValueError, AssertionError):
          raise ValueError
 
+   def getLocalDaysSinceEpoch(self):
+      return self.getLocalSeconds() // (24*60*60)
+
+   def getDaysSinceEpoch(self):
+      return self.getSeconds() // (24*60*60)
+
+   def getLocalSeconds(self):
+      return self.timeInSeconds
+      
    def getSeconds(self):
       return self.timeInSeconds+self.tzOffset
+
+   def getDateDisplayString(self):
+      return time.strftime("%Y-%m-%d", time.gmtime(self.timeInSeconds))
 
    def getDisplayString(self):
       return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(self.timeInSeconds))
@@ -118,6 +140,13 @@ class rdwTime:
    def __cmp__(self, other):
       return cmp(self.getSeconds(), other.getSeconds())
 
+class groupby(dict):
+    def __init__(self, seq, key=lambda x:x):
+        for value in seq:
+            k = key(value)
+            self.setdefault(k, []).append(value)
+    __iter__ = dict.iteritems
+    
 
 
 import unittest
@@ -135,18 +164,54 @@ class helpersTest(unittest.TestCase):
       myTime = rdwTime()
       assert myTime.getSeconds() == 0
       goodTimeString = "2005-12-25T23:34:15-05:00"
-      myTime.loadFromString(goodTimeString)
+      goodTimeStringNoTZ = "2005-12-26T04:34:15Z"
+      myTime.initFromString(goodTimeString)
+      
+      myTimeNoTZ = rdwTime()
+      myTimeNoTZ.initFromString(goodTimeStringNoTZ)
+      assert myTimeNoTZ.getSeconds() == myTimeNoTZ.getLocalSeconds()
+      assert myTime.getSeconds() == myTimeNoTZ.getSeconds()
 
       # Test correct load and retrieval
       assert myTime.getUrlString() == goodTimeString
+      assert myTime.getUrlStringNoTZ() == goodTimeStringNoTZ
       assert myTime.getDisplayString() == "2005-12-25 23:34:15"
+
+      assert myTime.getDateDisplayString() == "2005-12-25"
+      assert myTime.getLocalSeconds() < myTime.getSeconds()
+      assert myTime.getLocalSeconds() == 1135571655 - 5*60*60
       assert myTime.getSeconds() == 1135571655
+      assert myTime.getLocalDaysSinceEpoch() <= myTime.getDaysSinceEpoch()
+      assert myTime.getLocalDaysSinceEpoch() == 13142
+      assert myTime.getDaysSinceEpoch() == 13143
+
+      # Test boundaries on days since epoch
+      myTime.initFromString("2005-12-31T18:59:59-05:00")
+      assert myTime.getUrlStringNoTZ() == "2005-12-31T23:59:59Z"
+      assert myTime.getDaysSinceEpoch() == 13148
+      assert myTime.getLocalDaysSinceEpoch() == 13148
+
+      myTime.initFromString("2005-12-31T19:00:00-05:00")
+      assert myTime.getUrlStringNoTZ() == "2006-01-01T00:00:00Z"
+      assert myTime.getDaysSinceEpoch() == 13149
+      assert myTime.getLocalDaysSinceEpoch() == 13148
+
+      # Test UTC
+      myTime.initFromCurrentUTC()
+      assert myTime.getSeconds() == myTime.getLocalSeconds()
+      todayAsString = myTime.getDateDisplayString()
+
+      # Test midnight UTC
+      myTime.initFromMidnightUTC(0)
+      assert myTime.getSeconds() == myTime.getLocalSeconds()
+      assert myTime.getUrlString().find("T00:00:00Z") != -1
+      assert myTime.getDateDisplayString() == todayAsString
 
       # Make sure it rejects bad strings with the appropriate exceptions
       badTimeStrings = ["2005-12X25T23:34:15-05:00", "20005-12-25T23:34:15-05:00", "2005-12-25", "2005-12-25 23:34:15"]
       for badTime in badTimeStrings:
          try:
-            myTime.loadFromString(badTime)
+            myTime.initFromString(badTime)
          except ValueError:
             pass
          else:
@@ -164,6 +229,17 @@ class helpersTest(unittest.TestCase):
       assert(formatFileSizeStr(1024*1024*1024*1.2) == "1.2 GB")
       assert(formatFileSizeStr(1024*1024*1024*1.243) == "1.24 GB") # Round to one decimal
       assert(formatFileSizeStr(1024*1024*1024*1024*120) == "120 TB") # Round to one decimal
+
+   def testGroupBy(self):
+      numbers = [1,2,3,4,5,6,0,0,5,5]
+      groupedNumbers = groupby(numbers)
+      assert groupedNumbers == {0: [0, 0], 1: [1], 2: [2], 3: [3], 4: [4], 5: [5,5,5], 6: [6]}
+
+      projects = [{"name": "rdiffWeb", "language": "python"}, {"name": "CherryPy", "language": "python"},
+         {"name": "librsync", "language": "C"}]
+      projectsByLanguage = groupby(projects, lambda x: x["language"])
+      assert projectsByLanguage == {"C": [{"name": "librsync", "language": "C"}],
+         "python": [{"name": "rdiffWeb", "language": "python"}, {"name": "CherryPy", "language": "python"}]}
 
 if __name__ == "__main__":
    print "Called as standalone program; running unit tests..."

@@ -1,4 +1,17 @@
-<h2>Status</h2>
+<h2>Backup Status</h2>
 <p>
-This page will eventually be extended to include relevant status information, such as total used size, recently failed backups, etc.
+   <a href="/">Backup Locations</a>
 </p>
+<!--StartDeleteIf:messages--><p>There are no recent backups to display.</p><!--EndDeleteIf:messages-->
+<!--StartRepeat:messages-->
+<h3>^title$</h3>
+<div>^message$</div>
+   <!--StartIncludeIf:repoErrors-->
+   <p>There following repositories contain errors:</p>
+   <ul>
+      <!--StartRepeat:repoErrors-->
+      <li>^repo$: ^error$</li>
+      <!--EndRepeat:repoErrors-->
+   </ul>
+   <!--EndIncludeIf:repoErrors-->
+<!--EndRepeat:messages-->

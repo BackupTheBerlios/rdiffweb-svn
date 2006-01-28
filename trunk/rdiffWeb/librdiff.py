@@ -71,7 +71,7 @@ class incrementEntry:
       timeString = self.getDateString()
       returnTime = rdw_helpers.rdwTime()
       try:
-         returnTime.loadFromString(timeString)
+         returnTime.initFromString(timeString)
          return returnTime
       except ValueError:
          return None
@@ -156,7 +156,7 @@ class rdiffDirEntries:
       for backup in backupFiles:
          backupTimeString = rsplit(backup, ".", 3)[1]
          backupTime = rdw_helpers.rdwTime()
-         backupTime.loadFromString(backupTimeString)
+         backupTime.initFromString(backupTimeString)
          if not date or backupTime > date:
             return backupTime
       return backupFiles[-1]
@@ -246,7 +246,16 @@ def restoreFile(repoRoot, dirPath, filename, restoreDate):
    return rdiffOutputFile
 
 import gzip, re
-def getBackupHistory(repoRoot, numLatestEntries=-1):
+def getBackupHistory(repoRoot):
+   return _getBackupHistory(repoRoot)
+
+def getLastBackupHistoryEntry(repoRoot):
+   return _getBackupHistory(repoRoot, 1)[0]
+   
+def getBackupHistorySinceDate(repoRoot, date):
+   return _getBackupHistory(repoRoot, -1, date)
+
+def _getBackupHistory(repoRoot, numLatestEntries=-1, cutoffDate=None):
    """Returns a list of backupHistoryEntry's"""
    checkRepoPath(repoRoot, "")
 
@@ -263,6 +272,10 @@ def getBackupHistory(repoRoot, numLatestEntries=-1):
    entries = []
    for entryFile in curEntries:
       entry = incrementEntry(entryFile)
+      # compare local times because of discrepency between client/server time zones
+      if cutoffDate and entry.getDate().getLocalSeconds() < cutoffDate.getLocalSeconds():
+         continue
+
       try:
          errors = gzip.open(os.path.join(rdiffDir, entryFile), "r").read()
       except IOError:
@@ -396,11 +409,35 @@ class libRdiffTest(unittest.TestCase):
 
    def testGetBackupHistory(self):
       entries = getBackupHistory(self.destDir)
-      assert(len(entries) == 3)
+      assert len(entries) == 3
       for entry in entries:
-         assert(entry.errors == "")
-      assert(entries[0].size == 15)
-      assert(entries[1].size == 56)
+         assert entry.errors == ""
+      assert entries[0].size == 15
+      assert entries[1].size == 56
+      assert entries[2].size == 23
+
+      lastEntry = getLastBackupHistoryEntry(self.destDir)
+      assert lastEntry.size == 23
+
+      # Test that timezone differences are ignored
+      historyAsOf = lastEntry.date.getUrlString()
+      if "+" in historyAsOf:
+         historyAsOf = historyAsOf.replace("+", "-")
+      else:
+         historyAsOf = historyAsOf[:19] + "+" + historyAsOf[20:]
+
+      lastBackupTime = rdw_helpers.rdwTime()
+      lastBackupTime.initFromString(historyAsOf)
+      entries = getBackupHistorySinceDate(self.destDir, lastBackupTime)
+      assert len(entries) == 1
+
+      # Test that no backups are returned one second after the last backup
+      historyAsOf = historyAsOf[:18] + "1" + historyAsOf[19:]
+      postBackupTime = rdw_helpers.rdwTime()
+      postBackupTime.initFromString(historyAsOf)
+      assert lastBackupTime.getLocalSeconds() + 1 == postBackupTime.getLocalSeconds()
+      entries = getBackupHistorySinceDate(self.destDir, postBackupTime)
+      assert len(entries) == 0
 
    def testRestoreFile(self):
       entries = getBackupHistory(self.destDir)
