@@ -11,7 +11,7 @@ setup(name='rdiffWeb',
       packages=['rdiffWeb'],
       package_data={'rdiffWeb': ['templates/*.html', 'static/*']},
       data_files=[('/etc/rdiffweb', ['rdw.conf.sample']),
-                  #('/etc/init.d', ['init/rdiffweb'])
+                  ('/etc/init.d', ['init/rdiff-web'])
                   ],
       scripts=['rdiff-web', 'rdiff-web-config']
      )

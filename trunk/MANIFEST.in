@@ -1,4 +1,4 @@
-include COPYING rdiff-web rdiff-web-config rdw.conf.sample
+include COPYING rdiff-web rdiff-web-config rdw.conf.sample init/rdiff-web
 recursive-include rdiffWeb/templates *
 recursive-include rdiffWeb/static *
 recursive-include rdiffWeb *.py

@@ -106,7 +106,7 @@ class rdwTime:
 
    def getLocalSeconds(self):
       return self.timeInSeconds
-      
+
    def getSeconds(self):
       return self.timeInSeconds+self.tzOffset
 
@@ -146,7 +146,52 @@ class groupby(dict):
             k = key(value)
             self.setdefault(k, []).append(value)
     __iter__ = dict.iteritems
-    
+
+
+# Taken from ASPN: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/278731
+def daemonize():
+   """Detach a process from the controlling terminal and run it in the
+   background as a daemon. """
+   if (hasattr(os, "devnull")):
+      REDIRECT_TO = os.devnull
+   else:
+      REDIRECT_TO = "/dev/null"
+   MAXFD = 1024
+   UMASK = 0
+
+   try:
+      pid = os.fork()
+   except OSError, e:
+      raise Exception, "%s [%d]" % (e.strerror, e.errno)
+
+   if (pid == 0): # The first child.
+      os.setsid()
+      try:
+         pid = os.fork()   # Fork a second child.
+      except OSError, e:
+         raise Exception, "%s [%d]" % (e.strerror, e.errno)
+
+      if (pid == 0): # The second child.
+         os.umask(UMASK)
+      else:
+         os._exit(0) # Exit parent (the first child) of the second child.
+   else:
+      os._exit(0) # Exit parent of the first child.
+
+# Redirecting output to /dev/null fails when called from a script, for some reason...
+#    import resource      # Resource usage information.
+#    maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+#    if (maxfd == resource.RLIM_INFINITY):
+#       maxfd = MAXFD
+#    for fd in range(0, maxfd):
+#       try:
+#          os.close(fd)
+#       except OSError:   # ERROR, fd wasn't open to begin with (ignored)
+#          pass
+#    os.open(REDIRECT_TO, os.O_RDWR)  # standard input (0)
+#    os.dup2(0, 1)        # standard output (1)
+#    os.dup2(0, 2)        # standard error (2)
+   return(0)
 
 
 import unittest
@@ -166,7 +211,7 @@ class helpersTest(unittest.TestCase):
       goodTimeString = "2005-12-25T23:34:15-05:00"
       goodTimeStringNoTZ = "2005-12-26T04:34:15Z"
       myTime.initFromString(goodTimeString)
-      
+
       myTimeNoTZ = rdwTime()
       myTimeNoTZ.initFromString(goodTimeStringNoTZ)
       assert myTimeNoTZ.getSeconds() == myTimeNoTZ.getLocalSeconds()
