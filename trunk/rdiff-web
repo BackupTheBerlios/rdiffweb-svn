@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
 import cherrypy
+import getopt
 import rdiffWeb.rdw_config
+import sys
 
 if __name__ == "__main__":
 
@@ -15,9 +17,20 @@ if __name__ == "__main__":
       import sys
       sys.exit(2)
 
+
+   # Parse command line options
+   verbose = False
+   debug = False
+
+   opts, extraparams = getopt.getopt(sys.argv[1:], 'vd', ['debug', 'verbose'])
+   for option,value in opts:
+      if option in ['-d','--debug']:
+         debug = True
+      elif option in ['-v','--verbose']:
+         verbose = True
+
    # We import the rdiffWeb modules now instead of at the top of the file because it needs to access
    # the config file, and the config file may not exist
-
    import rdiffWeb.page_admin
    import rdiffWeb.page_browse
    import rdiffWeb.page_history
@@ -43,6 +56,12 @@ if __name__ == "__main__":
          'sessionAuthenticateFilter.checkLoginAndPassword' : server.checkAuthentication
       }
    }
+   if not debug:
+      settings['server.environment'] = "production"
+
+   if not verbose:
+      settings['server.logToScreen'] = False
+
    cherrypy.config.update(settings)
    cherrypy.root = rdiffWeb.page_locations.rdiffLocationsPage()
    cherrypy.root.browse = rdiffWeb.page_browse.rdiffBrowsePage()
