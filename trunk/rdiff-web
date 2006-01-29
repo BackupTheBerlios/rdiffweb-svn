@@ -60,11 +60,11 @@ if __name__ == "__main__":
       '/static' : {
          'staticFilter.on' : True,
          'staticFilter.dir': "static",
-         'sessionAuthenticateFilter.on' : False
+         'rdwAuthenticateFilter.on' : False
       },
       '/': {
-         'sessionAuthenticateFilter.on' : True,
-         'sessionAuthenticateFilter.checkLoginAndPassword' : server.checkAuthentication
+         'rdwAuthenticateFilter.on' : True,
+         'rdwAuthenticateFilter.checkLoginAndPassword' : server.checkAuthentication
       }
    }
    if not debug:
