@@ -5,15 +5,36 @@
 </head>
 <body>
 <!--EndDelete-->
+
+
 <h2>Backup Status</h2>
 <p>
    <a href="/">Backup Locations</a>
 </p>
 <!--StartDeleteIf:messages--><p>There are no recent backups to display.</p><!--EndDeleteIf:messages-->
 <!--StartRepeat:messages-->
-<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success">^title$</h3><!--EndIncludeIf:isSuccess-->
-<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure">^title$</h3><!--EndDeleteIf:isSuccess-->
-<div>^message$</div>
+
+<!-- BACKUP SUCCESS -->
+<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success">^title$</h3>
+<div>
+<p>The following backups have completed successfully:</p>
+<ul>
+   <!--StartRepeat:backups-->
+   <li>^displayDate$ - ^repo$ - ^size$</li>
+   <!--EndRepeat:backups-->
+</ul>
+</div>
+<!--EndIncludeIf:isSuccess-->
+
+<!-- BACKUP FAILURE -->
+<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure">^title$</h3>
+<div>
+   <p>The backup to <strong>^repo$</strong> on <strong>^displayDate$</strong>
+   failed with the following errors:</p>
+   <blockquote>^errors$</blockquote>
+   <p>Backup size: ^size$</p>
+</div>
+<!--EndDeleteIf:isSuccess-->
    <!--StartIncludeIf:repoErrors-->
    <p>There following repositories contain errors:</p>
    <ul>
@@ -23,6 +44,8 @@
    </ul>
    <!--EndIncludeIf:repoErrors-->
 <!--EndRepeat:messages-->
+
+
 <!--StartDelete-->
 </body>
 </html>

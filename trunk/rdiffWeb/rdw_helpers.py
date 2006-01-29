@@ -23,6 +23,14 @@ def decodeUrl(encodedUrl):
    if not encodedUrl: return encodedUrl
    return urllib.unquote_plus(encodedUrl)
 
+def encodeText(text):
+   if not text: return text
+   text = text.replace("&", "&amp;")
+   text = text.replace("<", "&lt;")
+   text = text.replace(">", "&gt;")
+   text = text.replace(">", "&quot;")
+   return text
+
 def removeDir(dir):
    for root, dirs, files in os.walk(dir, topdown=False):
       for name in files:

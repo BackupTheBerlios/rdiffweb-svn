@@ -12,7 +12,7 @@ Bug hunt
  * Better error handling - done
 Installer - done
 
-Version 0.2 - (2 weeks)
+Version 0.2 - (2 weeks) - done, not yet released
 Move toward unix project
  * Daemon support
    * Init script
@@ -22,15 +22,16 @@ Move toward unix project
 Version 0.3 - (3 weeks)
 Status page
 RSS feed
-HTML interface cleanup
+HTML interface cleanup/enhancements
  * Cute icons beside backups in locations page and history page
+ * Ability to (reverse) sort dir listings by name, size, last revision
 
 Version 0.4 - (3 weeks)
 Folder restore support
 
 Version 0.5 - (2 weeks)
  * Rewrite admin tools
- * admin page should query user db module to determine module's capabilities and structure page based on those abilities
+   * admin page should query user db module to determine module's capabilities and structure page based on those abilities
 
 
 More stuff?  Ideas?

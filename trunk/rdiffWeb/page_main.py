@@ -60,7 +60,7 @@ class rdiffPage:
    def writeTopLinks(self):
       pages = [("/status/", "Backup Status"), ("/doLogout", "Log out")]
       if self.userDB.userIsAdmin(self.getUsername()):
-         pages.append(("admin", "Admin"))
+         pages.append(("/admin", "Admin"))
       links = []
       for page in pages:
          (url, title) = page

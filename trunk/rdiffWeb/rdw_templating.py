@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import rdw_helpers
+import re
+
 class templateError:
    def __init__(self, errorString):
       self.errorString = errorString
@@ -10,7 +13,6 @@ class templateDataError(templateError):
 class templateDefinitionError(templateError):
    pass
 
-import re
 class templateParser:
    def __init__(self):
       self.replacements = []
@@ -60,7 +62,7 @@ class templateParser:
       matchText = match.group(1)
       if not matchText in replacements.keys():
          raise templateDataError(matchText)
-      return replacements[matchText]
+      return rdw_helpers.encodeText(replacements[matchText])
 
    def _handleDeleteIf(self, match):
       return self._handleConditionalInclude(match, False)

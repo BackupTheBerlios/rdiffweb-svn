@@ -9,7 +9,7 @@ class rdiffStatusPage(page_main.rdiffPage):
       userMessages = self._getUserMessages()
       page = self.startPage("Backup Status")
       page = page + self.writeTopLinks()
-      page = page + self.compileTemplate("status.html", messages=userMessages)      
+      page = page + self.compileTemplate("status.html", messages=userMessages)
       page = page + self.endPage()
       return page
    index.exposed = True
@@ -45,22 +45,20 @@ class rdiffStatusPage(page_main.rdiffPage):
 
       # generate failure messages
       for job in failedBackups:
-         date = job["date"]
          title = "Backup Failed: " + job["repo"]
-         message = self.compileTemplate("status_failure.html", **job)
-         userMessages.append({"isSuccess": 0, "date": date, "title": title, "message": message, "repoErrors": []})
+         job.update({"isSuccess": False, "title": title, "repoErrors": [], "backups": []})
+         userMessages.append(job)
 
       # generate success messages (publish date is most recent backup date)
       for day in successfulBackups.keys():
          date = successfulBackups[day][0]["date"]
          title = "Successful Backups for " + date.getDateDisplayString()
-         message = self.compileTemplate("status_success.html", backups=successfulBackups[day])
 
          # include repository errors in most recent entry
          if date == lastSuccessDate: repoErrorsForMsg = repoErrors
          else: repoErrorsForMsg = []
-         
-         userMessages.append({"isSuccess": 1, "date": date, "title": title, "message": message, "repoErrors": repoErrorsForMsg})
+
+         userMessages.append({"isSuccess": 1, "date": date, "title": title, "repoErrors": repoErrorsForMsg, "backups":successfulBackups[day]})
 
       # sort messages by date
       userMessages.sort(lambda x, y: cmp(y["date"], x["date"]))
