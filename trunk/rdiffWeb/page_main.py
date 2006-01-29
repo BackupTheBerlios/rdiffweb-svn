@@ -8,16 +8,18 @@ import db_mysql
 import rdw_templating
 import rdw_helpers
 import rdw_config
-from stunnelfilter import StunnelFilter
+from filter_stunnel import StunnelFilter
+from filter_authentication import rdwAuthenticationFilter
 
-def getTunnellingFilters():
+def getFilters():
+   filters = [rdwAuthenticationFilter()]
    if rdw_config.getConfigSetting("UseSTunnel").upper() == "TRUE":
-      return [StunnelFilter(rdw_config.getConfigSetting("VisibleServerName"))]
-   return []
+      filters.append(StunnelFilter(rdw_config.getConfigSetting("VisibleServerName")))
+   return filters
 
 
 class rdiffPage:
-   _cpFilterList = getTunnellingFilters()
+   _cpFilterList = getFilters()
    def __init__(self):
       self.userDB = self.getUserDBModule()
 
