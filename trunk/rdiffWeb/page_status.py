@@ -27,7 +27,7 @@ class rdiffStatusPage(page_main.rdiffPage):
       for repo in userRepos:
          try:
             backups = librdiff.getBackupHistorySinceDate(rdw_helpers.joinPaths(userRoot, repo), asOfDate)
-            allBackups = [{"repo": repo, "date": backup.date, "displayDate": backup.date.getDisplayString(),
+            allBackups += [{"repo": repo, "date": backup.date, "displayDate": backup.date.getDisplayString(),
                "size": rdw_helpers.formatFileSizeStr(backup.size), "errors": backup.errors} for backup in backups]
          except librdiff.FileError, error:
             repoErrors.append({"repo": repo, "error": error.getErrorString()})
@@ -48,7 +48,7 @@ class rdiffStatusPage(page_main.rdiffPage):
          date = job["date"]
          title = "Backup Failed: " + job["repo"]
          message = self.compileTemplate("status_failure.html", **job)
-         userMessages.append({"date": date, "title": title, "message": message, "repoErrors": []})
+         userMessages.append({"isSuccess": 0, "date": date, "title": title, "message": message, "repoErrors": []})
 
       # generate success messages (publish date is most recent backup date)
       for day in successfulBackups.keys():
@@ -60,7 +60,7 @@ class rdiffStatusPage(page_main.rdiffPage):
          if date == lastSuccessDate: repoErrorsForMsg = repoErrors
          else: repoErrorsForMsg = []
          
-         userMessages.append({"date": date, "title": title, "message": message, "repoErrors": repoErrorsForMsg})
+         userMessages.append({"isSuccess": 1, "date": date, "title": title, "message": message, "repoErrors": repoErrorsForMsg})
 
       # sort messages by date
       userMessages.sort(lambda x, y: cmp(y["date"], x["date"]))

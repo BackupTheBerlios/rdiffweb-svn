@@ -41,3 +41,12 @@ td.FlyoutContainer div
    color: black;
    background-color: silver;border: 1px solid gray;
 }
+
+.backupStatus_success
+{
+   color: green;
+}
+.backupStatus_failure
+{
+   color: red;
+}

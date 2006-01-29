@@ -1,10 +1,18 @@
+<!--StartDelete-->
+<html>
+<head>
+   <link rel="stylesheet" href="main.css" type="text/css" />
+</head>
+<body>
+<!--EndDelete-->
 <h2>Backup Status</h2>
 <p>
    <a href="/">Backup Locations</a>
 </p>
 <!--StartDeleteIf:messages--><p>There are no recent backups to display.</p><!--EndDeleteIf:messages-->
 <!--StartRepeat:messages-->
-<h3>^title$</h3>
+<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success">^title$</h3><!--EndIncludeIf:isSuccess-->
+<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure">^title$</h3><!--EndDeleteIf:isSuccess-->
 <div>^message$</div>
    <!--StartIncludeIf:repoErrors-->
    <p>There following repositories contain errors:</p>
@@ -15,3 +23,7 @@
    </ul>
    <!--EndIncludeIf:repoErrors-->
 <!--EndRepeat:messages-->
+<!--StartDelete-->
+</body>
+</html>
+<!--EndDelete-->
