@@ -60,9 +60,16 @@ class templateParser:
    def _replaceTemplateKeyword(self, match):
       replacements = self.replacements[-1]
       matchText = match.group(1)
+      multilineKeyword = "multiline:"
+      isMultiline = matchText.startswith(multilineKeyword)
+      if isMultiline:
+         matchText = matchText[len(multilineKeyword):]
       if not matchText in replacements.keys():
          raise templateDataError(matchText)
-      return rdw_helpers.encodeText(replacements[matchText])
+      replacementText = rdw_helpers.encodeText(replacements[matchText])
+      if isMultiline:
+         replacementText = replacementText.replace("\n", "\n<br/>")
+      return replacementText
 
    def _handleDeleteIf(self, match):
       return self._handleConditionalInclude(match, False)
