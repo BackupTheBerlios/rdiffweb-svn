@@ -1,6 +1,34 @@
 Roadmap
 
-Version 0.1 - (3 weeks) - released
+DONE, NOT YET RELEASED:
+Move toward unix project
+ * Daemon support
+   * Init script
+ * Packaging
+   * tar.gz
+Debug/devel commandline options
+Status page
+
+TODO:
+RSS feed
+HTML interface cleanup/enhancements
+ * Cute icons beside backups in locations page and history page
+ * Ability to (reverse) sort dir listings by name, size, last revision
+Folder restore support
+
+Rewrite admin tools
+ * admin page should query user db module to determine module's capabilities and structure page based on those abilities
+Rework admin functionality to only admin users within user root
+More packages
+ * rpm
+ * deb
+ * ebuild?
+* Logging options
+* Ability to run as another user
+
+
+RELEASED:
+Version 0.1 - (3 weeks)
 New interface design implemented, if somewhat rough
 Bug hunt
  * Security review - done
@@ -11,36 +39,4 @@ Bug hunt
  * Fix sporadic restore problems - done
  * Better error handling - done
 Installer - done
-
-Version 0.2 - (2 weeks) - done, not yet released
-Move toward unix project
- * Daemon support
-   * Init script
- * Packaging
-   * tar.gz
-
-Version 0.3 - (3 weeks)
-Status page
-RSS feed
-HTML interface cleanup/enhancements
- * Cute icons beside backups in locations page and history page
- * Ability to (reverse) sort dir listings by name, size, last revision
-
-Version 0.4 - (3 weeks)
-Folder restore support
-
-Version 0.5 - (2 weeks)
- * Rewrite admin tools
-   * admin page should query user db module to determine module's capabilities and structure page based on those abilities
-
-
-More stuff?  Ideas?
-
-* rpm
-* deb
-* ebuild?
-* Logging options
-* Debug/devel commandline options
-* Ability to run as another user
-
 

@@ -28,7 +28,7 @@ def encodeText(text):
    text = text.replace("&", "&amp;")
    text = text.replace("<", "&lt;")
    text = text.replace(">", "&gt;")
-   text = text.replace(">", "&quot;")
+   text = text.replace("\"", "&quot;")
    return text
 
 def removeDir(dir):
@@ -293,6 +293,10 @@ class helpersTest(unittest.TestCase):
       projectsByLanguage = groupby(projects, lambda x: x["language"])
       assert projectsByLanguage == {"C": [{"name": "librsync", "language": "C"}],
          "python": [{"name": "rdiffWeb", "language": "python"}, {"name": "CherryPy", "language": "python"}]}
+
+
+   def testEncodeText(self):
+      assert encodeText("<>&\"") == "&lt;&gt;&amp;&quot;"
 
 if __name__ == "__main__":
    print "Called as standalone program; running unit tests..."
