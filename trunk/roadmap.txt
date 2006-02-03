@@ -11,10 +11,11 @@ Status page
 
 TODO:
 RSS feed
+Folder restore support
 HTML interface cleanup/enhancements
  * Cute icons beside backups in locations page and history page
  * Ability to (reverse) sort dir listings by name, size, last revision
-Folder restore support
+ * Warning if the user views repo while backing up
 
 Rewrite admin tools
  * admin page should query user db module to determine module's capabilities and structure page based on those abilities

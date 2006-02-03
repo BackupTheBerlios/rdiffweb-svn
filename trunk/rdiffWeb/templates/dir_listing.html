@@ -11,7 +11,12 @@
 <p>
    <!--StartRepeat:parentDirs--> / <!--StartIncludeIf:parentPath--><a href=^parentPath$><!--EndIncludeIf:parentPath-->^parentDir$<!--StartIncludeIf:parentPath--></a><!--EndIncludeIf:parentPath--><!--EndRepeat:parentDirs-->
 </p>
+<p>
+<!--StartIncludeIf:restoreUrl--><a href="^restoreUrl$">Download folder contents as zip file</a><!--EndIncludeIf:restoreUrl-->
+<!--StartIncludeIf:viewUrl--><a href="^viewUrl$">View folder contents</a><!--EndIncludeIf:viewUrl-->
+</p>
 
+<!--StartIncludeIf:restoreUrl-->
 <table id="PopupTable">
 <thead>
    <tr>
@@ -26,9 +31,9 @@
       <td><a href="^fileRestoreUrl$">^filename$</a></td>
       <td>^size$</td>
       <td>^date$</td>
-   
-   <!-- ENTRIES WITH REVISIONS -->
+
       <!--StartIncludeIf:hasPrevRevisions-->
+   <!-- ENTRIES WITH REVISIONS -->
       <td>
          <a class="PopupLink" href="javascript:void 0">Previous Revisions</a>
       </td>
@@ -42,17 +47,31 @@
          </div>
       </td>
       <!--EndIncludeIf:hasPrevRevisions-->
-   
-   
-   <!-- ENTRIES WITH NO REVISIONS -->
       <!--StartIncludeIf:showNoRevisionsText-->
+   <!-- ENTRIES WITH NO REVISIONS -->
       <td class="FlyoutContainer">
          No Previous Revisions
       </td>
       <!--EndIncludeIf:showNoRevisionsText-->
-   
       </tr>
    <!--EndRepeat:files-->
 </tbody>
 </table>
+<!--EndIncludeIf:restoreUrl-->
 
+<!--StartIncludeIf:viewUrl-->
+<table>
+<thead>
+   <tr>
+      <td>Choose a backup date to restore as of:</td>
+   </tr>
+</thead>
+<tbody>
+   <!--StartRepeat:restoreDates-->
+   <tr>
+      <td><a href="^dirRestoreUrl$">^dateStr$</a></td>
+   </tr>
+   <!--EndRepeat:restoreDates-->
+</tbody>
+</table>
+<!--EndIncludeIf:viewUrl-->

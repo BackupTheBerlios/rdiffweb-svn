@@ -7,10 +7,11 @@ import urllib
 
 
 class rdiffBrowsePage(page_main.rdiffPage):
-   def index(self, repo="", path=""):
+   def index(self, repo="", path="", restore=""):
 
       repo = rdw_helpers.decodeUrl(repo)
       path = rdw_helpers.decodeUrl(path)
+      restore = rdw_helpers.decodeUrl(restore)
       try:
          rdw_helpers.ensurePathValid(repo)
          rdw_helpers.ensurePathValid(path)
@@ -24,50 +25,64 @@ class rdiffBrowsePage(page_main.rdiffPage):
 
       # Build "parent directories" links
       parentDirs = [{ "parentPath" : self.buildLocationsUrl(), "parentDir" : "Backup Locations" }]
-      parentDirs.append({ "parentPath" : self.buildBrowseUrl(repo, "/"), "parentDir" : repo.lstrip("/") })
+      parentDirs.append({ "parentPath" : self.buildBrowseUrl(repo, "/", False), "parentDir" : repo.lstrip("/") })
       parentDirPath = "/"
       for parentDir in path.split("/"):
          if parentDir:
             parentDirPath = joinPaths(parentDirPath, parentDir)
-            parentDirs.append({ "parentPath" : self.buildBrowseUrl(repo, parentDirPath), "parentDir" : parentDir })
+            parentDirs.append({ "parentPath" : self.buildBrowseUrl(repo, parentDirPath, False), "parentDir" : parentDir })
 
       parentDirs[-1]["parentPath"] = "" # Clear link for last parent, so it doesn't show it as a link
 
-      # Get list of actual directory entries
-      try:
-         fullRepoPath = joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)
-         libEntries = librdiff.getDirEntries(fullRepoPath, path)
-      except librdiff.FileError, error:
-         return self.writeErrorPage(str(error))
+      restoreUrl = ""
+      viewUrl = ""
+      if restore == "T":
+         title = "Restore "+repo
+         viewUrl = self.buildBrowseUrl(repo, path, False)
+         restoreDates = librdiff.getDirRestoreDates(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo), path)
+         restoreDates.reverse() # sort latest first
+         restoreDates = [ { "dateStr" : x.getDisplayString(), "dirRestoreUrl" : self.buildRestoreUrl(repo, path, x) }
+                         for x in restoreDates ]
+         entries = []
+      else:
+         title = "Browse "+repo
+         restoreUrl = self.buildBrowseUrl(repo, path, True)
+         restoreDates = []
 
-      entries = []
-      for libEntry in libEntries:
-         entryLink = ""
-         if libEntry.isDir:
-            entryLink = self.buildBrowseUrl(repo, joinPaths(path, libEntry.name))
-            changeDates = []
-         else:
-            entryLink = self.buildRestoreUrl(repo, joinPaths(path, libEntry.name), libEntry.changeDates[-1])
-            entryChangeDates = libEntry.changeDates[:-1]
-            entryChangeDates.reverse()
-            changeDates = [ { "changeDateUrl" : self.buildRestoreUrl(repo, joinPaths(path, libEntry.name), x),
-                              "changeDateStr" : x.getDisplayString() } for x in entryChangeDates]
+         # Get list of actual directory entries
+         try:
+            fullRepoPath = joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)
+            libEntries = librdiff.getDirEntries(fullRepoPath, path)
+         except librdiff.FileError, error:
+            return self.writeErrorPage(str(error))
 
-         showNoRevisionsText = (len(changeDates) == 0) and (not libEntry.isDir)
-         entries.append({ "filename" : libEntry.name,
-                          "fileRestoreUrl" : entryLink,
-                          "exists" : libEntry.exists,
-                          "date" : libEntry.changeDates[-1].getDisplayString(),
-                          "size" : rdw_helpers.formatFileSizeStr(libEntry.fileSize),
-                          "hasPrevRevisions" : len(changeDates) > 0,
-                          "showNoRevisionsText" : showNoRevisionsText,
-                          "changeDates" : changeDates })
+         entries = []
+         for libEntry in libEntries:
+            entryLink = ""
+            if libEntry.isDir:
+               entryLink = self.buildBrowseUrl(repo, joinPaths(path, libEntry.name), False)
+               changeDates = []
+            else:
+               entryLink = self.buildRestoreUrl(repo, joinPaths(path, libEntry.name), libEntry.changeDates[-1])
+               entryChangeDates = libEntry.changeDates[:-1]
+               entryChangeDates.reverse()
+               changeDates = [ { "changeDateUrl" : self.buildRestoreUrl(repo, joinPaths(path, libEntry.name), x),
+                                 "changeDateStr" : x.getDisplayString() } for x in entryChangeDates]
+
+            showNoRevisionsText = (len(changeDates) == 0) and (not libEntry.isDir)
+            entries.append({ "filename" : libEntry.name,
+                           "fileRestoreUrl" : entryLink,
+                           "exists" : libEntry.exists,
+                           "date" : libEntry.changeDates[-1].getDisplayString(),
+                           "size" : rdw_helpers.formatFileSizeStr(libEntry.fileSize),
+                           "hasPrevRevisions" : len(changeDates) > 0,
+                           "showNoRevisionsText" : showNoRevisionsText,
+                           "changeDates" : changeDates })
 
       # Start page
-      title = "Browse "+repo
       page = self.startPage(title)
       page = page + self.writeTopLinks()
-      page = page + self.compileTemplate("dir_listing.html", title=title, files=entries, parentDirs=parentDirs)
+      page = page + self.compileTemplate("dir_listing.html", title=title, files=entries, parentDirs=parentDirs, restoreUrl=restoreUrl, viewUrl=viewUrl, restoreDates=restoreDates)
       page = page + self.endPage()
       return page
 

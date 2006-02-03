@@ -24,8 +24,11 @@ class rdiffPage:
       self.userDB = self.getUserDBModule()
 
    ############################## HELPER FUNCTIONS ###################################
-   def buildBrowseUrl(self, repo, path):
-      return "/browse/?repo="+rdw_helpers.encodeUrl(repo)+"&path="+rdw_helpers.encodeUrl(path)
+   def buildBrowseUrl(self, repo, path, isRestoreView):
+      url = "/browse/?repo="+rdw_helpers.encodeUrl(repo)+"&path="+rdw_helpers.encodeUrl(path)
+      if isRestoreView:
+         url = url + "&restore=T"
+      return url
 
    def buildRestoreUrl(self, repo, path, date):
       return "/restore/?repo="+rdw_helpers.encodeUrl(repo)+"&path="+rdw_helpers.encodeUrl(path)+"&date="+rdw_helpers.encodeUrl(date.getUrlString())

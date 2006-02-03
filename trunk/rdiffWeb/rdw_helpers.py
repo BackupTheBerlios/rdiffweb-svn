@@ -1,6 +1,12 @@
 #!/usr/bin/python
 
-import os, time, datetime, re, calendar, urllib
+import calendar
+import datetime
+import os
+import re
+import time
+import urllib
+import zipfile
 
 def joinPaths(parentPath, *args):
    args = [x.lstrip("/") for x in args]
@@ -201,6 +207,19 @@ def daemonize():
 #    os.dup2(0, 2)        # standard error (2)
    return(0)
 
+def recursiveZipDir(dirPath, zipFilename):
+   assert os.path.isdir(dirPath)
+
+   dirPath = os.path.normpath(dirPath)
+
+   zipObj = zipfile.ZipFile(zipFilename, "w", zipfile.ZIP_DEFLATED)
+   for root, dirs, files in os.walk(dirPath, topdown=True):
+      for name in files:
+         fullPath = joinPaths(root, name)
+         assert fullPath.startswith(dirPath)
+         relPath = fullPath[len(dirPath):]
+         zipObj.write(fullPath, relPath)
+
 
 import unittest
 class helpersTest(unittest.TestCase):
@@ -297,6 +316,34 @@ class helpersTest(unittest.TestCase):
 
    def testEncodeText(self):
       assert encodeText("<>&\"") == "&lt;&gt;&amp;&quot;"
+
+   def testZipDir(self):
+      import tempfile
+      tempDir = tempfile.mkdtemp()
+      open(joinPaths(tempDir, "test.txt"), "w").write("test1")
+      open(joinPaths(tempDir, "test2.txt"), "w").write("test22")
+      os.mkdir(joinPaths(tempDir, "subdir"))
+      open(joinPaths(tempDir, "subdir", "test3.txt"), "w").write("test333")
+
+      zipFile = tempDir+".zip"
+      recursiveZipDir(tempDir, zipFile)
+      self._validateZippedDir(zipFile)
+      recursiveZipDir(tempDir+"/", zipFile)
+      self._validateZippedDir(zipFile)
+      recursiveZipDir("/"+tempDir, zipFile)
+      self._validateZippedDir(zipFile)
+
+      os.unlink(zipFile)
+      removeDir(tempDir)
+
+   def _validateZippedDir(self, zipFile):
+      zipObj = zipfile.ZipFile(zipFile, "r")
+      contents = zipObj.infolist()
+      assert len(contents) == 3
+      contents = [ (x.filename, x.file_size) for x in contents ]
+      assert ("/test.txt", 5) in contents
+      assert ("/test2.txt", 6) in contents
+      assert ("/subdir/test3.txt", 7) in contents
 
 if __name__ == "__main__":
    print "Called as standalone program; running unit tests..."

@@ -232,17 +232,25 @@ def getDirEntries(repoRoot, dirPath):
    return entriesList
 
 import tempfile
-def restoreFile(repoRoot, dirPath, filename, restoreDate):
+def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate):
    """ returns a file path to the file.  User is responsible for deleting file, as well as containing dir, after use. """
    checkRepoPath(repoRoot, joinPaths(dirPath, filename))
 
+   restoredFilename = filename
+   if restoredFilename == "/":
+      restoredFilename = "(root)"
+
    fileToRestore = joinPaths(repoRoot, dirPath, filename)
    dateString = str(restoreDate.getSeconds())
-   rdiffOutputFile = joinPaths(tempfile.mkdtemp(), filename) # TODO: make so this includes the username
+   rdiffOutputFile = joinPaths(tempfile.mkdtemp(), restoredFilename) # TODO: make so this includes the username
    args = [ "rdiff-backup", "--restore-as-of="+dateString, fileToRestore, rdiffOutputFile ]
    os.spawnvp(os.P_WAIT, args[0], args)
    if not os.access(rdiffOutputFile, os.F_OK):
       raise UnknownError()
+   if os.path.isdir(rdiffOutputFile):
+      rdw_helpers.recursiveZipDir(rdiffOutputFile, rdiffOutputFile+".zip")
+      rdw_helpers.removeDir(rdiffOutputFile)
+      rdiffOutputFile = rdiffOutputFile+".zip"
    return rdiffOutputFile
 
 import gzip, re
@@ -251,7 +259,7 @@ def getBackupHistory(repoRoot):
 
 def getLastBackupHistoryEntry(repoRoot):
    return _getBackupHistory(repoRoot, 1)[0]
-   
+
 def getBackupHistorySinceDate(repoRoot, date):
    return _getBackupHistory(repoRoot, -1, date)
 
@@ -293,6 +301,26 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, cutoffDate=None):
       entries.append(newEntry)
 
    return entries
+
+def getDirRestoreDates(repo, path):
+   backupHistory = [ x.date for x in getBackupHistory(repo) ]
+
+   if path != "/":
+      (parentPath, dirName) = os.path.split(path)
+      dirListing = getDirEntries(repo, parentPath)
+      entries = filter(lambda x: x.name == dirName, dirListing)
+      if not entries:
+         raise DoesNotExistError
+      entry = entries[0]
+
+      # Don't allow restores before the dir existed
+      backupHistory = filter(lambda x: x > entry.changeDates[0], backupHistory)
+
+      if not entry.exists:
+         # If the dir has been deleted, don't allow restores after its deletion
+         backupHistory = filter(lambda x: x < entry.changeDates[-1], backupHistory)
+
+   return backupHistory
 
 
 ##################### Unit Tests #########################
@@ -399,7 +427,7 @@ class libRdiffTest(unittest.TestCase):
          assert(unsortedDates == entry.changeDates)
 
       # Tests that dates on files that exist currently are correct
-      restoredFilePath = restoreFile(self.destDir, "/", self.file2, entries[1].changeDates[0]) # when file was created
+      restoredFilePath = restoreFileOrDir(self.destDir, "/", self.file2, entries[1].changeDates[0]) # when file was created
       assert(open(restoredFilePath, "r").read() == "now in the second file\n")
       self.cleanRestoredFile(restoredFilePath)
 
@@ -441,10 +469,10 @@ class libRdiffTest(unittest.TestCase):
 
    def testRestoreFile(self):
       entries = getBackupHistory(self.destDir)
-      restoredFilePath = restoreFile(self.destDir, "/", self.file1, entries[0].date)
+      restoredFilePath = restoreFileOrDir(self.destDir, "/", self.file1, entries[0].date)
       assert(open(restoredFilePath, "r").read() == "some text here\n")
       self.cleanRestoredFile(restoredFilePath)
-      restoredFilePath = restoreFile(self.destDir, "/", self.file1, entries[1].date)
+      restoredFilePath = restoreFileOrDir(self.destDir, "/", self.file1, entries[1].date)
       assert(open(restoredFilePath, "r").read() == "some text here\nand some more text")
       self.cleanRestoredFile(restoredFilePath)
 

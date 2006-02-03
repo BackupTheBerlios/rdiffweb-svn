@@ -21,7 +21,7 @@ class rdiffLocationsPage(page_main.rdiffPage):
          repoList.append({ "repoName" : userRepo,
                            "repoSize" : repoSize,
                            "repoDate" : repoDate,
-                           "repoBrowseUrl" : self.buildBrowseUrl(userRepo, "/"),
+                           "repoBrowseUrl" : self.buildBrowseUrl(userRepo, "/", False),
                            "repoHistoryUrl" : self.buildHistoryUrl(userRepo) })
       page = page + self.compileTemplate("repo_listing.html", title="browse", repos=repoList)
       page = page + self.endPage()

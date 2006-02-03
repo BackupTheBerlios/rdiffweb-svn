@@ -28,12 +28,12 @@ class rdiffRestorePage(page_main.rdiffPage):
 
       try:
          restoreTime = rdw_helpers.rdwTime()
-         restoreTime.loadFromString(date)
+         restoreTime.initFromString(date)
          (path, file) = os.path.split(path)
          if not file:
             file = path
             path = "/"
-         filePath = librdiff.restoreFile(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo), path, file, restoreTime)
+         filePath = librdiff.restoreFileOrDir(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo), path, file, restoreTime)
       except librdiff.FileError, error:
          return self.writeErrorPage(error.getErrorString())
       except ValueError:
