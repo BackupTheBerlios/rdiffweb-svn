@@ -122,34 +122,46 @@ class rdwTime:
       return self.timeInSeconds
 
    def getSeconds(self):
-      return self.timeInSeconds+self.tzOffset
+      return self.timeInSeconds-self.tzOffset
 
    def getDateDisplayString(self):
       return time.strftime("%Y-%m-%d", time.gmtime(self.timeInSeconds))
 
    def getDisplayString(self):
-      return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(self.timeInSeconds))
+      return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(self.getLocalSeconds()))
 
    def getUrlString(self):
-      return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self.timeInSeconds))+self.getTimeZoneString()
+      return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self.getLocalSeconds()))+self.getTimeZoneString()
 
    def getUrlStringNoTZ(self):
-      return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self.timeInSeconds+self.tzOffset))+"Z"
+      return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self.getSeconds()))+"Z"
 
    def getTimeZoneString(self):
       if not self.tzOffset: return "Z"
 
-      hours, minutes = map(abs, divmod(self.tzOffset/60, 60))
+      hours, minutes = divmod(abs(self.tzOffset)/60, 60)
       assert 0 <= hours <= 23
       assert 0 <= minutes <= 59
-      return "-%02d:%02d" % (hours, minutes)
+      
+      if self.tzOffset > 0:
+         plusMinus = "+"
+      else:
+         plusMinus = "-"
+
+      return plusMinus + "%02d:%02d" % (hours, minutes)
 
    def tzdtoseconds(self, tzd):
-      """Given w3 compliant TZD, return how far ahead UTC is"""
+      """Given w3 compliant TZD, converts it to number of seconds from UTC"""
       if tzd == "Z": return 0
       assert len(tzd) == 6 # only accept forms like +08:00 for now
       assert (tzd[0] == "-" or tzd[0] == "+") and tzd[3] == ":"
-      return -60 * (60 * int(tzd[:3]) + int(tzd[4:]))
+
+      if tzd[0] == "+":
+         plusMinus = 1
+      else:
+         plusMinus = -1
+
+      return plusMinus * 60 * (60 * int(tzd[1:3]) + int(tzd[4:]))
 
    def __cmp__(self, other):
       return cmp(self.getSeconds(), other.getSeconds())
@@ -256,6 +268,21 @@ class helpersTest(unittest.TestCase):
       assert myTime.getLocalDaysSinceEpoch() <= myTime.getDaysSinceEpoch()
       assert myTime.getLocalDaysSinceEpoch() == 13142
       assert myTime.getDaysSinceEpoch() == 13143
+
+      goodTimeString = "2005-12-25T23:04:15-05:30"
+      myTime.initFromString(goodTimeString)
+      assert myTime.getUrlString() == goodTimeString
+      assert myTime.getUrlStringNoTZ() == goodTimeStringNoTZ
+
+      goodTimeString = "2005-12-26T09:34:15+05:00"
+      myTime.initFromString(goodTimeString)
+      assert myTime.getUrlString() == goodTimeString
+      assert myTime.getUrlStringNoTZ() == goodTimeStringNoTZ
+
+      goodTimeString = "2005-12-26T10:04:15+05:30"
+      myTime.initFromString(goodTimeString)
+      assert myTime.getUrlString() == goodTimeString
+      assert myTime.getUrlStringNoTZ() == goodTimeStringNoTZ
 
       # Test boundaries on days since epoch
       myTime.initFromString("2005-12-31T18:59:59-05:00")
