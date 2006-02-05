@@ -65,6 +65,9 @@ if __name__ == "__main__":
       '/': {
          'rdwAuthenticateFilter.on' : True,
          'rdwAuthenticateFilter.checkLoginAndPassword' : server.checkAuthentication
+      },
+      '/status/feed': {
+         'rdwAuthenticateFilter.method' : 'HTTP Header'
       }
    }
    if not debug:

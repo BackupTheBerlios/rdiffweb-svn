@@ -136,9 +136,19 @@ class rdwTime:
    def getUrlStringNoTZ(self):
       return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self.getSeconds()))+"Z"
 
-   def getTimeZoneString(self):
-      if not self.tzOffset: return "Z"
+   def getRSSPubDateString(self):
+      tzinfo = self._getTimeZoneDisplayInfo()
+      timeZone = tzinfo["plusMinus"] + tzinfo["hours"] + tzinfo["minutes"]
+      return time.strftime("%a, %d %b %Y %H:%M:%S ", time.gmtime(self.getLocalSeconds())) + timeZone
 
+   def getTimeZoneString(self):
+      if self.tzOffset:
+         tzinfo = self._getTimeZoneDisplayInfo()
+         return tzinfo["plusMinus"] + tzinfo["hours"] + ":" + tzinfo["minutes"]
+      else:
+         return "Z"
+   
+   def _getTimeZoneDisplayInfo(self):
       hours, minutes = divmod(abs(self.tzOffset)/60, 60)
       assert 0 <= hours <= 23
       assert 0 <= minutes <= 59
@@ -147,8 +157,7 @@ class rdwTime:
          plusMinus = "+"
       else:
          plusMinus = "-"
-
-      return plusMinus + "%02d:%02d" % (hours, minutes)
+      return {"plusMinus": plusMinus, "hours": "%02d" % hours, "minutes": "%02d" % minutes}
 
    def tzdtoseconds(self, tzd):
       """Given w3 compliant TZD, converts it to number of seconds from UTC"""
@@ -166,6 +175,7 @@ class rdwTime:
    def __cmp__(self, other):
       return cmp(self.getSeconds(), other.getSeconds())
 
+# Taken from ASPN: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/259173
 class groupby(dict):
     def __init__(self, seq, key=lambda x:x):
         for value in seq:
@@ -260,6 +270,7 @@ class helpersTest(unittest.TestCase):
       assert myTime.getUrlString() == goodTimeString
       assert myTime.getUrlStringNoTZ() == goodTimeStringNoTZ
       assert myTime.getDisplayString() == "2005-12-25 23:34:15"
+      assert myTime.getRSSPubDateString() == "Sun, 25 Dec 2005 23:34:15 -0500"
 
       assert myTime.getDateDisplayString() == "2005-12-25"
       assert myTime.getLocalSeconds() < myTime.getSeconds()
