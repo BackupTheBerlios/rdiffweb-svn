@@ -31,8 +31,13 @@ class rdiffBrowsePage(page_main.rdiffPage):
          if parentDir:
             parentDirPath = joinPaths(parentDirPath, parentDir)
             parentDirs.append({ "parentPath" : self.buildBrowseUrl(repo, parentDirPath, False), "parentDir" : parentDir })
-
       parentDirs[-1]["parentPath"] = "" # Clear link for last parent, so it doesn't show it as a link
+
+      # Set up warning about in-progress backups, if necessary
+      if librdiff.backupIsInProgress(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)):
+         backupWarning = "Warning: a backup is currently in progress to this location.  The displayed data may be inconsistent."
+      else:
+         backupWarning = ""
 
       restoreUrl = ""
       viewUrl = ""
@@ -82,7 +87,7 @@ class rdiffBrowsePage(page_main.rdiffPage):
       # Start page
       page = self.startPage(title)
       page = page + self.writeTopLinks()
-      page = page + self.compileTemplate("dir_listing.html", title=title, files=entries, parentDirs=parentDirs, restoreUrl=restoreUrl, viewUrl=viewUrl, restoreDates=restoreDates)
+      page = page + self.compileTemplate("dir_listing.html", title=title, files=entries, parentDirs=parentDirs, restoreUrl=restoreUrl, viewUrl=viewUrl, restoreDates=restoreDates, warning=backupWarning)
       page = page + self.endPage()
       return page
 

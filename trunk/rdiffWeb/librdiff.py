@@ -323,6 +323,14 @@ def getDirRestoreDates(repo, path):
    return backupHistory
 
 
+def backupIsInProgress(repo):
+   rdiffDir = joinPaths(repo, rdiffDataDirName)
+   mirrorMarkers = os.listdir(rdiffDir)
+   mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
+   assert mirrorMarkers
+   return len(mirrorMarkers) > 1
+
+
 ##################### Unit Tests #########################
 
 import unittest, time

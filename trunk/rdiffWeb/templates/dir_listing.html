@@ -1,7 +1,7 @@
 <!--StartDelete-->
 <html>
 <head>
-   <link rel="stylesheet" href="main.css" type="text/css" />
+   <link rel="stylesheet" href="../static/main.css" type="text/css" />
 </head>
 <body>
 <!--EndDelete-->
@@ -12,9 +12,15 @@
    <!--StartRepeat:parentDirs--> / <!--StartIncludeIf:parentPath--><a href=^parentPath$><!--EndIncludeIf:parentPath-->^parentDir$<!--StartIncludeIf:parentPath--></a><!--EndIncludeIf:parentPath--><!--EndRepeat:parentDirs-->
 </p>
 <p>
-<!--StartIncludeIf:restoreUrl--><a href="^restoreUrl$">Download folder contents as zip file</a><!--EndIncludeIf:restoreUrl-->
-<!--StartIncludeIf:viewUrl--><a href="^viewUrl$">View folder contents</a><!--EndIncludeIf:viewUrl-->
+<!--StartIncludeIf:restoreUrl--><a class="viewFolder_link" href="^restoreUrl$">Download folder contents as zip file</a><!--EndIncludeIf:restoreUrl-->
+<!--StartIncludeIf:viewUrl--><a class="viewFolder_link" href="^viewUrl$">View folder contents</a><!--EndIncludeIf:viewUrl-->
 </p>
+
+<!--StartIncludeIf:warning-->
+<p class="warning">
+   ^warning$
+</p>
+<!--EndIncludeIf:warning-->
 
 <!--StartIncludeIf:restoreUrl-->
 <table id="PopupTable">
