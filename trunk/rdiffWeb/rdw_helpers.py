@@ -21,9 +21,9 @@ def ensurePathValid(path):
    if normalizedPath != path:
       raise accessDeniedError
 
-def encodeUrl(url):
+def encodeUrl(url, safeChars=""):
    if not url: return url
-   return urllib.quote_plus(url)
+   return urllib.quote_plus(url, safeChars)
 
 def decodeUrl(encodedUrl):
    if not encodedUrl: return encodedUrl

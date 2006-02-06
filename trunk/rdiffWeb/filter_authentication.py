@@ -3,6 +3,7 @@
 import cherrypy
 from cherrypy.lib.filter.basefilter import BaseFilter
 import page_main
+import rdw_helpers
 import base64
 
 class rdwAuthenticationFilter(BaseFilter):
@@ -47,7 +48,7 @@ class rdwAuthenticationFilter(BaseFilter):
 
       loginParms = {"message": "", "action": self.loginUrl,
          "loginKey": loginKey, "passwordKey": passwordKey, "redirectKey": redirectKey,
-         "loginValue": "", "redirectValue": cherrypy.request.path }
+         "loginValue": "", "redirectValue": cherrypy.request.path + "?" + rdw_helpers.encodeUrl(rdw_helpers.decodeUrl(cherrypy.request.queryString), "=&") }
 
       if cherrypy.request.path == self.loginUrl and cherrypy.request.method == "POST":
          # check for login credentials
@@ -83,9 +84,9 @@ class rdwAuthenticationFilter(BaseFilter):
             return { "login": auth[:colon], "password": auth[colon+1:] }
          else:
             return { "login": auth, "password": "" }
-         
+
       return None
-      
+
 ##################### Unit Tests #########################
 
 import unittest, os
