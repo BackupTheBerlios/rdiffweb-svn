@@ -48,7 +48,7 @@ class rdwAuthenticationFilter(BaseFilter):
 
       loginParms = {"message": "", "action": self.loginUrl,
          "loginKey": loginKey, "passwordKey": passwordKey, "redirectKey": redirectKey,
-         "loginValue": "", "redirectValue": cherrypy.request.path + "?" + rdw_helpers.encodeUrl(rdw_helpers.decodeUrl(cherrypy.request.queryString), "=&") }
+         "loginValue": "", "redirectValue": cherrypy.request.path + "?" + cherrypy.request.queryString }
 
       if cherrypy.request.path == self.loginUrl and cherrypy.request.method == "POST":
          # check for login credentials
