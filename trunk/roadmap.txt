@@ -8,14 +8,14 @@ Move toward unix project
    * tar.gz
 Debug/devel commandline options
 Status page
+Warning if the user views repo while backing up
+Folder restore support
+RSS feed
 
 TODO:
-RSS feed
-Folder restore support
 HTML interface cleanup/enhancements
  * Cute icons beside backups in locations page and history page
  * Ability to (reverse) sort dir listings by name, size, last revision
- * Warning if the user views repo while backing up
 
 Rewrite admin tools
  * admin page should query user db module to determine module's capabilities and structure page based on those abilities
