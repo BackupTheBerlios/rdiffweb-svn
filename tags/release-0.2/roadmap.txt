@@ -1,0 +1,44 @@
+Roadmap
+
+DONE, NOT YET RELEASED:
+Move toward unix project
+ * Daemon support
+   * Init script
+ * Packaging
+   * tar.gz
+Debug/devel commandline options
+Status page
+Warning if the user views repo while backing up
+Folder restore support
+RSS feed
+
+TODO:
+HTML interface cleanup/enhancements
+ * Cute icons beside backups in locations page and history page
+ * Ability to (reverse) sort dir listings by name, size, last revision
+
+Rewrite admin tools
+ * admin page should query user db module to determine module's capabilities and structure page based on those abilities
+Rework admin functionality to only admin users within user root
+More packages
+ * rpm
+ * deb
+ * ebuild?
+* Logging options
+* Ability to run as another user
+* Don't keep cherrypy session open if using http authentication
+
+
+RELEASED:
+Version 0.1 - (3 weeks)
+New interface design implemented, if somewhat rough
+Bug hunt
+ * Security review - done
+  * Each entry point
+  * SQL injection
+  * file access/permissions
+ * Fix mysql connection problem - done
+ * Fix sporadic restore problems - done
+ * Better error handling - done
+Installer - done
+

@@ -1,0 +1,50 @@
+<!--StartDelete-->
+<html>
+<head>
+   <link rel="stylesheet" href="main.css" type="text/css" />
+</head>
+<body>
+<!--EndDelete-->
+
+
+<h2>Backup Status</h2>
+<!--StartDeleteIf:messages--><p>There are no recent backups to display.</p><!--EndDeleteIf:messages-->
+<!--StartRepeat:messages-->
+
+<!-- BACKUP SUCCESS -->
+<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success">^title$</h3>
+<div>
+<p>The following backups have completed successfully:</p>
+<ul>
+   <!--StartRepeat:backups-->
+   <li>^displayDate$ - ^repo$ - ^size$</li>
+   <!--EndRepeat:backups-->
+</ul>
+</div>
+<!--EndIncludeIf:isSuccess-->
+
+<!-- BACKUP FAILURE -->
+<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure">^title$</h3>
+<div>
+   <p>The backup to <strong>^repo$</strong> on <strong>^displayDate$</strong>
+   failed with the following errors:</p>
+   <blockquote>^errors$</blockquote>
+   <p>Backup size: ^size$</p>
+</div>
+<!--EndDeleteIf:isSuccess-->
+   <!--StartIncludeIf:repoErrors-->
+   <p>There following repositories contain errors:</p>
+   <ul>
+      <!--StartRepeat:repoErrors-->
+      <li>^repo$: ^multiline:error$</li>
+      <!--EndRepeat:repoErrors-->
+   </ul>
+   <!--EndIncludeIf:repoErrors-->
+<!--EndRepeat:messages-->
+
+<a href="^feedLink$"><img src="../static/feed-icon-32x32.png" width="32" height="32" border="0" /></a>
+
+<!--StartDelete-->
+</body>
+</html>
+<!--EndDelete-->

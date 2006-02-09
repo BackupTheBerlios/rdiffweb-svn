@@ -1,0 +1,47 @@
+<!--StartDelete-->
+<html>
+<head>
+   <link rel="stylesheet" href="static/main.css" type="text/css" />
+</head>
+<body>
+<!--EndDelete-->
+<script type="text/javascript" language="javascript" src="/static/revisions_popup.js"></script>
+
+<h2>^title$</h2>
+
+<table id="PopupTable">
+<thead>
+   <tr>
+      <td>Date</td>
+      <td>Size</td>
+      <td>Result</td>
+   </tr>
+</thead>
+<tbody>
+   <!--StartRepeat:history-->
+   <tr>
+      <td>^date$</td>
+      <td>^size$</td>
+      <!--StartIncludeIf:errors-->
+      <td class="BackupResult">
+         <a class="PopupLink" href="javascript:void 0">Errors...</a>
+      </td>
+      <td class="FlyoutContainer">
+         <div id="^date$">
+         <p>
+            ^multiline:errors$
+         </p>
+         </div>
+      </td>
+      <!--EndIncludeIf:errors-->
+      <!--StartDeleteIf:errors-->
+      <td class="BackupResult">
+         Success
+      </td>
+      <!--EndDeleteIf:errors-->
+
+      </tr>
+   <!--EndRepeat:history-->
+</tbody>
+</table>
+

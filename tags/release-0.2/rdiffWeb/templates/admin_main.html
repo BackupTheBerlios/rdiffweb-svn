@@ -1,0 +1,15 @@
+<h2>Admin Panel</h2>
+<p>
+   <a href="/">Backup Locations</a>
+</p>
+<h3>Users</h3>
+<table>
+<!--StartRepeat:users-->
+   <tr>
+      <td>^username$</td>
+      <td><a href="/admin/editUser?user=^username$">Edit User</a></td><td><a href="/admin/changePassword?user=^username$">Change Password</a></td><td><a href="/admin/updateRepos?user=^username$">Find and update repositories</a></td>
+   </tr>
+<!--EndRepeat:users-->
+</table>
+<br>
+<a href="^addUserUrl$">Add User</a>
