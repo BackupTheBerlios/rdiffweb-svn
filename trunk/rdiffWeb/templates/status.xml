@@ -5,7 +5,7 @@
       <link>^link$</link>
       <description>Up-to-the-minute backup status for ^username$'s backups</description>
       <!--StartRepeat:messages-->
-      
+
       <item>
          <title>^title$</title>
          <link>^link$</link>
@@ -23,7 +23,7 @@
 <!--StartDeleteIf:isSuccess-->
 <p>The backup to <strong>^repo$</strong> on <strong>^displayDate$</strong>
 failed with the following errors:</p>
-<blockquote>^errors$</blockquote>
+<blockquote>^multiline:errors$</blockquote>
 <p>Backup size: ^size$</p>
 </div>
 <!--EndDeleteIf:isSuccess-->
