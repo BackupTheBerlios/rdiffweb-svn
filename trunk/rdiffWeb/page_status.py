@@ -8,13 +8,13 @@ import cherrypy
 class rdiffStatusPage(page_main.rdiffPage):
    def index(self):
       userMessages = self._getUserMessages()
-      page = self.startPage("Backup Status")
+      page = self.startPage("Backup Status", rssUrl=self._buildStatusFeedUrl(), rssTitle = "Backup status for "+self.getUsername())
       page = page + self.writeTopLinks()
       page = page + self.compileTemplate("status.html", messages=userMessages, feedLink=self._buildStatusFeedUrl())
       page = page + self.endPage()
       return page
    index.exposed = True
-   
+
    def feed(self):
       cherrypy.response.headerMap["Content-Type"] = "text/xml"
       userMessages = self._getUserMessages()

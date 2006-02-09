@@ -54,8 +54,8 @@ class rdiffPage:
 
 
    ########################## PAGE HELPER FUNCTIONS ##################################
-   def startPage(self, title):
-      return self.compileTemplate("page_start.html", title=title)
+   def startPage(self, title, rssUrl = "", rssTitle = ""):
+      return self.compileTemplate("page_start.html", title=title, rssLink=rssUrl, rssTitle=rssTitle)
 
    def endPage(self):
       return self.compileTemplate("page_end.html")

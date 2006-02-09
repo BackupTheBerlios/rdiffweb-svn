@@ -26,6 +26,7 @@ More packages
  * ebuild?
 * Logging options
 * Ability to run as another user
+* Don't keep cherrypy session open if using http authentication
 
 
 RELEASED:
