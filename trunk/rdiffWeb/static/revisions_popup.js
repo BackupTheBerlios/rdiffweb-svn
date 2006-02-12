@@ -8,7 +8,6 @@ function showPopup(div)
       cancelHidePopup();
    fg_curPopup = div;
    fg_curPopup.style.display = 'block';
-   fg_curPopup.style.display = 'visible';
    fg_curPopup.onmouseover = cancelHidePopup;
    fg_curPopup.onmouseout = delayHidePopup;
    fg_curPopup.style.marginTop = "0px";
@@ -63,7 +62,10 @@ function onTableMouseOver(event)
    {
       /* jump to the next cell */
       var cell = elem.parentNode;
-      cell = cell.parentNode.cells[cell.cellIndex+1];
+      do cell = cell.nextSibling;
+      while (cell && (!cell.tagName || cell.tagName !== "TD"));
+      if (!cell)
+         return;
 
       /* find first DIV child */
       var div = cell.firstChild;
@@ -81,8 +83,12 @@ function onTableMouseOut(event)
 
    event = event || window.event;
    var elem = event.target || event.srcElement;
-   if (elem.className === "PopupLink")
-      delayHidePopup();
+   while (elem)
+   {
+      if (elem.className === "PopupLink")
+         delayHidePopup();
+      elem = elem.parentNode;
+   }
 }
 
 
