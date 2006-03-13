@@ -83,6 +83,8 @@ class incrementEntry:
    def getDateStringNoTZ(self, tzOffset=0):
       filename = self._removeSuffix(self.entryName)
       incrDate = self.getDate()
+      if not incrDate: return "" # avoid crashing on invalid date strings
+
       incrDate.timeInSeconds += tzOffset
       return incrDate.getUrlStringNoTZ()
 
