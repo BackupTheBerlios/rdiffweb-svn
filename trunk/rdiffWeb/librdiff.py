@@ -52,7 +52,7 @@ class backupHistoryEntry:
 class incrementEntry:
    """Encapsalates all the ugly knowledge of increment behavior"""
    missingSuffix = ".missing"
-   suffixes = [".missing", ".snapshot.gz", ".diff.gz", ".data.gz", ".dir"];
+   suffixes = [".missing", ".snapshot.gz", ".diff.gz", ".data.gz", ".data", ".dir"];
 
    def __init__(self, incrementName):
       self.entryName = incrementName
@@ -83,10 +83,15 @@ class incrementEntry:
    def getDateStringNoTZ(self, tzOffset=0):
       filename = self._removeSuffix(self.entryName)
       incrDate = self.getDate()
-      if not incrDate: return "" # avoid crashing on invalid date strings
+      if not incrDate:
+         print "Warning: unintelligible date string! Filename:", self.entryName, " Filetitle:", filename, " Date String:", self.getDateString()
+         return "" # avoid crashing on invalid date strings
 
       incrDate.timeInSeconds += tzOffset
       return incrDate.getUrlStringNoTZ()
+
+   def isCompressed(self):
+      return self.entryName.endswith(".gz")
 
    def hasIncrementSuffix(self, filename):
       for suffix in self.suffixes:
@@ -287,7 +292,10 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, cutoffDate=None):
          continue
 
       try:
-         errors = gzip.open(os.path.join(rdiffDir, entryFile), "r").read()
+         if entry.isCompressed():
+            errors = gzip.open(joinPaths(rdiffDir, entryFile), "r").read()
+         else:
+            errors = open(joinPaths(rdiffDir, entryFile), "r").read()
       except IOError:
          errors = "[Unable to read errors file.]"
       try:
