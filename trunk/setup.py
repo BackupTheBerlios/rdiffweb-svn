@@ -9,7 +9,7 @@ setup(name='rdiffWeb',
       author_email='rdiffweb@rdiffweb.org',
       url='http://www.rdiffweb.org',
       packages=['rdiffWeb'],
-      package_data={'rdiffWeb': ['templates/*.html', 'static/*']},
+      package_data={'rdiffWeb': ['templates/*.html', 'templates/*.xml', 'static/*']},
       data_files=[('/etc/rdiffweb', ['rdw.conf.sample']),
                   ('/etc/init.d', ['init/rdiff-web'])
                   ],
