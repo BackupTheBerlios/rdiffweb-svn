@@ -161,15 +161,14 @@ class rdiffDirEntries:
       backupFiles = filter(lambda x: x.startswith("mirror_metadata"), self.dataDirEntries)
       backupFiles.sort()
       for backup in backupFiles:
-         backupTimeString = rsplit(backup, ".", 3)[1]
-         backupTime = rdw_helpers.rdwTime()
-         backupTime.initFromString(backupTimeString)
+         incrEntry = incrementEntry(backup)
+         backupTime = incrEntry.getDate()
          if not date or backupTime > date:
             return backupTime
       return backupFiles[-1]
 
    def _getLastChangedBackupTime(self, filename):
-      files = filter((lambda x: incrementEntry(x).getFilename() == filename), self.incrementEntries)
+      files = filter((lambda x: incrementEntry(x).getFilename() == filename and x.endswith(".dir")), self.incrementEntries)
       files.sort()
       if not files:
          return self._getFirstBackupAfterDate(None)
