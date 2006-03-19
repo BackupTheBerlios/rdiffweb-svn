@@ -266,10 +266,17 @@ def getBackupHistory(repoRoot):
 def getLastBackupHistoryEntry(repoRoot):
    return _getBackupHistory(repoRoot, 1)[0]
 
+def getBackupHistoryForDay(repoRoot, date):
+   return _getBackupHistory(repoRoot, -1, date)
+
 def getBackupHistorySinceDate(repoRoot, date):
    return _getBackupHistory(repoRoot, -1, date)
 
-def _getBackupHistory(repoRoot, numLatestEntries=-1, cutoffDate=None):
+def getBackupHistoryForDateRange(repoRoot, earliestDate, latestDate):
+   return _getBackupHistory(repoRoot, -1, earliestDate, latestDate)
+
+# earliestDate and latestDate are inclusive
+def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDate=None):
    """Returns a list of backupHistoryEntry's"""
    checkRepoPath(repoRoot, "")
 
@@ -287,7 +294,10 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, cutoffDate=None):
    for entryFile in curEntries:
       entry = incrementEntry(entryFile)
       # compare local times because of discrepency between client/server time zones
-      if cutoffDate and entry.getDate().getLocalSeconds() < cutoffDate.getLocalSeconds():
+      if earliestDate and entry.getDate().getLocalSeconds() < earliestDate.getLocalSeconds():
+         continue
+
+      if latestDate and entry.getDate().getLocalSeconds() > latestDate.getLocalSeconds():
          continue
 
       try:

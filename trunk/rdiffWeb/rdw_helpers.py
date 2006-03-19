@@ -106,7 +106,7 @@ class rdwTime:
 
          timetuple = (year, month, day, hour, minute, second, -1, -1, 0)
          self.timeInSeconds = calendar.timegm(timetuple)
-         self.tzOffset = self.tzdtoseconds(timeString[19:])
+         self.tzOffset = self._tzdtoseconds(timeString[19:])
          self.getTimeZoneString() # to get assertions there
 
       except (TypeError, ValueError, AssertionError):
@@ -147,19 +147,25 @@ class rdwTime:
          return tzinfo["plusMinus"] + tzinfo["hours"] + ":" + tzinfo["minutes"]
       else:
          return "Z"
-   
+
+   def setTime(self, hour, minute, second):
+      year = time.gmtime(self.timeInSeconds)[0]
+      month = time.gmtime(self.timeInSeconds)[1]
+      day = time.gmtime(self.timeInSeconds)[2]
+      self.timeInSeconds = calendar.timegm((year, month, day, hour, minute, second, -1, -1, 0))
+
    def _getTimeZoneDisplayInfo(self):
       hours, minutes = divmod(abs(self.tzOffset)/60, 60)
       assert 0 <= hours <= 23
       assert 0 <= minutes <= 59
-      
+
       if self.tzOffset > 0:
          plusMinus = "+"
       else:
          plusMinus = "-"
       return {"plusMinus": plusMinus, "hours": "%02d" % hours, "minutes": "%02d" % minutes}
 
-   def tzdtoseconds(self, tzd):
+   def _tzdtoseconds(self, tzd):
       """Given w3 compliant TZD, converts it to number of seconds from UTC"""
       if tzd == "Z": return 0
       assert len(tzd) == 6 # only accept forms like +08:00 for now
@@ -316,6 +322,13 @@ class helpersTest(unittest.TestCase):
       assert myTime.getSeconds() == myTime.getLocalSeconds()
       assert myTime.getUrlString().find("T00:00:00Z") != -1
       assert myTime.getDateDisplayString() == todayAsString
+
+      myTime.initFromCurrentUTC()
+      midnightTime = rdwTime()
+      midnightTime.initFromMidnightUTC(0)
+      assert myTime.getSeconds() != midnightTime.getSeconds()
+      myTime.setTime(0, 0, 0)
+      assert myTime.getSeconds() == midnightTime.getSeconds()
 
       # Make sure it rejects bad strings with the appropriate exceptions
       badTimeStrings = ["2005-12X25T23:34:15-05:00", "20005-12-25T23:34:15-05:00", "2005-12-25", "2005-12-25 23:34:15"]
