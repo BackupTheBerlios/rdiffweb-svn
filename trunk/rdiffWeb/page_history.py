@@ -7,7 +7,6 @@ import os, urllib
 
 class rdiffHistoryPage(page_main.rdiffPage):
    def index(self, repo):
-      repo = rdw_helpers.decodeUrl(repo)
       try:
          rdw_helpers.ensurePathValid(repo)
       except rdw_helpers.accessDeniedError, error:

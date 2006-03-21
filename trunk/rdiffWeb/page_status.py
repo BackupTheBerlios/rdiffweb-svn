@@ -16,9 +16,6 @@ class rdiffStatusPage(page_main.rdiffPage):
    index.exposed = True
 
    def entry(self, success="", date="", repo=""):
-      success = rdw_helpers.decodeUrl(success)
-      date = rdw_helpers.decodeUrl(date)
-
       # Validate date
       try:
          entryTime = rdw_helpers.rdwTime()

@@ -14,9 +14,6 @@ class autoDeleteDir:
 
 class rdiffRestorePage(page_main.rdiffPage):
    def index(self, repo, path, date):
-      repo = rdw_helpers.decodeUrl(repo)
-      path = rdw_helpers.decodeUrl(path)
-      date = rdw_helpers.decodeUrl(date)
       try:
          rdw_helpers.ensurePathValid(repo)
          rdw_helpers.ensurePathValid(path)

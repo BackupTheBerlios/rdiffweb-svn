@@ -9,9 +9,6 @@ import urllib
 class rdiffBrowsePage(page_main.rdiffPage):
    def index(self, repo="", path="", restore=""):
 
-      repo = rdw_helpers.decodeUrl(repo)
-      path = rdw_helpers.decodeUrl(path)
-      restore = rdw_helpers.decodeUrl(restore)
       try:
          rdw_helpers.ensurePathValid(repo)
          rdw_helpers.ensurePathValid(path)
