@@ -52,7 +52,7 @@ class backupHistoryEntry:
 class incrementEntry:
    """Encapsalates all the ugly knowledge of increment behavior"""
    missingSuffix = ".missing"
-   suffixes = [".missing", ".snapshot.gz", ".diff.gz", ".data.gz", ".data", ".dir"];
+   suffixes = [".missing", ".snapshot.gz", ".diff.gz", ".data.gz", ".data", ".dir", ".diff"];
 
    def __init__(self, incrementName):
       self.entryName = incrementName

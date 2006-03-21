@@ -10,12 +10,12 @@ class rdiffStatusPage(page_main.rdiffPage):
       userMessages = self._getRecentUserMessages()
       page = self.startPage("Backup Status", rssUrl=self._buildStatusFeedUrl(), rssTitle = "Backup status for "+self.getUsername())
       page = page + self.writeTopLinks()
-      page = page + self.compileTemplate("status.html", messages=userMessages, feedLink=self._buildStatusFeedUrl())
+      page = page + self.compileTemplate("status.html", messages=userMessages, feedLink=self._buildStatusFeedUrl(), statusLink="", title="Backup Status")
       page = page + self.endPage()
       return page
    index.exposed = True
 
-   def entry(self, success="", date="", repo=""):
+   def entry(self, date="", repo=""):
       # Validate date
       try:
          entryTime = rdw_helpers.rdwTime()
@@ -23,7 +23,7 @@ class rdiffStatusPage(page_main.rdiffPage):
       except ValueError:
          return self.writeErrorPage("Invalid date parameter.")
 
-      if success.upper() == "TRUE":
+      if not repo:
          userRepos = self.userDB.getUserRepoPaths(self.getUsername())
 
          # Set the start and end time to be the start and end of the day, respectively, to get all entries for that day
@@ -49,9 +49,9 @@ class rdiffStatusPage(page_main.rdiffPage):
 
          userMessages = self._getUserMessages([repo], False, True, entryTime, entryTime)
 
-      page = self.startPage("Backup Status", rssUrl=self._buildStatusFeedUrl(), rssTitle = "Backup status for "+self.getUsername()) # TODO: should we have an RSS feed link here?
+      page = self.startPage("Backup Status Entry", rssUrl="", rssTitle="")
       page = page + self.writeTopLinks()
-      page = page + self.compileTemplate("status.html", messages=userMessages, feedLink=self._buildStatusFeedUrl())
+      page = page + self.compileTemplate("status.html", messages=userMessages, feedLink="", statusLink=self._buildAbsoluteStatusUrl(), title="Backup Status Entry")
       page = page + self.endPage()
       return page
    entry.exposed = True
@@ -69,8 +69,8 @@ class rdiffStatusPage(page_main.rdiffPage):
    def _buildStatusFeedUrl(self):
       return "/status/feed"
 
-   def _buildStatusEntryUrl(self, isSuccess, repo, date):
-      return self._buildAbsoluteStatusUrl() + "entry?success="+str(isSuccess)+"&repo="+rdw_helpers.encodeUrl(repo)+"&date="+rdw_helpers.encodeUrl(date.getUrlString())
+   def _buildStatusEntryUrl(self, repo, date):
+      return self._buildAbsoluteStatusUrl() + "entry?repo="+rdw_helpers.encodeUrl(repo)+"&date="+rdw_helpers.encodeUrl(date.getUrlString())
 
    def _getRecentUserMessages(self):
       userRepos = self.userDB.getUserRepoPaths(self.getUsername())
@@ -109,7 +109,7 @@ class rdiffStatusPage(page_main.rdiffPage):
             date = job["date"]
             title = "Backup Failed: " + job["repo"]
             job.update({"isSuccess": False, "date": date, "pubDate": date.getRSSPubDateString(),
-               "link": self._buildStatusEntryUrl(False, job["repo"], date), "title": title, "repoErrors": [], "backups": []})
+               "link": self._buildStatusEntryUrl(job["repo"], date), "title": title, "repoErrors": [], "backups": []})
             userMessages.append(job)
 
       # generate success messages (publish date is most recent backup date)
@@ -123,7 +123,7 @@ class rdiffStatusPage(page_main.rdiffPage):
             else: repoErrorsForMsg = []
 
             userMessages.append({"isSuccess": 1, "date": date, "pubDate": date.getRSSPubDateString(),
-               "link": self._buildStatusEntryUrl(True, "", date), "title": title, "repoErrors": repoErrorsForMsg, "backups":successfulBackups[day]})
+               "link": self._buildStatusEntryUrl("", date), "title": title, "repoErrors": repoErrorsForMsg, "backups":successfulBackups[day]})
 
       # sort messages by date
       userMessages.sort(lambda x, y: cmp(y["date"], x["date"]))

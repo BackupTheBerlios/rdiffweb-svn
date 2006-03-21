@@ -7,12 +7,15 @@
 <!--EndDelete-->
 
 
-<h2>Backup Status</h2>
+<h2>^title$</h2>
+<!--StartIncludeIf:statusLink-->
+<h3><a href="^statusLink$">Recent Backup Status</a><h3>
+<!--EndIncludeIf:statusLink-->
 <!--StartDeleteIf:messages--><p>There are no recent backups to display.</p><!--EndDeleteIf:messages-->
 <!--StartRepeat:messages-->
 
 <!-- BACKUP SUCCESS -->
-<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success">^title$</h3>
+<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success"><a href="^link$">^title$<a></h3>
 <div>
 <p>The following backups have completed successfully:</p>
 <ul>
@@ -24,7 +27,7 @@
 <!--EndIncludeIf:isSuccess-->
 
 <!-- BACKUP FAILURE -->
-<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure">^title$</h3>
+<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure"><a href="^link$">^title$</a></h3>
 <div>
    <p>The backup to <strong>^repo$</strong> on <strong>^displayDate$</strong>
    failed with the following errors:</p>
@@ -42,7 +45,9 @@
    <!--EndIncludeIf:repoErrors-->
 <!--EndRepeat:messages-->
 
+<!--StartIncludeIf:feedLink-->
 <a href="^feedLink$"><img src="../static/feed-icon-32x32.png" width="32" height="32" border="0" /></a>
+<!--EndIncludeIf:feedLink-->
 
 <!--StartDelete-->
 </body>

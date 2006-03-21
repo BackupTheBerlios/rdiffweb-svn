@@ -14,7 +14,7 @@ class StunnelFilter(BaseFilter):
             cherrypy.request.scheme = 'https'
 
     def beforeRequestBody(self):
-	fromPage = cherrypy.request.browserUrl
-	if fromPage.startswith("http://"):
-	   cherrypy.request.browserUrl = fromPage.replace("http://", "https://")
+      fromPage = cherrypy.request.browserUrl
+      if fromPage.startswith("http://"):
+         cherrypy.request.browserUrl = fromPage.replace("http://", "https://")
 

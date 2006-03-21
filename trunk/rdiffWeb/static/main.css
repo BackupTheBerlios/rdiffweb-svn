@@ -57,13 +57,19 @@ td.FlyoutContainer div
    border: 1px solid gray;
 }
 
-.backupStatus_success
+.backupStatus_success,
+.backupStatus_success a:link,
+.backupStatus_success a:visited
 {
    color: green;
+   text-decoration: none;
 }
-.backupStatus_failure
+.backupStatus_failure,
+.backupStatus_failure a:link,
+.backupStatus_failure a:visited
 {
    color: red;
+   text-decoration: none;
 }
 
 .warning
