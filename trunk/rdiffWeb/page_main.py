@@ -8,13 +8,13 @@ import db_mysql
 import rdw_templating
 import rdw_helpers
 import rdw_config
-from filter_stunnel import StunnelFilter
+from filter_https import rdwHttpsFilter
 from filter_authentication import rdwAuthenticationFilter
 
 def getFilters():
    filters = [rdwAuthenticationFilter()]
-   if rdw_config.getConfigSetting("UseSTunnel").upper() == "TRUE":
-      filters.append(StunnelFilter(rdw_config.getConfigSetting("VisibleServerName")))
+   if rdw_config.getConfigSetting("UseHttps").upper() == "TRUE":
+      filters.append(rdwHttpsFilter()))
    return filters
 
 
