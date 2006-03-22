@@ -14,7 +14,7 @@ from filter_authentication import rdwAuthenticationFilter
 def getFilters():
    filters = [rdwAuthenticationFilter()]
    if rdw_config.getConfigSetting("UseHttps").upper() == "TRUE":
-      filters.append(rdwHttpsFilter()))
+      filters.append(rdwHttpsFilter())
    return filters
 
 
