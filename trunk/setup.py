@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='rdiffWeb',
-      version='0.2.9',
+      version='0.3',
       description='A web interface to rdiff-backup repositories',
       author='Josh Nisly',
       author_email='rdiffweb@rdiffweb.org',
