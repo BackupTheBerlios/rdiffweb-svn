@@ -352,160 +352,159 @@ def backupIsInProgress(repo):
 
 ##################### Unit Tests #########################
 
+def runRdiff(src, dest, time):
+   #print "rdiff-backup", "rdiff-backup", "--current-time="+str(time), src, dest
+   os.spawnlp(os.P_WAIT, "rdiff-backup", "rdiff-backup", "--current-time="+str(time.getSeconds()), src, dest)
+
+def getMatchingDirEntry(entries, filename):
+#    for entry in entries:
+#       print entry.name
+   matchingEntries = filter(lambda x: x.name == filename, entries)
+   assert len(matchingEntries) == 1, entries
+   return matchingEntries[0]
+
 import unittest, time
 class libRdiffTest(unittest.TestCase):
-   # The temp dir on Mac OS X is a symlink; expand it because of validation against symlinks in paths
-   tmpDir = os.path.realpath(tempfile.gettempdir())
-   sourceDir = os.path.join(tmpDir, "librdiff-src")
-   destDir = os.path.join(tmpDir, "librdiff-dest")
-   restoreDir = os.path.join(tmpDir, "librdiff-restore")
-   file1 = "test.txt"
-   file2 = "test-2.txt"
-   dir = "temp"
-   currentBackupTime = 0
+   # The dirs containing source data for automated tests are set up in the following format:
+   # one folder for each test, named to describe the test
+      # one folder for each state in the backup, named using the rdiff-backup time format (e.g. "2006-01-04T01:49:50Z")
+         # folder contents at given state.  Subdirs are not really handled
+
+   # The setUp function is responsible for backing up data for each backup test case and test case state, rooted at self.destRoot
 
    def setUp(self):
+      # The temp dir on Mac OS X is a symlink; expand it because of validation against symlinks in paths
+      self.destRoot = joinPaths(os.path.realpath(tempfile.gettempdir()), "rdiffWeb")
+      self.masterDirPath = joinPaths("..", "tests") # TODO: do this right, including tying tests into "python setup.py test"
       self.tearDown()
-      # Create files
-      os.makedirs(self.sourceDir)
-      os.makedirs(self.restoreDir)
 
-      self.writeToFile(os.path.join(self.sourceDir,self.file1), "some text here\n")
-      os.makedirs(os.path.join(self.sourceDir, self.dir))
-      self.runRdiff()
+      os.makedirs(self.destRoot)
 
-      self.writeToFile(os.path.join(self.sourceDir,self.file1), "some text here\nand some more text")
-      self.writeToFile(os.path.join(self.sourceDir,self.file2), "now in the second file\n")
+      # Set up each scenario
+      tests = os.listdir(self.masterDirPath)
+      for testDir in tests:
+         # Iterate through the backup states
+         origStateDir = joinPaths(self.masterDirPath, testDir)
+         backupStates = os.listdir(origStateDir)
+         backupStates.sort(lambda x, y: cmp(x, y))
+         for backupState in backupStates:
+            # Try to parse the folder name as a date.  If we can't, raise
+            backupTime = rdw_helpers.rdwTime()
+            backupTime.initFromString(backupState)
 
-      self.runRdiff()
-
-      os.remove(os.path.join(self.sourceDir,self.file1))
-      self.runRdiff()
-
-      # at the end here there should be three files total:
-      # temp
-      # test-2.txt
-      # test.txt
+            # Backup the data as it should be at that state
+            #print "   State", backupState
+            runRdiff(joinPaths(origStateDir, backupState), joinPaths(self.destRoot, testDir), backupTime)
 
    def tearDown(self):
-      # Remove sandbox dirs
-      for sandboxDir in [self.sourceDir, self.destDir, self.restoreDir]:
-         if (os.access(sandboxDir, os.F_OK)):
-            removeDir(sandboxDir)
-
-   def runRdiff(self):
-      libRdiffTest.currentBackupTime = libRdiffTest.currentBackupTime+10000
-      os.spawnlp(os.P_WAIT, "rdiff-backup", "rdiff-backup", "--current-time="+str(libRdiffTest.currentBackupTime), self.sourceDir, self.destDir)
-
-   def cleanRestoredFile(self, filePath):
-      (containingFolder, file) = os.path.split(filePath)
-      removeDir(containingFolder)
-
-   def writeToFile(self, file, text):
-      f = open(file, "w")
-      f.write(text)
-      f.close()
+      if (os.access(self.destRoot, os.F_OK)):
+            removeDir(self.destRoot)
 
    ################  Start actual tests ###################
    def testGetDirEntries(self):
-      try:
-         getDirEntries(self.destDir, "/bogus_dir")
-      except DoesNotExistError:
-         pass
-      else:
-         assert(False)
+      tests = os.listdir(self.masterDirPath)
+      for testDir in tests:
+         # Get a list of backup entries for the root folder
+         rdiffDestDir = joinPaths(self.destRoot, testDir)
+         entries = getDirEntries(rdiffDestDir, "/")
 
-      os.symlink("/", self.destDir+"/link")
-      try:
-         getDirEntries(self.destDir, "/link")
-      except AccessDeniedError:
-         pass
-      else:
-         assert(False)
-      try:
-         getDirEntries(self.destDir+"/link"+self.destDir, "/")
-      except AccessDeniedError:
-         pass
-      else:
-         assert(False)
-      os.unlink(self.destDir+"/link")
+         # Go back through all backup states and make sure that the backup entries match the files that exist
+         origStateDir = joinPaths(self.masterDirPath, testDir)
+         backupStates = os.listdir(origStateDir)
+         backupStates.sort(lambda x, y: cmp(x, y))
+         for backupState in backupStates:
+            backupTime = rdw_helpers.rdwTime()
+            backupTime.initFromString(backupState)
 
-      # Make sure all files are listed
-      # Tests that isDir is reported correctly
-      entries = getDirEntries(self.destDir, "/")
-      assert(len(entries) == 3)
-      assert(entries[0].name == "temp")
-      assert(entries[0].isDir == True)
-      assert(entries[2].exists == False)
-      assert(entries[1].exists == True)
+            # Go through each file, and make sure we have a backup entry for this file and date
+            origStateDir = joinPaths(self.masterDirPath, testDir, backupState)
+            files = os.listdir(origStateDir)
+            for file in files:
+               origFilePath = joinPaths(origStateDir, file)
 
-      # Test file size of one of the backed-up files (w/o increments)
-      assert(entries[1].fileSize == len("now in the second file\n"))
+               entry = getMatchingDirEntry(entries, file)
+               assert backupTime in entry.changeDates
+               assert os.path.isdir(origFilePath) == entry.isDir
+               #assert os.lstat(origFilePath)[6] == entry.fileSize, "Real size: "+str(os.lstat(origFilePath)[6])+" Reported size: "+str(entry.fileSize)
 
-      # Tests that the files created/changed between backups have that reflected in the changeDates dict
-      assert(len(entries[0].changeDates) == 1)
-      assert(len(entries[1].changeDates) == 1)
-
-      # Tests that the changeDates dict is sorted correctly
-      # Tests that changeDates are in local time
-      for entry in entries:
-         unsortedDates = entry.changeDates[:]
-         entry.changeDates.sort()
-         assert(unsortedDates == entry.changeDates)
-
-      # Tests that dates on files that exist currently are correct
-      restoredFilePath = restoreFileOrDir(self.destDir, "/", self.file2, entries[1].changeDates[0]) # when file was created
-      assert(open(restoredFilePath, "r").read() == "now in the second file\n")
-      self.cleanRestoredFile(restoredFilePath)
-
-      # Tests that subdirs are backed-up correctly
-      entries = getDirEntries(self.destDir, "/temp")
-      assert(len(entries) == 0)
 
    def testGetBackupHistory(self):
-      entries = getBackupHistory(self.destDir)
-      assert len(entries) == 3
-      for entry in entries:
-         assert entry.errors == ""
-      assert entries[0].size == 15
-      assert entries[1].size == 56
-      assert entries[2].size == 23
+      tests = os.listdir(self.masterDirPath)
+      for testDir in tests:
+         # Get a list of backup entries for the root folder
+         origBackupDir = joinPaths(self.masterDirPath, testDir)
+         backupStates = os.listdir(origBackupDir)
+         backupStates.sort(lambda x, y: cmp(x, y))
 
-      lastEntry = getLastBackupHistoryEntry(self.destDir)
-      assert lastEntry.size == 23
+         rdiffDestDir = joinPaths(self.destRoot, testDir)
+         entries = getBackupHistory(rdiffDestDir)
+         assert len(entries) == len(backupStates)
 
-      # Test that timezone differences are ignored
-      historyAsOf = lastEntry.date.getUrlString()
-      if "+" in historyAsOf:
-         historyAsOf = historyAsOf.replace("+", "-")
-      else:
-         historyAsOf = historyAsOf[:19] + "+" + historyAsOf[20:]
+         backupNum = 0
+         for backup in backupStates:
+            origBackupStateDir = joinPaths(origBackupDir, backup)
+            totalBackupSize = 0
+            for file in os.listdir(origBackupStateDir):
+               totalBackupSize = totalBackupSize + os.lstat(joinPaths(origBackupStateDir, file))[6]
 
-      lastBackupTime = rdw_helpers.rdwTime()
-      lastBackupTime.initFromString(historyAsOf)
-      entries = getBackupHistorySinceDate(self.destDir, lastBackupTime)
-      assert len(entries) == 1
+            assert totalBackupSize == entries[backupNum].size, "Calculated: "+str(totalBackupSize)+" Reported: "+str(entries[backupNum].size)+" State: "+str(backupNum)
+            backupNum = backupNum + 1
 
-      # Test that no backups are returned one second after the last backup
-      historyAsOf = historyAsOf[:18] + "1" + historyAsOf[19:]
-      postBackupTime = rdw_helpers.rdwTime()
-      postBackupTime.initFromString(historyAsOf)
-      assert lastBackupTime.getLocalSeconds() + 1 == postBackupTime.getLocalSeconds()
-      entries = getBackupHistorySinceDate(self.destDir, postBackupTime)
-      assert len(entries) == 0
+         # Test that the last backup entry works correctly
+         lastEntry = getLastBackupHistoryEntry(rdiffDestDir)
+
+         lastBackupTime = rdw_helpers.rdwTime()
+         lastBackupTime.initFromString(backupStates[-1])
+         assert lastEntry.date == lastBackupTime
+
+         # Test that timezone differences are ignored
+         historyAsOf = lastEntry.date.getUrlString()
+         if "+" in historyAsOf:
+            historyAsOf = historyAsOf.replace("+", "-")
+         else:
+            historyAsOf = historyAsOf[:19] + "+" + historyAsOf[20:]
+
+         lastBackupTime = rdw_helpers.rdwTime()
+         lastBackupTime.initFromString(historyAsOf)
+         entries = getBackupHistorySinceDate(rdiffDestDir, lastBackupTime)
+         assert len(entries) == 1
+
+         # Test that no backups are returned one second after the last backup
+         historyAsOf = historyAsOf[:18] + "1" + historyAsOf[19:]
+         postBackupTime = rdw_helpers.rdwTime()
+         postBackupTime.initFromString(historyAsOf)
+         assert lastBackupTime.getLocalSeconds() + 1 == postBackupTime.getLocalSeconds()
+         entries = getBackupHistorySinceDate(rdiffDestDir, postBackupTime)
+         assert len(entries) == 0
 
    def testRestoreFile(self):
-      entries = getBackupHistory(self.destDir)
-      restoredFilePath = restoreFileOrDir(self.destDir, "/", self.file1, entries[0].date)
-      assert(open(restoredFilePath, "r").read() == "some text here\n")
-      self.cleanRestoredFile(restoredFilePath)
-      restoredFilePath = restoreFileOrDir(self.destDir, "/", self.file1, entries[1].date)
-      assert(open(restoredFilePath, "r").read() == "some text here\nand some more text")
-      self.cleanRestoredFile(restoredFilePath)
+      tests = os.listdir(self.masterDirPath)
+      for testDir in tests:
+         # Get a list of backup entries for the root folder
+         rdiffDestDir = joinPaths(self.destRoot, testDir)
+         entries = getDirEntries(rdiffDestDir, "/")
 
+         # Go back through all backup states and make sure that the backup entries match the files that exist
+         origStateDir = joinPaths(self.masterDirPath, testDir)
+         backupStates = os.listdir(origStateDir)
+         backupStates.sort(lambda x, y: cmp(x, y))
+         for backupState in backupStates:
+            backupTime = rdw_helpers.rdwTime()
+            backupTime.initFromString(backupState)
+
+            # Go through each file, and make sure that the restored file looks the same as the orig file
+            origStateDir = joinPaths(self.masterDirPath, testDir, backupState)
+            files = os.listdir(origStateDir)
+            for file in files:
+               origFilePath = joinPaths(origStateDir, file)
+               if not os.path.isdir(origFilePath):
+                  restoredFilePath = restoreFileOrDir(rdiffDestDir, "/", file, backupTime)
+                  assert open(restoredFilePath, "r").read() == open(origFilePath, "r").read()
+                  os.remove(restoredFilePath)
 
 if __name__ == "__main__":
    print "Called as standalone program; running unit tests..."
+
    testSuite = unittest.makeSuite(libRdiffTest, 'test')
    testRunner = unittest.TextTestRunner()
    testRunner.run(testSuite)
