@@ -110,7 +110,7 @@ class rdwTime:
          self.getTimeZoneString() # to get assertions there
 
       except (TypeError, ValueError, AssertionError):
-         raise ValueError
+         raise ValueError, timeString
 
    def getLocalDaysSinceEpoch(self):
       return self.getLocalSeconds() // (24*60*60)
