@@ -152,10 +152,10 @@ class rdiffDirEntries:
       for entryFile in self.incrementEntries:
          entry = incrementEntry(entryFile)
          entryName = entry.getFilename()
-         entryDate = entry.getDate()
-         if not entry.isSnapshotIncrement():
-            entryDate = self._getFirstBackupAfterDate(entry.getDate())
          if entry.shouldShowIncrement() or entry.isMissingIncrement():
+            entryDate = entry.getDate()
+            if not entry.isSnapshotIncrement():
+               entryDate = self._getFirstBackupAfterDate(entry.getDate())
             if (not entryName in entriesDict.keys()):
                entryPath = joinPaths(self.repo, rdiffIncrementsDirName, self.dirPath, entryName)
                newEntry = dirEntry(entryName, os.path.isdir(entryPath), 0, False, [entryDate])
