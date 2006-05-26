@@ -58,7 +58,13 @@ class incrementEntry:
       self.entryName = incrementName
 
    def shouldShowIncrement(self):
-      return self.hasIncrementSuffix(self.entryName) and not self.entryName.endswith(self.missingSuffix)
+      return self.hasIncrementSuffix(self.entryName) and not self.isMissingIncrement()
+
+   def isMissingIncrement(self):
+      return self.entryName.endswith(self.missingSuffix)
+   
+   def isSnapshotIncrement(self):
+      return self.entryName.endswith(".snapshot.gz")
 
    def getFilename(self):
       filename = self._removeSuffix(self.entryName)
@@ -145,14 +151,19 @@ class rdiffDirEntries:
       # Go through the increments dir.  If we find any files that didn't exist in dirPath (i.e. have been deleted), add them
       for entryFile in self.incrementEntries:
          entry = incrementEntry(entryFile)
+         entryName = entry.getFilename()
+         entryDate = entry.getDate()
+         if not entry.isSnapshotIncrement():
+            entryDate = self._getFirstBackupAfterDate(entry.getDate())
          if entry.shouldShowIncrement():
-            entryName = entry.getFilename()
             if (not entryName in entriesDict.keys()):
                entryPath = joinPaths(self.repo, rdiffIncrementsDirName, self.dirPath, entryName)
-               newEntry = dirEntry(entryName, os.path.isdir(entryPath), 0, False, [entry.getDate()])
+               newEntry = dirEntry(entryName, os.path.isdir(entryPath), 0, False, [entryDate])
                entriesDict[entryName] = newEntry
             else:
-               bisect.insort_left(entriesDict[entryName].changeDates, entry.getDate())
+               bisect.insort_left(entriesDict[entryName].changeDates, entryDate)
+         elif entry.isMissingIncrement():
+            bisect.insort_left(entriesDict[entryName].changeDates, entryDate)
 
       return entriesDict
 
@@ -171,7 +182,7 @@ class rdiffDirEntries:
       if os.path.isdir(joinPaths(self.completePath, filename)):
          files = filter((lambda x: incrementEntry(x).getFilename() == filename and x.endswith(".dir")), self.incrementEntries)
       else:
-         files = filter((lambda x: incrementEntry(x).getFilename() == filename and incrementEntry(x).shouldShowIncrement()), self.incrementEntries)
+         files = filter((lambda x: incrementEntry(x).getFilename() == filename), self.incrementEntries)
       files.sort()
       if not files:
          return self._getFirstBackupAfterDate(None)
@@ -359,7 +370,7 @@ def runRdiff(src, dest, time):
    # Force a null TZ for backups, to keep rdiff-backup from mangling the times
    environ = os.environ;
    environ['TZ'] = ""
-   os.spawnlp(os.P_WAIT, "rdiff-backup", "rdiff-backup", "--current-time="+str(time.getSeconds()), src, dest)
+   os.spawnlp(os.P_WAIT, "rdiff-backup", "rdiff-backup", "--no-compare-inode", "--current-time="+str(time.getSeconds()), src, dest)
 
 def getMatchingDirEntry(entries, filename):
 #    for entry in entries:
@@ -410,6 +421,16 @@ class libRdiffTest(unittest.TestCase):
 
    def getBackupStates(self, backupTestDir):
       return filter(lambda x: not x.startswith("."), os.listdir(backupTestDir))
+   
+   def fileChangedBetweenBackups(self, backupTest, filename, lastBackup, allBackups):
+      prevRevisions = filter(lambda x: x < lastBackup, allBackups)
+      if not prevRevisions: return False
+      oldVersion = prevRevisions[-1]
+      oldFilePath = joinPaths(self.masterDirPath, backupTest, oldVersion, filename)
+      newFilePath = joinPaths(self.masterDirPath, backupTest, lastBackup, filename)
+      
+      if not os.access(oldFilePath, os.F_OK): return False
+      return open(oldFilePath, "r").read() == open(newFilePath, "r").read()
 
    ################  Start actual tests ###################
    def testGetDirEntries(self):
@@ -418,7 +439,7 @@ class libRdiffTest(unittest.TestCase):
          # Get a list of backup entries for the root folder
          rdiffDestDir = joinPaths(self.destRoot, testDir)
          entries = getDirEntries(rdiffDestDir, "/")
-
+         
          # Go back through all backup states and make sure that the backup entries match the files that exist
          origStateDir = joinPaths(self.masterDirPath, testDir)
          backupStates = self.getBackupStates(origStateDir)
@@ -440,9 +461,12 @@ class libRdiffTest(unittest.TestCase):
                assertionErrorMessage = assertionErrorMessage + "\nIncrements dir: "+str(os.listdir(joinPaths(rdiffDestDir, "rdiff-backup-data", "increments")))
                for entryDate in entry.changeDates:
                   if backupTime.getSeconds() == entryDate.getSeconds():
+                     if self.fileChangedBetweenBackups(testDir, entry.name, backupState, backupStates):
+                        assert False, assertionErrorMessage
                      break
                else:
-                  assert False, assertionErrorMessage
+                  if not self.fileChangedBetweenBackups(testDir, entry.name, backupState, backupStates):
+                     assert False or False, assertionErrorMessage
                assert os.path.isdir(origFilePath) == entry.isDir
                #assert os.lstat(origFilePath)[6] == entry.fileSize, "Real size: "+str(os.lstat(origFilePath)[6])+" Reported size: "+str(entry.fileSize)
 
@@ -466,6 +490,7 @@ class libRdiffTest(unittest.TestCase):
             for file in os.listdir(origBackupStateDir):
                totalBackupSize = totalBackupSize + os.lstat(joinPaths(origBackupStateDir, file))[6]
 
+            #TODO: fix this to handle subdirs
             #assert totalBackupSize == entries[backupNum].size, "Calculated: "+str(totalBackupSize)+" Reported: "+str(entries[backupNum].size)+" State: "+str(backupNum)
             backupNum = backupNum + 1
 
