@@ -155,15 +155,13 @@ class rdiffDirEntries:
          entryDate = entry.getDate()
          if not entry.isSnapshotIncrement():
             entryDate = self._getFirstBackupAfterDate(entry.getDate())
-         if entry.shouldShowIncrement():
+         if entry.shouldShowIncrement() or entry.isMissingIncrement():
             if (not entryName in entriesDict.keys()):
                entryPath = joinPaths(self.repo, rdiffIncrementsDirName, self.dirPath, entryName)
                newEntry = dirEntry(entryName, os.path.isdir(entryPath), 0, False, [entryDate])
                entriesDict[entryName] = newEntry
             else:
                bisect.insort_left(entriesDict[entryName].changeDates, entryDate)
-         elif entry.isMissingIncrement():
-            bisect.insort_left(entriesDict[entryName].changeDates, entryDate)
 
       return entriesDict
 
