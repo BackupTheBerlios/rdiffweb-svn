@@ -55,6 +55,7 @@ if __name__ == "__main__":
    settings = {
       'sessionFilter.on' : True,
       'server.socketHost' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
+      'server.socketPort' : rdiffWeb.rdw_config.getConfigSetting("ServerPort"),
       '/static' : {
          'staticFilter.on' : True,
          'staticFilter.dir': "static",

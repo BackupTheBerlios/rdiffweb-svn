@@ -33,7 +33,9 @@ def promptUser(promptText, legalOptions, defaultOption, isNumericOption):
 def addConfigFileLine(lineText):
    if not os.access("/etc/rdiffweb", os.F_OK):
       os.mkdir("/etc/rdiffweb", stat.S_IRWXU)
-   open("/etc/rdiffweb/rdw.conf", "a").write(lineText+"\n")
+   configFilePath = "/etc/rdiffweb/rdw.conf"
+   open(configFilePath, "a").write(lineText+"\n")
+   os.chmod(configFilePath, stat.S_IRWXU)
 
 def fileSetup():
    print "File backend chosen.\n"
@@ -181,6 +183,9 @@ if __name__ == "__main__":
    if os.getuid() != 0:
       print "Error: this script must be run as root."
       sys.exit(2)
+
+   addConfigFileLine("ServerName=localhost")
+   addConfigFileLine("ServerPort=8080")
 
    print "Welcome to the rdiffWeb configuration script.\n"
    backend = promptUser("""First, a configuration backend must be chosen.  There are two options: file and mysql.
