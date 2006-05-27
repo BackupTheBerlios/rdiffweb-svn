@@ -22,7 +22,12 @@ fi
 # See how we were called.
 case "$1" in
    start)
-      echo -n "Starting rdiff-web..."
+      if [ ! -f /etc/rdiffweb/rdw.conf ]; then
+         echo -n "rdiffWeb is not configured!"
+         echo $ERROR_MSG
+         exit 1
+      fi
+      echo -n "Starting rdiffWeb..."
       /usr/bin/rdiff-web --pid-file="$PIDFILE" \
       --background > /dev/null 2>&1
       echo $SUCCESS_MSG
@@ -31,20 +36,20 @@ case "$1" in
 
    stop)
       if [ -e "$PIDFILE" ]; then
-         echo -n "Stopping rdiff-web..."
+         echo -n "Stopping rdiffWeb..."
          kill `cat "$PIDFILE" 2>/dev/null` > /dev/null 2>&1
          rm $PIDFILE > /dev/null 2>&1
          echo $SUCCESS_MSG
          exit 0
       else
-         echo -n "rdiff-web is not running"
+         echo -n "rdiffWeb is not running"
          echo $ERROR_MSG
          exit 1
       fi
    ;;
 
    status)
-      echo -n "rdiff-web "
+      echo -n "rdiffWeb "
       if [ -e "$PIDFILE" ]; then
          echo "is running."
          exit 0
