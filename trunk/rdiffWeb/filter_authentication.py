@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import cherrypy
-from cherrypy.lib.filter.basefilter import BaseFilter
+try:
+   from cherrypy.filters.basefilter import BaseFilter
+except:
+   from cherrypy.lib.filter.basefilter import BaseFilter
 import page_main
 import rdw_helpers
 import base64
@@ -70,6 +73,7 @@ class rdwAuthenticationFilter(BaseFilter):
       # write login page
       loginPage = page_main.rdiffPage()
       cherrypy.response.body = loginPage.compileTemplate("login.html", **loginParms)
+      cherrypy.request.execute_main = False      
 
    def _getHTTPAuthorizationCredentials(self, authHeader):
       try:

@@ -1,5 +1,8 @@
 import cherrypy
-from cherrypy.lib.filter.basefilter import BaseFilter
+try:
+   from cherrypy.filters.basefilter import BaseFilter
+except:
+   from cherrypy.lib.filter.basefilter import BaseFilter
 
 class rdwHttpsFilter(BaseFilter):
     def onStartResource(self):
