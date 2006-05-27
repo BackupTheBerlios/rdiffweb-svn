@@ -358,8 +358,7 @@ def backupIsInProgress(repo):
    rdiffDir = joinPaths(repo, rdiffDataDirName)
    mirrorMarkers = os.listdir(rdiffDir)
    mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
-   assert mirrorMarkers
-   return len(mirrorMarkers) > 1
+   return mirrorMarkers and len(mirrorMarkers) > 1
 
 
 ##################### Unit Tests #########################
