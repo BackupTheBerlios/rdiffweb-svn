@@ -95,6 +95,9 @@ function onTableMouseOut(event)
 window.onload = function()
 {
    var table = document.getElementById("PopupTable");
-   table.onmouseover = onTableMouseOver;
-   table.onmouseout = onTableMouseOut;
+   if (table)
+   {
+      table.onmouseover = onTableMouseOver;
+      table.onmouseout = onTableMouseOut;
+   }
 };
