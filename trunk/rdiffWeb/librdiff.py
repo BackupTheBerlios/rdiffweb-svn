@@ -62,7 +62,7 @@ class incrementEntry:
 
    def isMissingIncrement(self):
       return self.entryName.endswith(self.missingSuffix)
-   
+
    def isSnapshotIncrement(self):
       return self.entryName.endswith(".snapshot.gz")
 
@@ -136,6 +136,10 @@ class rdiffDirEntries:
       if os.access(incrementsDir, os.F_OK): # the increments may not exist if the folder has existed forever and never been changed
          self.incrementEntries = os.listdir(incrementsDir)
 
+      self.groupedIncrementEntries = rdw_helpers.groupby(self.incrementEntries, lambda x: incrementEntry(x).getFilename())
+      self.backupTimes = [ incrementEntry(x).getDate() for x in filter(lambda x: x.startswith("mirror_metadata"), self.dataDirEntries) ]
+      self.backupTimes.sort()
+
    def getDirEntries(self):
       """ returns dictionary of dir entries, keyed by dir name """
       entriesDict = {}
@@ -167,20 +171,14 @@ class rdiffDirEntries:
 
    def _getFirstBackupAfterDate(self, date):
       """ Iterates the mirror_metadata files in the rdiff data dir """
-      backupFiles = filter(lambda x: x.startswith("mirror_metadata"), self.dataDirEntries)
-      backupFiles.sort()
-      for backup in backupFiles:
-         incrEntry = incrementEntry(backup)
-         backupTime = incrEntry.getDate()
-         if not date or backupTime > date:
-            return backupTime
-      return backupFiles[-1]
+      if not date:
+         return self.backupTimes[0]
+      return self.backupTimes[bisect.bisect_right(self.backupTimes, date)]
 
    def _getLastChangedBackupTime(self, filename):
+      files = self.groupedIncrementEntries.get(filename, [])
       if os.path.isdir(joinPaths(self.completePath, filename)):
-         files = filter((lambda x: incrementEntry(x).getFilename() == filename and x.endswith(".dir")), self.incrementEntries)
-      else:
-         files = filter((lambda x: incrementEntry(x).getFilename() == filename), self.incrementEntries)
+         files = files.filter(lambda x: x.endswith(".dir"), self.incrementEntries)
       files.sort()
       if not files:
          return self._getFirstBackupAfterDate(None)
@@ -418,14 +416,14 @@ class libRdiffTest(unittest.TestCase):
 
    def getBackupStates(self, backupTestDir):
       return filter(lambda x: not x.startswith("."), os.listdir(backupTestDir))
-   
+
    def fileChangedBetweenBackups(self, backupTest, filename, lastBackup, allBackups):
       prevRevisions = filter(lambda x: x < lastBackup, allBackups)
       if not prevRevisions: return False
       oldVersion = prevRevisions[-1]
       oldFilePath = joinPaths(self.masterDirPath, backupTest, oldVersion, filename)
       newFilePath = joinPaths(self.masterDirPath, backupTest, lastBackup, filename)
-      
+
       if not os.access(oldFilePath, os.F_OK): return False
       return open(oldFilePath, "r").read() == open(newFilePath, "r").read()
 
@@ -436,7 +434,7 @@ class libRdiffTest(unittest.TestCase):
          # Get a list of backup entries for the root folder
          rdiffDestDir = joinPaths(self.destRoot, testDir)
          entries = getDirEntries(rdiffDestDir, "/")
-         
+
          # Go back through all backup states and make sure that the backup entries match the files that exist
          origStateDir = joinPaths(self.masterDirPath, testDir)
          backupStates = self.getBackupStates(origStateDir)
@@ -549,3 +547,5 @@ if __name__ == "__main__":
    testSuite = unittest.makeSuite(libRdiffTest, 'test')
    testRunner = unittest.TextTestRunner()
    testRunner.run(testSuite)
+#    import profile
+#    profile.run("getDirEntries('/', '/')", "results.txt")
