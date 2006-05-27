@@ -52,10 +52,13 @@ if __name__ == "__main__":
    # OK, we're good to go.  Start the server.
    server = rdiffWeb.page_locations.rdiffLocationsPage()
 
+   serverPort = 8080
+   if rdiffWeb.rdw_config.getConfigSetting("ServerPort") != "":
+      serverPort = int(rdiffWeb.rdw_config.getConfigSetting("ServerPort"))
    settings = {
       'sessionFilter.on' : True,
       'server.socketHost' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
-      'server.socketPort' : rdiffWeb.rdw_config.getConfigSetting("ServerPort"),
+      'server.socketPort' : serverPort,
       '/static' : {
          'staticFilter.on' : True,
          'staticFilter.dir': "static",

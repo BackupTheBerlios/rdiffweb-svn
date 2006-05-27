@@ -23,7 +23,7 @@ fi
 case "$1" in
    start)
       if [ ! -f /etc/rdiffweb/rdw.conf ]; then
-         echo -n "rdiffWeb is not configured!"
+         echo -n "rdiffWeb is not configured!  Please run 'rdiff-web-config'."
          echo $ERROR_MSG
          exit 1
       fi
