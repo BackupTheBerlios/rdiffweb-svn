@@ -178,7 +178,7 @@ class rdiffDirEntries:
    def _getLastChangedBackupTime(self, filename):
       files = self.groupedIncrementEntries.get(filename, [])
       if os.path.isdir(joinPaths(self.completePath, filename)):
-         files = files.filter(lambda x: x.endswith(".dir"), self.incrementEntries)
+         files = filter(lambda x: x.endswith(".dir"), files)
       files.sort()
       if not files:
          return self._getFirstBackupAfterDate(None)
