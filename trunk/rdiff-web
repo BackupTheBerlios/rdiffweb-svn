@@ -23,11 +23,14 @@ if __name__ == "__main__":
    verbose = True
    debug = False
    pidFile = ""
+   logFile = ""
 
-   opts, extraparams = getopt.getopt(sys.argv[1:], 'vd', ['debug', 'pid-file=', 'background'])
+   opts, extraparams = getopt.getopt(sys.argv[1:], 'vd', ['debug', 'log-file=', 'pid-file=', 'background'])
    for option,value in opts:
       if option in ['-d','--debug']:
          debug = True
+      elif option in ['--log-file']:
+         logFile = value
       elif option in ['--pid-file']:
          pidFile = value
       elif option in ['--background']:
@@ -59,8 +62,10 @@ if __name__ == "__main__":
       'sessionFilter.on' : True,
       'server.socketHost' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
       'server.socketPort' : serverPort,
+      'server.logFile' : logFile,
       '/static' : {
          'staticFilter.on' : True,
+         'staticFilter.root': rdiffWeb.rdw_helpers.joinPaths(os.path.abspath(os.path.dirname(__file__)), "rdiffWeb"),
          'staticFilter.dir': "static",
          'rdwAuthenticateFilter.on' : False
       },
