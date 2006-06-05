@@ -65,7 +65,7 @@ if __name__ == "__main__":
       'server.logFile' : logFile,
       '/static' : {
          'staticFilter.on' : True,
-         'staticFilter.root': rdiffWeb.rdw_helpers.joinPaths(os.path.abspath(os.path.dirname(__file__)), "rdiffWeb"),
+         'staticFilter.root': rdiffWeb.rdw_helpers.getStaticRootPath(),
          'staticFilter.dir': "static",
          'rdwAuthenticateFilter.on' : False
       },

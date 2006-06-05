@@ -12,6 +12,9 @@ def joinPaths(parentPath, *args):
    args = [x.lstrip("/") for x in args]
    return os.path.join(parentPath, *args)
 
+def getStaticRootPath():
+   return os.path.abspath(os.path.dirname(__file__))
+
 class accessDeniedError:
    def __str__(self):
       return "Access is denied."
