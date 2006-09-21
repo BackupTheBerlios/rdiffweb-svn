@@ -113,6 +113,15 @@ class rdiffAdminPage(page_main.rdiffPage):
       return page + self.endPage()
    editUser.exposed = True
 
+   def deleteUser(self, user):
+      if not self._userIsAdmin(): return self.writeErrorPage("Access denied.")
+      if not self.userDB.userExists(user): return
+
+      self.userDB.deleteUser(user)
+      return self.writeMessagePage("Success", "User account removed.")
+
+   deleteUser.exposed = True
+
    def changePassword(self, user, password=""):
       if not self._userIsAdmin(): return self.writeErrorPage("Access denied.")
       if not self.userDB.userExists(user): return
@@ -133,7 +142,7 @@ class rdiffAdminPage(page_main.rdiffPage):
    def updateRepos(self, user):
       if not self._userIsAdmin(): return self.writeErrorPage("Access denied.")
       if not self.userDB.userExists(user): return
-      rdw_spider_repos.findReposForUsers(user, self.userDB)
+      rdw_spider_repos.findReposForUser(user, self.userDB)
       return self.writeMessagePage("Success", "Successfully updated repositories.")
    updateRepos.exposed = True
 

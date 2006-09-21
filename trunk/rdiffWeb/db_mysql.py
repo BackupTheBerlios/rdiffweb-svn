@@ -62,7 +62,6 @@ class mysqlUserDB:
       repoPaths = [ {"repo" : repo} for repo in repoPaths ]
       cursor = self.sqlConnection.cursor()
       cursor.executemany(query, repoPaths)
-      return cursor.fetchall()
 
    def setUserPassword(self, username, password):
       if not self.userExists(username): raise ValueError

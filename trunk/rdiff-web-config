@@ -81,6 +81,12 @@ def listDatabases(sqlConnection):
    databases = [ x[0] for x in results]
    return databases
 
+def addUser(username, password, userRoot, isAdmin):
+   mysqlUserDb = rdiffWeb.db_mysql.mysqlUserDB()
+   mysqlUserDb.addUser(username)
+   mysqlUserDb.setUserPassword(username, password)
+   mysqlUserDb.setUserInfo(username, userRoot, isAdmin)
+
 def mysqlSetup():
    print "MySQL backend chosen.\n"
    # TODO: load default answers from existing config file, if any
@@ -148,7 +154,7 @@ def mysqlSetup():
    mysqlUserDb = rdiffWeb.db_mysql.mysqlUserDB()
    for createStatement in mysqlUserDb._getCreateStatements():
       executeQuery(sqlConnection, createStatement)
-   
+
    mysqlUserDb = rdiffWeb.db_mysql.mysqlUserDB()
 
    print "\nYou must now add the first user account.  This user will have admin privileges, and therefore will have the ability to add/delete other users."
@@ -171,19 +177,13 @@ def mysqlSetup():
    response = promptUser(prompt, ["yes", "no"], "yes", False)
    if response == "yes":
       try:
-         repos = rdiffWeb.rdw_spider_repos.findReposForUsers(username, mysqlUserDb)
+         repos = rdiffWeb.rdw_spider_repos.findReposForUser(username, mysqlUserDb)
       except OSError, error:
          print "Unable to search repository: " + str(error)
       else:
          print "Repository search complete."
 
-if __name__ == "__main__":
-   # Because this script manipulates files in the /etc directory, it must be run as root.  Validate
-   # that we're being run as root, before the user has spent a lot of time entering data.
-   if os.getuid() != 0:
-      print "Error: this script must be run as root."
-      sys.exit(2)
-
+def doMainSetup():
    addConfigFileLine("ServerName=localhost")
    addConfigFileLine("ServerPort=8080")
 
@@ -198,6 +198,29 @@ Enter 1 for file, or 2 for mysql""", [1,2], 1, True)
       fileSetup()
    else:
       mysqlSetup()
-
    print "Configuration complete!"
 
+def doSpiderRepos():
+   rdiffWeb.rdw_spider_repos.findReposForAllUsers()
+
+def doAddUser():
+   if len(sys.argv) != 5:
+      print "Usage: rdiff-web-config adduser <username> <password> </path/to/usr/root>"
+      sys.exit(2)
+
+   addUser(sys.argv[2], sys.argv[3], sys.argv[4], False)
+
+if __name__ == "__main__":
+   # Because this script manipulates files in the /etc directory, it must be run as root.  Validate
+   # that we're being run as root, before the user has spent a lot of time entering data.
+   if os.getuid() != 0:
+      print "Error: this script must be run as root."
+      sys.exit(2)
+
+   if len(sys.argv) > 1:
+      if sys.argv[1] == "adduser":
+         doAddUser()
+      elif sys.argv[1] == "spiderrepos":
+         doSpiderRepos()
+   else:
+      doMainSetup()
