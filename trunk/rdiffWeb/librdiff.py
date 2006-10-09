@@ -434,8 +434,11 @@ class libRdiffTest(unittest.TestCase):
 
          statusText = ""
          for entry in entries:
-            for changeDate in entry.changeDates:
-               statusText = statusText + entry.name + "\t" + str(entry.isDir) + "\t" + str(entry.fileSize) + "\t" + str(entry.exists) + "\t" + changeDate.getUrlString()+"\n"
+            if entry.name != ".svn":
+               for changeDate in entry.changeDates:
+                  size = entry.fileSize
+                  if entry.isDir: size = 0
+                  statusText = statusText + entry.name + "\t" + str(entry.isDir) + "\t" + str(size) + "\t" + str(entry.exists) + "\t" + changeDate.getUrlString()+"\n"
             
          assert statusText.replace("\n", "") == self.getExpectedDirEntriesResults(testDir).replace("\n", ""), "Got: " + statusText + "\nExpected:" + self.getExpectedDirEntriesResults(testDir)
 
