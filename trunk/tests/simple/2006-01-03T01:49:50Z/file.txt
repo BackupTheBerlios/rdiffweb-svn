@@ -1,0 +1,3 @@
+This file is changed before the second backup.
+And changed again before the third backup.
+testdir1 has been removed before the third backup.
