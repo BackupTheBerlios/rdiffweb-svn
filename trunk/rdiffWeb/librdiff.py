@@ -347,11 +347,11 @@ def getDirRestoreDates(repo, path):
       entry = entries[0]
 
       # Don't allow restores before the dir existed
-      backupHistory = filter(lambda x: x > entry.changeDates[0], backupHistory)
+      backupHistory = filter(lambda x: x >= entry.changeDates[0], backupHistory)
 
       if not entry.exists:
          # If the dir has been deleted, don't allow restores after its deletion
-         backupHistory = filter(lambda x: x < entry.changeDates[-1], backupHistory)
+         backupHistory = filter(lambda x: x <= entry.changeDates[-1], backupHistory)
 
    return backupHistory
 
@@ -421,6 +421,15 @@ class libRdiffTest(unittest.TestCase):
    def getBackupStates(self, backupTestDir):
       return filter(lambda x: not x.startswith(".") and x != "results", os.listdir(backupTestDir))
    
+   def hasDirEntriesResults(self, testname):
+      return os.access(joinPaths(self.masterDirPath, testname, "results", "dir_entries.txt"), os.F_OK)
+   
+   def hasDirRestoreDates(self, testname):
+      return os.access(joinPaths(self.masterDirPath, testname, "results", "dir_restore_dates.txt"), os.F_OK)
+   
+   def getExpectedDirRestoreDates(self, testName):
+      return open(joinPaths(self.masterDirPath, testName, "results", "dir_restore_dates.txt")).read()
+
    def getExpectedDirEntriesResults(self, testName):
       return open(joinPaths(self.masterDirPath, testName, "results", "dir_entries.txt")).read()
 
@@ -428,22 +437,34 @@ class libRdiffTest(unittest.TestCase):
    def testGetDirEntries(self):
       tests = self.getBackupTests()
       for testDir in tests:
-         # Get a list of backup entries for the root folder
-         rdiffDestDir = joinPaths(self.destRoot, testDir)
-         entries = getDirEntries(rdiffDestDir, "/")
-
-         statusText = ""
-         for entry in entries:
-            if entry.name != ".svn":
-               for changeDate in entry.changeDates:
-                  size = entry.fileSize
-                  if entry.isDir: size = 0
-                  statusText = statusText + entry.name + "\t" + str(entry.isDir) + "\t" + str(size) + "\t" + str(entry.exists) + "\t" + changeDate.getUrlString()+"\n"
-            
-         assert statusText.replace("\n", "") == self.getExpectedDirEntriesResults(testDir).replace("\n", ""), "Got: " + statusText + "\nExpected:" + self.getExpectedDirEntriesResults(testDir)
+         if self.hasDirEntriesResults(testDir):
+            # Get a list of backup entries for the root folder
+            rdiffDestDir = joinPaths(self.destRoot, testDir)
+            entries = getDirEntries(rdiffDestDir, "/")
+   
+            statusText = ""
+            for entry in entries:
+               if entry.name != ".svn":
+                  for changeDate in entry.changeDates:
+                     size = entry.fileSize
+                     if entry.isDir: size = 0
+                     statusText = statusText + entry.name + "\t" + str(entry.isDir) + "\t" + str(size) + "\t" + str(entry.exists) + "\t" + changeDate.getUrlString()+"\n"
+               
+            assert statusText.replace("\n", "") == self.getExpectedDirEntriesResults(testDir).replace("\n", ""), "Got: " + statusText + "\nExpected:" + self.getExpectedDirEntriesResults(testDir)
 
    def testGetDirRestoreDates(self):
-      pass
+      tests = self.getBackupTests()
+      for testDir in tests:
+         if self.hasDirRestoreDates(testDir):
+            rdiffDestDir = joinPaths(self.destRoot, testDir)
+            
+            #print rdiffDestDir
+            dates = getDirRestoreDates(rdiffDestDir, "/testdir2")
+            statusText = ""
+            for date in dates:
+               statusText = statusText + date.getUrlString() + "\n"
+            
+            assert statusText.replace("\n", "") == self.getExpectedDirRestoreDates(testDir).replace("\n", ""), "Got: " + statusText + "\nExpected:" + self.getExpectedDirRestoreDates(testDir)
 
    def testGetBackupHistory(self):
       tests = self.getBackupTests()
