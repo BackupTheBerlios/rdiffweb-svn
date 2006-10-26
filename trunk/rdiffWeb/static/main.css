@@ -40,7 +40,8 @@ table td
    padding-right: 2em
 }
 
-/* disable padding on flyouts */
+/* disable padding on icons and flyouts */
+td.Icon,
 td.FlyoutContainer,
 td.FlyoutContainer td
 {

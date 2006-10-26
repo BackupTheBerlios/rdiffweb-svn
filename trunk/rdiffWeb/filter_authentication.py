@@ -17,7 +17,7 @@ class rdwAuthenticationFilter(BaseFilter):
    def beforeMain(self):
       if not cherrypy.config.get("rdwAuthenticateFilter.on", False):
          return
-      checkLoginAndPassword = cherrypy.config.get("rdwAuthenticateFilter.checkLoginAndPassword", lambda username, password: u"Wrong login/password")
+      checkLoginAndPassword = cherrypy.config.get("rdwAuthenticateFilter.checkLoginAndPassword", lambda username, password: u"Invalid username or password")
 
       if cherrypy.request.path == self.logoutUrl:
          cherrypy.session[self.sessionUserNameKey] = None

@@ -26,6 +26,7 @@
 <table id="PopupTable">
 <thead>
    <tr>
+      <td></td>
       <td>Name</td>
       <td>Size</td>
       <td>Last Revision</td>
@@ -34,6 +35,7 @@
 <tbody>
    <!--StartRepeat:files-->
    <!--StartIncludeIf:exists--><tr><!--EndIncludeIf:exists--><!--StartDeleteIf:exists--><tr style="color: #999" ><!--EndDeleteIf:exists-->
+      <td class="Icon"><img src="/static/images/^filetype$.png" valign=middle alt="^filetype$" ></td>
       <td><a href="^fileRestoreUrl$">^filename$</a></td>
       <td>^size$</td>
       <td>^date$</td>
@@ -69,12 +71,14 @@
 <table>
 <thead>
    <tr>
+      <td></td>
       <td>Choose a backup date to restore as of:</td>
    </tr>
 </thead>
 <tbody>
    <!--StartRepeat:restoreDates-->
    <tr>
+      <td class="Icon" valign="middle"><img src="/static/images/history.png"></img></td>
       <td><a href="^dirRestoreUrl$">^dateStr$</a></td>
    </tr>
    <!--EndRepeat:restoreDates-->

@@ -90,7 +90,7 @@ class rdiffPage:
       if self.userDB.areUserCredentialsValid(username, password):
          cherrypy.session['username'] = username #TODO: this seems like a hack.  Figure out clean way to pull this off
          return None
-      return "Bad password!"
+      return "Invalid username or password."
 
    def getUsername(self):
       username = cherrypy.session['username']
