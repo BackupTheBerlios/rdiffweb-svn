@@ -14,7 +14,7 @@ if pythonVersion > 2.3:
       author_email='rdiffweb@rdiffweb.org',
       url='http://www.rdiffweb.org',
       packages=['rdiffWeb'],
-      package_data={'rdiffWeb': ['templates/*.html', 'templates/*.xml', 'static/*']},
+      package_data={'rdiffWeb': ['templates/*.html', 'templates/*.xml', 'static/*.png', 'static/*.js', 'static/*.css' 'static/images/*']},
       data_files=[('/etc/rdiffweb', ['rdw.conf.sample']),
                   ('/etc/init.d', ['init/rdiff-web'])
                   ],
