@@ -48,6 +48,20 @@ td.FlyoutContainer td
    padding-right: 0em;
 }
 
+table.Login td
+{
+   padding-right: .5em;
+}
+
+#Login
+{
+   background-color: #E8EEFA;
+   color: #000;
+   spacing: 0.5em;
+   float: left;
+   border: 10px double white;
+}
+
 td.FlyoutContainer div
 {
    display:none;
