@@ -22,7 +22,7 @@
 <!-- BACKUP FAILURE -->
 <!--StartDeleteIf:isSuccess-->
 <p>The backup to <strong>^repo$</strong> on <strong>^displayDate$</strong>
-failed with the following errors:</p>
+completed with the following errors:</p>
 <blockquote>^multiline:errors$</blockquote>
 <p>Backup size: ^size$</p>
 </div>

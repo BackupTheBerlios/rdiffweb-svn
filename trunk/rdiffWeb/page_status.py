@@ -107,7 +107,7 @@ class rdiffStatusPage(page_main.rdiffPage):
       if includeFailure:
          for job in failedBackups:
             date = job["date"]
-            title = "Backup Failed: " + job["repo"]
+            title = "Backup Completed with Errors: " + job["repo"]
             job.update({"isSuccess": False, "date": date, "pubDate": date.getRSSPubDateString(),
                "link": self._buildStatusEntryUrl(job["repo"], date), "title": title, "repoErrors": [], "backups": []})
             userMessages.append(job)

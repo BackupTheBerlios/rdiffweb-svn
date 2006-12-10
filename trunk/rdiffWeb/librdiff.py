@@ -273,6 +273,12 @@ def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate):
       rdiffOutputFile = rdiffOutputFile+".zip"
    return rdiffOutputFile
 
+def backupIsInProgress(repo):
+   rdiffDir = joinPaths(repo, rdiffDataDirName)
+   mirrorMarkers = os.listdir(rdiffDir)
+   mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
+   return mirrorMarkers and len(mirrorMarkers) > 1
+
 import gzip, re
 def getBackupHistory(repoRoot):
    return _getBackupHistory(repoRoot)
@@ -287,10 +293,10 @@ def getBackupHistorySinceDate(repoRoot, date):
    return _getBackupHistory(repoRoot, -1, date)
 
 def getBackupHistoryForDateRange(repoRoot, earliestDate, latestDate):
-   return _getBackupHistory(repoRoot, -1, earliestDate, latestDate)
+   return _getBackupHistory(repoRoot, -1, earliestDate, latestDate, False)
 
 # earliestDate and latestDate are inclusive
-def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDate=None):
+def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDate=None, includeInProgress=True):
    """Returns a list of backupHistoryEntry's"""
    checkRepoPath(repoRoot, "")
 
@@ -333,6 +339,8 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
       newEntry.size = int(expression)
       entries.append(newEntry)
 
+   if len(entries) > 0 and not includeInProgress and backupIsInProgress(repoRoot):
+      entries.pop()
    return entries
 
 def getDirRestoreDates(repo, path):
@@ -354,13 +362,6 @@ def getDirRestoreDates(repo, path):
          backupHistory = filter(lambda x: x <= entry.changeDates[-1], backupHistory)
 
    return backupHistory
-
-
-def backupIsInProgress(repo):
-   rdiffDir = joinPaths(repo, rdiffDataDirName)
-   mirrorMarkers = os.listdir(rdiffDir)
-   mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
-   return mirrorMarkers and len(mirrorMarkers) > 1
 
 
 ##################### Unit Tests #########################
