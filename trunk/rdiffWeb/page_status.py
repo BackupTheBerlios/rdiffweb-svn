@@ -120,7 +120,7 @@ class rdiffStatusPage(page_main.rdiffPage):
             if date == lastSuccessDate: repoErrorsForMsg = repoErrors
             else: repoErrorsForMsg = []
 
-            userMessages.append({"isSuccess": 1, "date": date, "dateString": date.getDisplayString(), "pubDate": date.getRSSPubDateString(),
+            userMessages.append({"isSuccess": 1, "date": date, "dateString": date.getDateDisplayString(), "pubDate": date.getRSSPubDateString(),
                "link": self._buildStatusEntryUrl("", date), "repoErrors": repoErrorsForMsg, "backups":successfulBackups[day]})
 
       # sort messages by date
