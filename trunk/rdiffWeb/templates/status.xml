@@ -7,7 +7,14 @@
       <!--StartRepeat:messages-->
 
       <item>
-         <title>^title$</title>
+<!-- BACKUP SUCCESS -->
+<!--StartIncludeIf:isSuccess-->
+         <title>Successful Backups for ^date$</title>
+<!--EndIncludeIf:isSuccess-->
+<!-- BACKUP FAILURE -->
+<!--StartDeleteIf:isSuccess-->
+         <title>Backup Completed with Errors: ^repo$</title>
+<!--EndDeleteIf:isSuccess-->
          <link>^link$</link>
          <description><![CDATA[
 <!--StartIncludeIf:isSuccess-->

@@ -15,7 +15,7 @@
 <!--StartRepeat:messages-->
 
 <!-- BACKUP SUCCESS -->
-<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success"><a href="^link$">^title$<a></h3>
+<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success"><a href="^link$">Successful Backups for ^date$<a></h3>
 <div>
 <p>The following backups have completed successfully:</p>
 <ul>
@@ -27,7 +27,7 @@
 <!--EndIncludeIf:isSuccess-->
 
 <!-- BACKUP FAILURE -->
-<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure"><a href="^link$">^title$</a></h3>
+<!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure"><a href="^link$">Backup Completed with Errors: ^repo$</a></h3>
 <div>
    <p>The backup to <strong>^repo$</strong> on <strong>^displayDate$</strong>
    failed with the following errors:</p>

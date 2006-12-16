@@ -107,23 +107,21 @@ class rdiffStatusPage(page_main.rdiffPage):
       if includeFailure:
          for job in failedBackups:
             date = job["date"]
-            title = "Backup Completed with Errors: " + job["repo"]
             job.update({"isSuccess": False, "date": date, "pubDate": date.getRSSPubDateString(),
-               "link": self._buildStatusEntryUrl(job["repo"], date), "title": title, "repoErrors": [], "backups": []})
+               "link": self._buildStatusEntryUrl(job["repo"], date), "repoErrors": [], "backups": [], "repo": job["repo"]})
             userMessages.append(job)
 
       # generate success messages (publish date is most recent backup date)
       if includeSuccess:
          for day in successfulBackups.keys():
             date = successfulBackups[day][0]["date"]
-            title = "Successful Backups for " + date.getDateDisplayString()
 
             # include repository errors in most recent entry
             if date == lastSuccessDate: repoErrorsForMsg = repoErrors
             else: repoErrorsForMsg = []
 
-            userMessages.append({"isSuccess": 1, "date": date, "pubDate": date.getRSSPubDateString(),
-               "link": self._buildStatusEntryUrl("", date), "title": title, "repoErrors": repoErrorsForMsg, "backups":successfulBackups[day]})
+            userMessages.append({"isSuccess": 1, "date": date.getDisplayString(), "pubDate": date.getRSSPubDateString(),
+               "link": self._buildStatusEntryUrl("", date), "repoErrors": repoErrorsForMsg, "backups":successfulBackups[day]})
 
       # sort messages by date
       userMessages.sort(lambda x, y: cmp(y["date"], x["date"]))
