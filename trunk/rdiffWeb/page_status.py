@@ -107,7 +107,7 @@ class rdiffStatusPage(page_main.rdiffPage):
       if includeFailure:
          for job in failedBackups:
             date = job["date"]
-            job.update({"isSuccess": False, "date": date, "pubDate": date.getRSSPubDateString(),
+            job.update({"isSuccess": False, "date": date, "dateString": date.getDisplayString(), "pubDate": date.getRSSPubDateString(),
                "link": self._buildStatusEntryUrl(job["repo"], date), "repoErrors": [], "backups": [], "repo": job["repo"]})
             userMessages.append(job)
 
@@ -120,7 +120,7 @@ class rdiffStatusPage(page_main.rdiffPage):
             if date == lastSuccessDate: repoErrorsForMsg = repoErrors
             else: repoErrorsForMsg = []
 
-            userMessages.append({"isSuccess": 1, "date": date.getDisplayString(), "pubDate": date.getRSSPubDateString(),
+            userMessages.append({"isSuccess": 1, "date": date, "dateString": date.getDisplayString(), "pubDate": date.getRSSPubDateString(),
                "link": self._buildStatusEntryUrl("", date), "repoErrors": repoErrorsForMsg, "backups":successfulBackups[day]})
 
       # sort messages by date

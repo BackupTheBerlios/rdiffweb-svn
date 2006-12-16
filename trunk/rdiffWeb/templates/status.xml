@@ -9,7 +9,7 @@
       <item>
 <!-- BACKUP SUCCESS -->
 <!--StartIncludeIf:isSuccess-->
-         <title>Successful Backups for ^date$</title>
+         <title>Successful Backups for ^dateString$</title>
 <!--EndIncludeIf:isSuccess-->
 <!-- BACKUP FAILURE -->
 <!--StartDeleteIf:isSuccess-->
