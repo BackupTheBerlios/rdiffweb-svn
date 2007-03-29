@@ -20,8 +20,8 @@ class accessDeniedError:
       return "Access is denied."
 
 def ensurePathValid(path):
-   normalizedPath = os.path.normpath(path)
-   if normalizedPath != path:
+   realPath = os.path.realpath(path)
+   if realPath != path:
       raise accessDeniedError
 
 def encodeUrl(url, safeChars=""):
