@@ -20,8 +20,8 @@ class accessDeniedError:
       return "Access is denied."
 
 def ensurePathValid(path):
-   normalizedPath = os.path.normpath(path)
-   if normalizedPath != path:
+   realPath = os.path.realpath(path)
+   if realPath != path:
       raise accessDeniedError
 
 def encodeUrl(url, safeChars=""):
@@ -389,6 +389,68 @@ class helpersTest(unittest.TestCase):
 
       os.unlink(zipFile)
       removeDir(tempDir)
+      
+   def testEnsurePathValid(self):
+      try:
+         not ensurePathValid("../..")
+      except: pass
+      else: assert(False)
+      
+      try:
+         not ensurePathValid("..")
+      except: pass
+      else: assert(False)
+      
+      try:
+         not ensurePathValid("/..")
+      except: pass
+      else: assert(False)
+      
+      try:
+         not ensurePathValid("../")
+      except: pass
+      else: assert(False)
+      
+      try:
+         not ensurePathValid("../..")
+      except: pass
+      else: assert(False)
+      
+      try:
+         not ensurePathValid("../dir/..")
+      except: pass
+      else: assert(False)
+      
+      # should be "/dir"
+      try:
+         not ensurePathValid("/dir/")
+      except: pass
+      else: assert(False)
+      
+      # should be "dir"
+      try:
+         not ensurePathValid("dir/")
+      except: pass
+      else: assert(False)      
+      
+      try:
+         not ensurePathValid("/dir")
+      except: assert(False)
+      
+      # test symlinks
+      import tempfile
+      tempDir = tempfile.mkdtemp()
+      os.symlink(tempDir+"/a", tempDir+"/b")
+      try:
+         not ensurePathValid(tempDir+"/b")
+      except: pass
+      else: assert(False)
+      
+      try:
+         not ensurePathValid(tempDir+"/1")
+      except: assert(False)
+      removeDir(tempDir)
+      
 
    def _validateZippedDir(self, zipFile):
       zipObj = zipfile.ZipFile(zipFile, "r")
