@@ -52,7 +52,7 @@ class backupHistoryEntry:
 class incrementEntry:
    """Encapsalates all the ugly knowledge of increment behavior"""
    missingSuffix = ".missing"
-   suffixes = [".missing", ".snapshot.gz", ".diff.gz", ".data.gz", ".data", ".dir", ".diff"];
+   suffixes = [".missing", ".snapshot.gz", ".snapshot", ".diff.gz", ".data.gz", ".data", ".dir", ".diff"];
 
    def __init__(self, incrementName):
       self.entryName = incrementName
@@ -64,7 +64,7 @@ class incrementEntry:
       return self.entryName.endswith(self.missingSuffix)
 
    def isSnapshotIncrement(self):
-      return self.entryName.endswith(".snapshot.gz")
+      return self.entryName.endswith(".snapshot.gz") or self.entryName.endswith(".snapshot")
 
    def getFilename(self):
       filename = self._removeSuffix(self.entryName)
