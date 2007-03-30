@@ -6,7 +6,6 @@ import rdw_helpers, page_main, librdiff
 class rdiffLocationsPage(page_main.rdiffPage):
    def index(self):
       page = self.startPage("Backup Locations")
-      page = page + self.writeTopLinks()
 
       repoList = []
       for userRepo in self.userDB.getUserRepoPaths(self.getUsername()):

@@ -21,7 +21,7 @@ def getFilters():
 class rdiffPage:
    _cpFilterList = getFilters()
    def __init__(self):
-      self.userDB = self.getUserDBModule()
+      self.userDB = self._getUserDBModule()
 
    ############################## HELPER FUNCTIONS ###################################
    def buildBrowseUrl(self, repo, path, isRestoreView):
@@ -43,8 +43,21 @@ class rdiffPage:
       (packageDir, ignored) = os.path.split(__file__)
       templateText = open(rdw_helpers.joinPaths(packageDir, "templates", templatePath), "r").read()
       return rdw_templating.templateParser().parseTemplate(templateText, **kwargs)
+         
+   def validateUserPath(self, path):
+      '''Takes a path relative to the user's root dir and validates that it is valid and within the user's root'''
+      path = path.rstrip("/")
+      realPath = os.path.realpath(path)
+      if realPath != path:
+         raise rdw_helpers.accessDeniedError
+      
+      # Make sure that the path starts with the user root
+      # This check should be accomplished by ensurePathValid, but adding for a sanity check
+      realDestPath = os.path.realpath(path)
+      if realDestPath.find(self.userDB.getUserRoot(self.getUsername())) != 0:      
+         raise rdw_helpers.accessDeniedError
 
-   def getUserDBModule(self):
+   def _getUserDBModule(self):
       authModuleSetting = rdw_config.getConfigSetting("UserDB");
       if authModuleSetting.lower() == "file":
          return db_file.fileUserDB()
@@ -55,7 +68,7 @@ class rdiffPage:
 
    ########################## PAGE HELPER FUNCTIONS ##################################
    def startPage(self, title, rssUrl = "", rssTitle = ""):
-      return self.compileTemplate("page_start.html", title=title, rssLink=rssUrl, rssTitle=rssTitle)
+      return self.compileTemplate("page_start.html", title=title, rssLink=rssUrl, rssTitle=rssTitle) + self.writeTopLinks()
 
    def endPage(self):
       return self.compileTemplate("page_end.html")
@@ -72,14 +85,12 @@ class rdiffPage:
 
    def writeErrorPage(self, error):
       page = self.startPage("Error")
-      page = page + self.writeTopLinks()
       page = page + error
       page = page + self.endPage()
       return page
 
    def writeMessagePage(self, title, message):
       page = self.startPage(title)
-      page = page + self.writeTopLinks()
       page = page + message
       page = page + self.endPage()
       return page
@@ -88,7 +99,7 @@ class rdiffPage:
    ########## SESSION INFORMATION #############
    def checkAuthentication(self, username, password):
       if self.userDB.areUserCredentialsValid(username, password):
-         cherrypy.session['username'] = username #TODO: this seems like a hack.  Figure out clean way to pull this off
+         cherrypy.session['username'] = username
          return None
       return "Invalid username or password."
 

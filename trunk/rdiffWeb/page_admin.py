@@ -69,7 +69,6 @@ class rdiffAdminPage(page_main.rdiffPage):
       if not self._userIsAdmin(): return self.writeErrorPage("Access denied.")
 
       page = self.startPage("Administration")
-      page = page + self.writeTopLinks()
       userNames = self.userDB.getUserList()
       users = [ { "username" : user } for user in userNames ]
       page = page + self.compileTemplate("admin_main.html", users=users, addUserUrl="/admin/addUser")
@@ -89,7 +88,6 @@ class rdiffAdminPage(page_main.rdiffPage):
             return self.writeMessagePage("Success", "User added successfully.")
 
       page = self.startPage("Add User")
-      page = page + self.writeTopLinks()
       page = page + formVals.generateFormHtml(True, self._isSubmit(), self)
       return page + self.endPage()
    addUser.exposed = True
@@ -108,7 +106,6 @@ class rdiffAdminPage(page_main.rdiffPage):
          formVals.loadFromDatabase(user, self.userDB)
 
       page = self.startPage("Edit User")
-      page = page + self.writeTopLinks()
       page = page + formVals.generateFormHtml(False, self._isSubmit(), self)
       return page + self.endPage()
    editUser.exposed = True
@@ -134,7 +131,6 @@ class rdiffAdminPage(page_main.rdiffPage):
             return self.writeMessagePage("Success", "Password modified successfully.")
 
       page = self.startPage("Change User Password")
-      page = page + self.writeTopLinks()
       page = page + self.compileTemplate("admin_change_password.html", username=user)
       return page + self.endPage()
    changePassword.exposed = True

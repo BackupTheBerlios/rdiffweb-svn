@@ -10,8 +10,7 @@ class rdiffBrowsePage(page_main.rdiffPage):
    def index(self, repo="", path="", restore=""):
 
       try:
-         rdw_helpers.ensurePathValid(repo)
-         rdw_helpers.ensurePathValid(path)
+         self.validateUserPath(joinPaths(repo, path))
       except rdw_helpers.accessDeniedError, error:
          return self.writeErrorPage(str(error))
 
@@ -88,7 +87,6 @@ class rdiffBrowsePage(page_main.rdiffPage):
 
       # Start page
       page = self.startPage(title)
-      page = page + self.writeTopLinks()
       page = page + self.compileTemplate("dir_listing.html", title=title, files=entries, parentDirs=parentDirs, restoreUrl=restoreUrl, viewUrl=viewUrl, restoreDates=restoreDates, warning=backupWarning)
       page = page + self.endPage()
       return page

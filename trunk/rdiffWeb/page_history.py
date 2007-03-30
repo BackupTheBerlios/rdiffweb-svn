@@ -8,7 +8,7 @@ import os, urllib
 class rdiffHistoryPage(page_main.rdiffPage):
    def index(self, repo):
       try:
-         rdw_helpers.ensurePathValid(repo)
+         self.validateUserPath(repo)
       except rdw_helpers.accessDeniedError, error:
          return self.writeErrorPage(str(error))
 
@@ -17,7 +17,6 @@ class rdiffHistoryPage(page_main.rdiffPage):
          return self.writeErrorPage("Access is denied.")
 
       page = self.startPage("Backup History")
-      page = page + self.writeTopLinks()
       try:
          rdiffHistory = librdiff.getBackupHistory(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo))
       except librdiff.FileError, error:

@@ -9,7 +9,6 @@ class rdiffStatusPage(page_main.rdiffPage):
    def index(self):
       userMessages = self._getRecentUserMessages()
       page = self.startPage("Backup Status", rssUrl=self._buildStatusFeedUrl(), rssTitle = "Backup status for "+self.getUsername())
-      page = page + self.writeTopLinks()
       page = page + self.compileTemplate("status.html", messages=userMessages, feedLink=self._buildStatusFeedUrl(), statusLink="", title="Backup Status")
       page = page + self.endPage()
       return page
@@ -30,10 +29,8 @@ class rdiffStatusPage(page_main.rdiffPage):
          startTime = rdw_helpers.rdwTime()
          startTime.timeInSeconds = entryTime.timeInSeconds
          startTime.tzOffset = entryTime.tzOffset
-         endTime = rdw_helpers.rdwTime()
-         endTime.timeInSeconds = entryTime.timeInSeconds
-         endTime.tzOffset = entryTime.tzOffset
          startTime.setTime(0, 0, 0)
+         endTime = startTime
          endTime.setTime(23, 59, 59)
 
          userMessages = self._getUserMessages(userRepos, True, False, startTime, endTime)
@@ -43,14 +40,13 @@ class rdiffStatusPage(page_main.rdiffPage):
          if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
             return self.writeErrorPage("Access is denied.")
          try:
-            rdw_helpers.ensurePathValid(repo)
+            self.validateUserPath(repo)
          except rdw_helpers.accessDeniedError, error:
             return self.writeErrorPage(str(error))
 
          userMessages = self._getUserMessages([repo], False, True, entryTime, entryTime)
 
       page = self.startPage("Backup Status Entry", rssUrl="", rssTitle="")
-      page = page + self.writeTopLinks()
       page = page + self.compileTemplate("status.html", messages=userMessages, feedLink="", statusLink=self._buildAbsoluteStatusUrl(), title="Backup Status Entry")
       page = page + self.endPage()
       return page

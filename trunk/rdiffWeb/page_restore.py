@@ -15,8 +15,7 @@ class autoDeleteDir:
 class rdiffRestorePage(page_main.rdiffPage):
    def index(self, repo, path, date):
       try:
-         rdw_helpers.ensurePathValid(repo)
-         rdw_helpers.ensurePathValid(path)
+         self.validateUserPath(rdw_helpers.joinPaths(repo, path))
       except rdw_helpers.accessDeniedError, error:
          return self.writeErrorPage(str(error))
       if not repo: return self.writeErrorPage("Backup location not specified.")
