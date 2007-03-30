@@ -184,6 +184,12 @@ def mysqlSetup():
          print "Repository search complete."
 
 def doMainSetup():
+   try:
+      import cherrypy
+   except:
+      print "Unable to load the CherryPy python module. This is most likely because it has not been installed. Please install this module and run the configuration again."
+      return
+   
    addConfigFileLine("ServerName=localhost")
    addConfigFileLine("ServerPort=8080")
 
