@@ -21,7 +21,7 @@ class mysqlUserDB:
       return len(results) == 1
 
    def getUserRoot(self, username):
-      if not self.userRootCache[username]:
+      if not username in self.userRootCache:
          self.userRootCache[username] = self._getUserField(username, "UserRoot")
       return self.userRootCache[username]
 
