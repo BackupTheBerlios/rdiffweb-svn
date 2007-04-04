@@ -46,6 +46,7 @@ class rdiffPage:
          
    def validateUserPath(self, path):
       '''Takes a path relative to the user's root dir and validates that it is valid and within the user's root'''
+      path = rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), path)
       path = path.rstrip("/")
       realPath = os.path.realpath(path)
       if realPath != path:
