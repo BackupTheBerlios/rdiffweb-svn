@@ -9,6 +9,7 @@ class mysqlUserDB:
       import MySQLdb
       self.configFilePath = configFilePath
       MySQLdb.paramstyle = "pyformat"
+      self.userRootCache = {}
       self._connect()
 
    def userExists(self, username):
@@ -20,7 +21,9 @@ class mysqlUserDB:
       return len(results) == 1
 
    def getUserRoot(self, username):
-      return self._getUserField(username, "UserRoot")
+      if not self.userRootCache[username]:
+         self.userRootCache[username] = self._getUserField(username, "UserRoot")
+      return self.userRootCache[username]
 
    def getUserRepoPaths(self, username):
       if not self.userExists(username): return None
@@ -53,6 +56,7 @@ class mysqlUserDB:
          adminInt = 0
       query = "UPDATE users SET UserRoot=%(userRoot)s, IsAdmin="+str(adminInt)+" WHERE Username = %(user)s"
       self._executeQuery(query, userRoot=userRoot, user=username)
+      self.userRootCache[username] = userRoot # update cache
 
    def setUserRepos(self, username, repoPaths):
       if not self.userExists(username): raise ValueError
@@ -120,12 +124,15 @@ class mysqlUserDB:
 
    def _getCreateStatements(self):
       return ["""create table users ( UserID int(11) NOT NULL auto_increment,
-               Username varchar (50) binary unique not null,
-               Password varchar (40) not null,
-               UserRoot varchar (255) not null,
-               IsAdmin tinyint not null,
+               Username varchar (50) binary unique NOT NULL,
+               Password varchar (40) NOT NULL DEFAULT "",
+               UserRoot varchar (255) NOT NULL DEFAULT "",
+               IsAdmin tinyint NOT NULL DEFAULT FALSE,
                primary key (UserID) )""",
-               "create table repos ( UserID int(11) NOT NULL, RepoPath varchar (255) not null);"]
+               """create table repos ( RepoID int(11) NOT NULL auto_increment,
+               UserID int(11) NOT NULL, 
+               RepoPath varchar (255) NOT NULL,
+               primary key (RepoID))"""]
 
 
 ##################### Unit Tests #########################
