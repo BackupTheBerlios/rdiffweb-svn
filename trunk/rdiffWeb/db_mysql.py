@@ -62,8 +62,8 @@ class mysqlUserDB:
       if not self.userExists(username): raise ValueError
       userID = self._getUserID(username)
       self._deleteUserRepos(username)
-      query = "INSERT INTO repos (UserID, RepoPath) values (%(userID)s, %(repo)s)"
-      repoPaths = [ {"userID": str(userID), "repo" : repo} for repo in repoPaths ]
+      query = "INSERT INTO repos (UserID, RepoPath) values (%s, %s)"
+      repoPaths = [ (str(userID), repo) for repo in repoPaths ]
       cursor = self.sqlConnection.cursor()
       cursor.executemany(query, repoPaths)
 
