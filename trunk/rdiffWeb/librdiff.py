@@ -284,7 +284,9 @@ def getBackupHistory(repoRoot):
    return _getBackupHistory(repoRoot)
 
 def getLastBackupHistoryEntry(repoRoot):
-   return _getBackupHistory(repoRoot, 1)[0]
+   history = _getBackupHistory(repoRoot, 1)
+   if not history: raise FileError # We may not have any backup entries if the first backup for the repository is in progress
+   return history[0]
 
 def getBackupHistoryForDay(repoRoot, date):
    return _getBackupHistory(repoRoot, -1, date)
