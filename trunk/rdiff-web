@@ -6,6 +6,9 @@ import os
 import rdiffWeb.rdw_config
 import sys
 
+def isValidSessionDir(sessionDir):
+   return os.path.exists(sessionDir) and os.path.isdir(sessionDir) and os.access(sessionDir, os.W_OK)
+
 if __name__ == "__main__":
 
    # First make sure we have a valid config file.  If not, tell the user to run the config script
@@ -82,6 +85,14 @@ if __name__ == "__main__":
 
    if not verbose:
       settings['server.logToScreen'] = False
+
+   if rdiffWeb.rdw_config.getConfigSetting("SessionStorage").lower() == "disk":
+      sessionDir = rdiffWeb.rdw_config.getConfigSetting("SessionDir")
+      if isValidSessionDir(sessionDir):
+         cherrypy.log("Setting session mode to disk in directory %s" % sessionDir)
+         settings['sessionFilter'] = True
+         settings['sessionFilter.storageType'] = 'File'
+         settings['sessionFilter.storagePath'] = sessionDir
 
    cherrypy.config.update(settings)
    cherrypy.root = rdiffWeb.page_locations.rdiffLocationsPage()
