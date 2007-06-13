@@ -42,8 +42,8 @@
 
       <!--StartIncludeIf:hasPrevRevisions-->
    <!-- ENTRIES WITH REVISIONS -->
-      <td>
-         <a class="PopupLink" href="javascript:void 0">Previous Revisions</a>
+      <td class="PopupLinkCell">
+         <a class="PopupLink" href="javascript:void 0">^numPrevRevisions$ Previous Revision<!--StartIncludeIf:hasMultipleRevisions-->s<!--EndIncludeIf:hasMultipleRevisions--></a>
       </td>
       <td class="FlyoutContainer">
          <div>
@@ -55,12 +55,12 @@
          </div>
       </td>
       <!--EndIncludeIf:hasPrevRevisions-->
-      <!--StartIncludeIf:showNoRevisionsText-->
+      <!--StartDeleteIf:showRevisionsText-->
    <!-- ENTRIES WITH NO REVISIONS -->
       <td class="FlyoutContainer">
          No Previous Revisions
       </td>
-      <!--EndIncludeIf:showNoRevisionsText-->
+      <!--EndDeleteIf:showRevisionsText-->
       </tr>
    <!--EndRepeat:files-->
 </tbody>

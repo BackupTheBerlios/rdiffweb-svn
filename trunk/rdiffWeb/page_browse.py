@@ -74,7 +74,7 @@ class rdiffBrowsePage(page_main.rdiffPage):
                changeDates = [ { "changeDateUrl" : self.buildRestoreUrl(repo, joinPaths(path, libEntry.name), x),
                                  "changeDateStr" : x.getDisplayString() } for x in entryChangeDates]
 
-            showNoRevisionsText = (len(changeDates) == 0) and (not libEntry.isDir)
+            showRevisionsText = (len(changeDates) > 0) or libEntry.isDir
             entries.append({ "filename" : libEntry.name,
                            "fileRestoreUrl" : entryLink,
                            "filetype" : fileType,
@@ -82,7 +82,9 @@ class rdiffBrowsePage(page_main.rdiffPage):
                            "date" : libEntry.changeDates[-1].getDisplayString(),
                            "size" : fileSize,
                            "hasPrevRevisions" : len(changeDates) > 0,
-                           "showNoRevisionsText" : showNoRevisionsText,
+                           "numPrevRevisions" : str(len(changeDates)), 
+                           "hasMultipleRevisions" : len(changeDates) > 1,
+                           "showRevisionsText" : showRevisionsText,
                            "changeDates" : changeDates })
 
       # Start page

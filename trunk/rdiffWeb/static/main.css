@@ -37,7 +37,14 @@ table thead
 
 table td
 {
-   padding-right: 2em
+   padding-right: 2em;
+}
+
+td.PopupLinkCell,
+td.PopupLinkCell td
+{
+   padding-right: 0em;
+   text-align: right;
 }
 
 /* disable padding on icons and flyouts */
