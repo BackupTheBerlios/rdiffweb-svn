@@ -66,7 +66,7 @@ class templateParser:
          matchText = matchText[len(multilineKeyword):]
       if not matchText in replacements.keys():
          raise templateDataError(matchText)
-      replacementText = rdw_helpers.encodeText(replacements[matchText])
+      replacementText = rdw_helpers.encodeText(str(replacements[matchText]))
       if isMultiline:
          replacementText = replacementText.replace("\n", "\n<br/>")
       return replacementText
