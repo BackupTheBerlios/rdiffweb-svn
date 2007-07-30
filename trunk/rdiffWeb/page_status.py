@@ -52,8 +52,10 @@ class rdiffStatusPage(page_main.rdiffPage):
       return page
    entry.exposed = True
 
-   def feed(self):
+   def feed(self, user=""):
       cherrypy.response.headerMap["Content-Type"] = "text/xml"
+      if user and user != self.getUsername():
+         return self.writeErrorPage("Invalid username.")
       userMessages = self._getRecentUserMessages()
       statusUrl = self._buildAbsoluteStatusUrl()
       return self.compileTemplate("status.xml", username=self.getUsername(), link=statusUrl, messages=userMessages)
