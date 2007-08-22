@@ -7,8 +7,8 @@ import urllib
 
 
 class rdiffBrowsePage(page_main.rdiffPage):
+   
    def index(self, repo="", path="", restore=""):
-
       try:
          self.validateUserPath(joinPaths(repo, path))
       except rdw_helpers.accessDeniedError, error:
@@ -19,6 +19,16 @@ class rdiffBrowsePage(page_main.rdiffPage):
       if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
          return self.writeErrorPage("Access is denied.")
 
+      parms = self.getParmsForPage(self.userDB.getUserRoot(self.getUsername()), repo, path, restore)
+      page = self.startPage(parms["title"])
+      page = page + self.compileTemplate("dir_listing.html", **parms)
+      page = page + self.endPage()
+      return page
+   
+   index.exposed = True
+   
+   
+   def getParmsForPage(self, userRoot, repo="", path="", restore=""):
       # Build "parent directories" links
       parentDirs = [{ "parentPath" : self.buildLocationsUrl(), "parentDir" : "Backup Locations" }]
       parentDirs.append({ "parentPath" : self.buildBrowseUrl(repo, "/", False), "parentDir" : repo.lstrip("/") })
@@ -30,7 +40,7 @@ class rdiffBrowsePage(page_main.rdiffPage):
       parentDirs[-1]["parentPath"] = "" # Clear link for last parent, so it doesn't show it as a link
 
       # Set up warning about in-progress backups, if necessary
-      if librdiff.backupIsInProgress(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)):
+      if librdiff.backupIsInProgressForRepo(joinPaths(userRoot, repo)):
          backupWarning = "Warning: a backup is currently in progress to this location.  The displayed data may be inconsistent."
       else:
          backupWarning = ""
@@ -40,7 +50,7 @@ class rdiffBrowsePage(page_main.rdiffPage):
       if restore == "T":
          title = "Restore "+repo
          viewUrl = self.buildBrowseUrl(repo, path, False)
-         restoreDates = librdiff.getDirRestoreDates(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo), path)
+         restoreDates = librdiff.getDirRestoreDates(joinPaths(userRoot, repo), path)
          restoreDates.reverse() # sort latest first
          restoreDates = [ { "dateStr" : x.getDisplayString(), "dirRestoreUrl" : self.buildRestoreUrl(repo, path, x) }
                          for x in restoreDates ]
@@ -52,7 +62,7 @@ class rdiffBrowsePage(page_main.rdiffPage):
 
          # Get list of actual directory entries
          try:
-            fullRepoPath = joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)
+            fullRepoPath = joinPaths(userRoot, repo)
             libEntries = librdiff.getDirEntries(fullRepoPath, path)
          except librdiff.FileError, error:
             return self.writeErrorPage(str(error))
@@ -87,11 +97,23 @@ class rdiffBrowsePage(page_main.rdiffPage):
                            "showRevisionsText" : showRevisionsText,
                            "changeDates" : changeDates })
 
-      # Start page
-      page = self.startPage(title)
-      page = page + self.compileTemplate("dir_listing.html", title=title, files=entries, parentDirs=parentDirs, restoreUrl=restoreUrl, viewUrl=viewUrl, restoreDates=restoreDates, warning=backupWarning)
-      page = page + self.endPage()
-      return page
+      return { "title" : title, "files" : entries, "parentDirs" : parentDirs, "restoreUrl" : restoreUrl, "viewUrl" : viewUrl, "restoreDates" : restoreDates, "warning" : backupWarning }
 
-   index.exposed = True
+class browsePageTest(page_main.pageTest, rdiffBrowsePage):
+   def getTemplateName(self):
+      return "browse_template.txt"
+   
+   def getExpectedResultsName(self):
+      return "browse_results.txt"
+      
+   def getParmsForTemplate(self, repoParentPath, repoName):
+      return self.getParmsForPage(repoParentPath, repoName)
+
+if __name__ == "__main__":
+   print "Called as standalone program; running unit tests..."
+
+   import unittest
+   testSuite = unittest.makeSuite(browsePageTest, 'test')
+   testRunner = unittest.TextTestRunner()
+   testRunner.run(testSuite)
 

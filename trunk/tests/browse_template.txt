@@ -1,0 +1,9 @@
+Title:^title$
+Path:<!--StartRepeat:parentDirs--> / ^parentDir$<!--EndRepeat:parentDirs-->
+Viewing
+
+Name	Size	Revision	Number_Previous_Revisions	Exists?
+<!--StartRepeat:files-->^filename$	^size$	^date$	^numPrevRevisions$	^exists$<!--StartIncludeIf:hasPrevRevisions-->
+<!--StartRepeat:changeDates-->
+PrevRevision	^changeDateStr$<!--EndRepeat:changeDates--><!--EndIncludeIf:hasPrevRevisions-->
+<!--EndRepeat:files-->

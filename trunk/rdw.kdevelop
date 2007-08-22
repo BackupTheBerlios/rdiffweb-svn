@@ -10,6 +10,7 @@
       <keyword>Python</keyword>
     </keywords>
     <ignoreparts/>
+    <projectname>rdw</projectname>
   </general>
   <kdevscriptproject>
     <general>

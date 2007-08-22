@@ -107,5 +107,53 @@ class rdiffPage:
    def getUsername(self):
       username = cherrypy.session['username']
       return username
+   
 
+import unittest, shutil, tempfile, os.path
+class pageTest(unittest.TestCase):
+   # The dirs containing source data for automated tests are set up in the following format:
+   # one folder for each test, named to describe the test
+      # one folder, called repo. This contains the sample rdiff-backup repository
+      # expected results for each of the page templates
+   # templates for each of the pages to test
 
+   def _getBackupTests(self):
+      return filter(lambda x: not x.startswith(".") and os.path.isdir(rdw_helpers.joinPaths(self.destRoot, x)), os.listdir(self.destRoot))
+   
+   def _getFileText(self, testName, templateName):
+      return open(rdw_helpers.joinPaths(self.destRoot, testName, templateName)).read()
+   
+   def _copyDirWithoutSvn(self, src, dest):
+      names = filter(lambda x: x != ".svn", os.listdir(src))
+      os.makedirs(dest)
+      for name in names:
+         srcname = os.path.join(src, name)
+         destname = os.path.join(dest, name)
+         if os.path.isdir(srcname):
+            self._copyDirWithoutSvn(srcname, destname)
+         else:
+            shutil.copy2(srcname, destname)
+
+   def setUp(self):
+      self.destRoot = rdw_helpers.joinPaths(os.path.realpath(tempfile.gettempdir()), "rdiffWeb")
+      self.masterDirPath = os.path.realpath("tests") # TODO: do this right, including tying tests into "python setup.py test"
+      self.tearDown()
+      
+      # Copy and set up each test
+      self._copyDirWithoutSvn(self.masterDirPath, self.destRoot)
+
+   def tearDown(self):
+      if (os.access(self.destRoot, os.F_OK)):
+         rdw_helpers.removeDir(self.destRoot)
+
+   def testCompileTemplate(self):
+      for test in self._getBackupTests():
+         parms = self.getParmsForTemplate(rdw_helpers.joinPaths(self.destRoot, test), "repo")
+         #print parms
+         
+         encounteredText = rdw_templating.templateParser().parseTemplate(self._getFileText("", self.getTemplateName()), **parms)
+         expectedText = self._getFileText(test, self.getExpectedResultsName())
+         
+         self.assertEquals(encounteredText, expectedText)
+         #assert encounteredText == expectedText, "Got:\n" + encounteredText + "\nExpected:\n" + expectedText
+      

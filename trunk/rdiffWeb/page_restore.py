@@ -22,7 +22,7 @@ class rdiffRestorePage(page_main.rdiffPage):
       if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
          return self.writeErrorPage("Access is denied.")
 
-      if librdiff.backupIsInProgress(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)):
+      if librdiff.backupIsInProgressForRepo(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)):
          return self.writeErrorPage("A backup is currently in progress to this location.  Restores are disabled until this backup is complete.")
 
       try:

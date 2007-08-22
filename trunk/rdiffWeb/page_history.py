@@ -25,9 +25,13 @@ class rdiffHistoryPage(page_main.rdiffPage):
       rdiffHistory.reverse()
       entries = []
       for historyItem in rdiffHistory:
+         sizeStr = ""
+         if not historyItem.inProgress:
+            sizeStr = rdw_helpers.formatFileSizeStr(historyItem.size)
          entries.append({ "date" : historyItem.date.getDisplayString(),
+                          "inProgress" : historyItem.inProgress,
                           "errors" : historyItem.errors,
-                          "size" : rdw_helpers.formatFileSizeStr(historyItem.size) })
+                          "size" : sizeStr })
       page = page + self.compileTemplate("history.html", title="Backup history for "+repo, history=entries)
       page = page + self.endPage()
       return page

@@ -273,18 +273,26 @@ def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate):
       rdiffOutputFile = rdiffOutputFile+".zip"
    return rdiffOutputFile
 
-def backupIsInProgress(repo):
+def backupIsInProgressForRepo(repo):
    rdiffDir = joinPaths(repo, rdiffDataDirName)
    mirrorMarkers = os.listdir(rdiffDir)
    mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
    return mirrorMarkers and len(mirrorMarkers) > 1
+
+def backupIsInProgress(repo, date):
+   rdiffDir = joinPaths(repo, rdiffDataDirName)
+   mirrorMarkers = os.listdir(rdiffDir)
+   mirrorMarkers.sort()
+   mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
+   mirrorMarkers = mirrorMarkers[1:]
+   return len(filter(lambda x: x.startswith("current_mirror."+date.getUrlString()), mirrorMarkers)) > 0
 
 import gzip, re
 def getBackupHistory(repoRoot):
    return _getBackupHistory(repoRoot)
 
 def getLastBackupHistoryEntry(repoRoot):
-   history = _getBackupHistory(repoRoot, 1)
+   history = _getBackupHistory(repoRoot, 1, None, None, False)
    if not history: raise FileError # We may not have any backup entries if the first backup for the repository is in progress
    return history[0]
 
@@ -298,6 +306,7 @@ def getBackupHistoryForDateRange(repoRoot, earliestDate, latestDate):
    return _getBackupHistory(repoRoot, -1, earliestDate, latestDate, False)
 
 # earliestDate and latestDate are inclusive
+# if limiting by numLatestEntries, will any in-progress backups will be ignored
 def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDate=None, includeInProgress=True):
    """Returns a list of backupHistoryEntry's"""
    checkRepoPath(repoRoot, "")
@@ -308,10 +317,6 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
    curEntries = filter(lambda x: x.startswith("error_log."), curEntries)
    curEntries.sort()
 
-   if numLatestEntries != -1:
-      assert numLatestEntries > 0
-      curEntries = curEntries[-numLatestEntries:]
-      curEntries.reverse()
    entries = []
    for entryFile in curEntries:
       entry = incrementEntry(entryFile)
@@ -337,12 +342,19 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
          expression = 0
       newEntry = backupHistoryEntry()
       newEntry.date = entry.getDate()
-      newEntry.errors = errors
+      newEntry.inProgress = backupIsInProgress(repoRoot, entry.getDate())
+      if newEntry.inProgress:
+         newEntry.errors = ""
+      else:
+         newEntry.errors = errors
       newEntry.size = int(expression)
       entries.append(newEntry)
 
-   if len(entries) > 0 and not includeInProgress and backupIsInProgress(repoRoot):
+   if len(entries) > 0 and not includeInProgress and backupIsInProgressForRepo(repoRoot):
       entries.pop()
+   
+   if numLatestEntries != -1:
+      entries = entries[-numLatestEntries:]
    return entries
 
 def getDirRestoreDates(repo, path):
@@ -416,7 +428,7 @@ class libRdiffTest(unittest.TestCase):
 
    def tearDown(self):
       if (os.access(self.destRoot, os.F_OK)):
-            removeDir(self.destRoot)
+         removeDir(self.destRoot)
 
    def getBackupTests(self):
       return filter(lambda x: not x.startswith("."), os.listdir(self.masterDirPath))
