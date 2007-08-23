@@ -16,12 +16,17 @@ class rdiffHistoryPage(page_main.rdiffPage):
       if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
          return self.writeErrorPage("Access is denied.")
 
-      page = self.startPage("Backup History")
+      parms = {}
       try:
-         rdiffHistory = librdiff.getBackupHistory(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo))
+         parms = self.getParmsForPage(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo), repo)
       except librdiff.FileError, error:
          return self.writeErrorPage(error.getErrorString())
-
+      
+      return self.startPage("Backup History") + self.compileTemplate("history.html", **parms) + self.endPage()
+   index.exposed = True
+   
+   def getParmsForPage(self, repoPath, repoName):
+      rdiffHistory = librdiff.getBackupHistory(repoPath)
       rdiffHistory.reverse()
       entries = []
       for historyItem in rdiffHistory:
@@ -32,7 +37,23 @@ class rdiffHistoryPage(page_main.rdiffPage):
                           "inProgress" : historyItem.inProgress,
                           "errors" : historyItem.errors,
                           "size" : sizeStr })
-      page = page + self.compileTemplate("history.html", title="Backup history for "+repo, history=entries)
-      page = page + self.endPage()
-      return page
-   index.exposed = True
+      return {"title" : "Backup history for "+repoName, "history" : entries}
+      
+
+class historyPageTest(page_main.pageTest, rdiffHistoryPage):
+   def getTemplateName(self):
+      return "history_template.txt"
+   
+   def getExpectedResultsName(self):
+      return "history_results.txt"
+      
+   def getParmsForTemplate(self, repoParentPath, repoName):
+      return self.getParmsForPage(rdw_helpers.joinPaths(repoParentPath, repoName), repoName)
+
+if __name__ == "__main__":
+   print "Called as standalone program; running unit tests..."
+
+   import unittest
+   testSuite = unittest.makeSuite(historyPageTest, 'test')
+   testRunner = unittest.TextTestRunner()
+   testRunner.run(testSuite)

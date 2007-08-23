@@ -155,5 +155,5 @@ class pageTest(unittest.TestCase):
          expectedText = self._getFileText(test, self.getExpectedResultsName())
          
          self.assertEquals(encounteredText, expectedText)
-         #assert encounteredText == expectedText, "Got:\n" + encounteredText + "\nExpected:\n" + expectedText
+         #assert encounteredText == expectedText, "Got:\n" + encounteredText + "\nExpected:\n" + expectedText + "\nEnd"
       
