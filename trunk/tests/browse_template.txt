@@ -1,7 +1,7 @@
 Title:^title$
 Path:<!--StartRepeat:parentDirs--> / ^parentDir$<!--EndRepeat:parentDirs-->
 Viewing
-
+^warning$
 Name	Size	Revision	Number_Previous_Revisions	Exists?
 <!--StartRepeat:files-->^filename$	^size$	^date$	^numPrevRevisions$	^exists$<!--StartIncludeIf:hasPrevRevisions-->
 <!--StartRepeat:changeDates-->
