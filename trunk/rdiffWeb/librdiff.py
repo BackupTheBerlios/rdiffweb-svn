@@ -277,13 +277,15 @@ def backupIsInProgressForRepo(repo):
    rdiffDir = joinPaths(repo, rdiffDataDirName)
    mirrorMarkers = os.listdir(rdiffDir)
    mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
-   return mirrorMarkers and len(mirrorMarkers) > 1
+   return not mirrorMarkers or len(mirrorMarkers) > 1
 
 def backupIsInProgress(repo, date):
    rdiffDir = joinPaths(repo, rdiffDataDirName)
    mirrorMarkers = os.listdir(rdiffDir)
    mirrorMarkers.sort()
    mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
+   if not mirrorMarkers:
+      return True
    mirrorMarkers = mirrorMarkers[1:]
    return len(filter(lambda x: x.startswith("current_mirror."+date.getUrlString()), mirrorMarkers)) > 0
 
