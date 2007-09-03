@@ -108,12 +108,3 @@ class browsePageTest(page_main.pageTest, rdiffBrowsePage):
       
    def getParmsForTemplate(self, repoParentPath, repoName):
       return self.getParmsForPage(repoParentPath, repoName)
-
-if __name__ == "__main__":
-   print "Called as standalone program; running unit tests..."
-
-   import unittest
-   testSuite = unittest.makeSuite(browsePageTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(testSuite)
-

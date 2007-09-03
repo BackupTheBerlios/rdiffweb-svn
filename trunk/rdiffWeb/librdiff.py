@@ -3,6 +3,7 @@
 """All functions throw on error."""
 
 import os, bisect
+import gzip, re
 from rdw_helpers import joinPaths, removeDir
 import rdw_helpers
 
@@ -289,7 +290,6 @@ def backupIsInProgress(repo, date):
    mirrorMarkers = mirrorMarkers[1:]
    return len(filter(lambda x: x.startswith("current_mirror."+date.getUrlString()), mirrorMarkers)) > 0
 
-import gzip, re
 def getBackupHistory(repoRoot):
    return _getBackupHistory(repoRoot)
 

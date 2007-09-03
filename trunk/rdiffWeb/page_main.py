@@ -75,9 +75,12 @@ class rdiffPage:
       return self.compileTemplate("page_end.html")
 
    def writeTopLinks(self):
-      pages = [("/status/", "Backup Status"), ("/doLogout", "Log out")]
+      pages = [("/status/", "Backup Status")]
+      if self.userDB.modificationsSupported():
+         pages.append(("/prefs", "Preferences"))
       if self.userDB.userIsAdmin(self.getUsername()):
          pages.append(("/admin", "Admin"))
+      pages.append(("/doLogout", "Log out"))
       links = []
       for page in pages:
          (url, title) = page

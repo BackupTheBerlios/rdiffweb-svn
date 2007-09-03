@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 class userDB:
+   def modificationsSupported(self):
+      return False
+
    def areUserCredentialsValid(self, username, password):
       raise NotImplementedError
 

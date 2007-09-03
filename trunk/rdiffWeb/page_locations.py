@@ -49,11 +49,3 @@ class locationsPageTest(page_main.pageTest, rdiffLocationsPage):
       
    def getParmsForTemplate(self, repoParentPath, repoName):
       return self.getParmsForPage(repoParentPath, [repoName])
-
-if __name__ == "__main__":
-   print "Called as standalone program; running unit tests..."
-
-   import unittest
-   testSuite = unittest.makeSuite(locationsPageTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(testSuite)

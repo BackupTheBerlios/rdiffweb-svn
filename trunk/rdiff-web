@@ -54,6 +54,7 @@ if __name__ == "__main__":
    import rdiffWeb.page_locations
    import rdiffWeb.page_restore
    import rdiffWeb.page_status
+   import rdiffWeb.page_prefs
 
    # OK, we're good to go.  Start the server.
    server = rdiffWeb.page_locations.rdiffLocationsPage()
@@ -101,5 +102,6 @@ if __name__ == "__main__":
    cherrypy.root.history = rdiffWeb.page_history.rdiffHistoryPage()
    cherrypy.root.status = rdiffWeb.page_status.rdiffStatusPage()
    cherrypy.root.admin = rdiffWeb.page_admin.rdiffAdminPage()
+   cherrypy.root.prefs = rdiffWeb.page_prefs.rdiffPreferencesPage()
    cherrypy.server.start()
 

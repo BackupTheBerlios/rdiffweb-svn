@@ -49,11 +49,3 @@ class historyPageTest(page_main.pageTest, rdiffHistoryPage):
       
    def getParmsForTemplate(self, repoParentPath, repoName):
       return self.getParmsForPage(rdw_helpers.joinPaths(repoParentPath, repoName), repoName)
-
-if __name__ == "__main__":
-   print "Called as standalone program; running unit tests..."
-
-   import unittest
-   testSuite = unittest.makeSuite(historyPageTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(testSuite)
