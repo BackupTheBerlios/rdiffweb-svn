@@ -15,6 +15,8 @@ class templateDefinitionError(templateError):
 
 class templateParser:
    def __init__(self):
+      self.deleteIfRegex = re.compile(r"<!--StartDeleteIf:(.*?)-->(.*?)<!--EndDeleteIf:\1-->", re.S)
+      self.includeIfRegex = re.compile(r"<!--StartIncludeIf:(.*?)-->(.*?)<!--EndIncludeIf:\1-->", re.S)
       self.replacements = []
 
    def parseTemplate(self, templateString, **kwargs):
@@ -36,8 +38,8 @@ class templateParser:
 
    def parseSingleTemplate(self, templateString):
       # Handle conditional includes/deletes
-      templateString = re.compile(r"<!--StartDeleteIf:(.*?)-->(.*?)<!--EndDeleteIf:\1-->", re.S).sub(self._handleDeleteIf, templateString)
-      templateString = re.compile(r"<!--StartIncludeIf:(.*?)-->(.*?)<!--EndIncludeIf:\1-->", re.S).sub(self._handleIncludeIf, templateString)
+      templateString = self.deleteIfRegex.sub(self._handleDeleteIf, templateString)
+      templateString = self.includeIfRegex.sub(self._handleIncludeIf, templateString)
 
       # Process any individual keywords
       result = re.compile("\^(.*?)\$").sub(self._replaceTemplateKeyword, templateString)
@@ -82,6 +84,9 @@ class templateParser:
       conditional = match.group(1)
       textToInclude = match.group(2).rstrip("\n")
       if (replacements[conditional] and includeIfTrue) or (not replacements[conditional] and not includeIfTrue):
+         # The included text may contain additional include/delete statements. Check for those, and if they exist, recurse.
+         if self.deleteIfRegex.search(textToInclude) != None or self.includeIfRegex.search(textToInclude) != None:
+            return self.parseSingleTemplate(textToInclude)
          return textToInclude
       return ""
 
@@ -111,14 +116,17 @@ class templateParsingTest(unittest.TestCase):
 
    def testConditionalInclude(self):
       template = """<!--StartIncludeIf:include-->text<!--EndIncludeIf:include-->"""
-      parmsDict = {"linkUrl":"http://www.google.com", "linkText":"Google"}
       assert(templateParser().parseTemplate(template, include=True) == "text")
       assert(templateParser().parseTemplate(template, include=False) == "")
 
       template = """<!--StartDeleteIf:include-->text<!--EndDeleteIf:include-->"""
-      parmsDict = {"linkUrl":"http://www.google.com", "linkText":"Google"}
-      assert(templateParser().parseTemplate(template, include=False) == "text")
+      self.assertEquals(templateParser().parseTemplate(template, include=False), "text")
       assert(templateParser().parseTemplate(template, include=True) == "")
+      
+   def testNestedIncludes(self):
+      template = """<!--StartIncludeIf:include--><!--StartDeleteIf:delete-->should be deleted<!--EndDeleteIf:delete-->text<!--EndIncludeIf:include-->"""
+      self.assertEquals(templateParser().parseTemplate(template, include=True, delete=True), "text")
+      self.assertEquals(templateParser().parseTemplate(template, include=False, delete=True), "")
 
    def testGoodListReplace(self):
       template = """<!--StartRepeat:links-->
