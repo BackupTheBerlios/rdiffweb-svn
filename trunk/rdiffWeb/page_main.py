@@ -3,8 +3,7 @@ import cherrypy
 import urllib
 import os.path
 
-import db_file
-import db_mysql
+import db
 import rdw_templating
 import rdw_helpers
 import rdw_config
@@ -21,7 +20,7 @@ def getFilters():
 class rdiffPage:
    _cpFilterList = getFilters()
    def __init__(self):
-      self.userDB = self._getUserDBModule()
+      self.userDB = db.userDB().getUserDBModule()
 
    ############################## HELPER FUNCTIONS ###################################
    def buildBrowseUrl(self, repo, path, isRestoreView):
@@ -40,9 +39,7 @@ class rdiffPage:
       return "/"
 
    def compileTemplate(self, templatePath, **kwargs):
-      (packageDir, ignored) = os.path.split(__file__)
-      templateText = open(rdw_helpers.joinPaths(packageDir, "templates", templatePath), "r").read()
-      return rdw_templating.templateParser().parseTemplate(templateText, **kwargs)
+      return rdw_helpers.compileTemplate(templatePath, **kwargs)
          
    def validateUserPath(self, path):
       '''Takes a path relative to the user's root dir and validates that it is valid and within the user's root'''
@@ -57,14 +54,6 @@ class rdiffPage:
       realDestPath = os.path.realpath(path)
       if realDestPath.find(self.userDB.getUserRoot(self.getUsername())) != 0:      
          raise rdw_helpers.accessDeniedError
-
-   def _getUserDBModule(self):
-      authModuleSetting = rdw_config.getConfigSetting("UserDB");
-      if authModuleSetting.lower() == "file":
-         return db_file.fileUserDB()
-      if authModuleSetting.lower() == "mysql":
-         return db_mysql.mysqlUserDB()
-      assert(False)
 
 
    ########################## PAGE HELPER FUNCTIONS ##################################

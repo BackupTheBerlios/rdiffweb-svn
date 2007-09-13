@@ -94,8 +94,20 @@ td.FlyoutContainer div
    text-decoration: none;
 }
 
-.warning
+.warning,
+.error
 {
    color: red
 }
 
+.message
+{
+   color: blue
+}
+
+table.notificationsTable td
+{
+   vertical-align: top;
+   padding-right: 0.5em;
+   text-align: right;
+}

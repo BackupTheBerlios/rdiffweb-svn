@@ -1,8 +1,38 @@
+<!--StartDelete-->
+<html>
+<head>
+   <link rel="stylesheet" href="../static/main.css" type="text/css" />
+</head>
+<body>
+<script type="text/javascript" language="javascript" src="../static/prefs.js"></script>
+<!--EndDelete-->
+<script type="text/javascript" language="javascript" src="/static/prefs.js"></script>
+
+<!--StartIncludeIf:notificationsEnabled-->
+<script type="text/javascript" language="javascript">
+
+var backupData = {
+<!--StartRepeat:backups-->
+"^backupName$" : ^maxDays$,
+<!--EndRepeat:backups-->
+}
+
+window.onload = function()
+{
+   for (i in backupData)
+   {
+      droplist = document.getElementById(i+"Select");
+      droplist.selectedIndex = backupData[i]
+   }
+}
+</script>
+<!--EndIncludeIf:notificationsEnabled-->
+
 <h2>User Preferences</h2>
 <p>
+<!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
+<!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
 <h3>Change Password</h3>
-<!--StartIncludeIf:error--><p style="color:red">^error$</p><!--EndIncludeIf:error-->
-<!--StartIncludeIf:message--><p style="color:blue">^message$</p><!--EndIncludeIf:message-->
 <form action="changePassword" method="post">
 <table>
 <tr>
@@ -22,3 +52,48 @@
 
 <input type="submit" value="Change Password" />
 </form>
+
+<h3>Update Backup Locations</h3>
+<a href="updateRepos">Find and update backup locations</a>
+
+<!--StartIncludeIf:notificationsEnabled-->
+<h3>Backup Notifications</h3>
+<form action="setNotifications" method="post">
+
+<table class="notificationsTable">
+<tr>
+   <td>Notify me at</td>
+<!--StartIncludeIf:userEmail-->
+   <td><input name="userEmail" value="^userEmail$"></td>
+<!--EndIncludeIf:userEmail-->
+<!--StartDeleteIf:userEmail-->
+   <td><input name="userEmail" value="joe@example.com"></td>
+<!--EndDeleteIf:userEmail-->
+   <td align="left">
+      when my backups do not get backed up for:
+   </td>
+</tr>
+</table>
+<table class="notificationsTable">
+<!--StartRepeat:backups-->
+<tr>
+   <td>^backupName$ : </td>
+   <td>
+      <select name="^backupName$numDays" id="^backupName$Select">
+         <option selected>Don't notify
+         <option>1 day
+         <option>2 days
+         <option>3 days
+         <option>4 days
+         <option>5 days
+         <option>6 days
+         <option>7 days
+      </select>
+   </td>
+</tr>
+<!--EndRepeat:backups-->
+</table>
+</table>
+<input type="submit" value="Change Notifications" />
+</form>
+<!--EndIncludeIf:notificationsEnabled-->

@@ -8,6 +8,8 @@ import time
 import urllib
 import zipfile
 
+import rdw_templating
+
 def joinPaths(parentPath, *args):
    args = [x.lstrip("/") for x in args]
    return os.path.join(parentPath, *args)
@@ -69,6 +71,11 @@ def formatFileSizeStr(filesize):
 
    (filesize, name) = sizeNames[-1]
    return formatNumStr(1.0*filesize / size, 2) + " " + name
+
+def compileTemplate(templatePath, **kwargs):
+   (packageDir, ignored) = os.path.split(__file__)
+   templateText = open(joinPaths(packageDir, "templates", templatePath), "r").read()
+   return rdw_templating.templateParser().parseTemplate(templateText, **kwargs)
 
 class rdwTime:
    """Time information has two components: the local time, stored in GMT as seconds since Epoch,
