@@ -62,8 +62,6 @@ class rdiffPreferencesPage(page_main.rdiffPage):
    def getPrefsPage(self, errorMessage="", statusMessage=""):
       title = "User Preferences"
       email = self.userDB.getUserEmail(self.getUsername());
-      if not email:
-         email = "joe@example.com"
       parms = { "title" : title, "error" : errorMessage, "message" : statusMessage, "userEmail" : email, "notificationsEnabled" : False }
       if email_notification.emailNotificationIsEnabled():
          repos = self.userDB.getUserRepoPaths(self.getUsername())
