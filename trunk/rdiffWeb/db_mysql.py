@@ -11,6 +11,7 @@ class mysqlUserDB:
       MySQLdb.paramstyle = "pyformat"
       self.userRootCache = {}
       self._connect()
+      self._updateToLatestFormat()
 
    def modificationsSupported(self):
       return True
@@ -34,6 +35,10 @@ class mysqlUserDB:
       repos = [ row[0] for row in self._executeQuery(query)]
       repos.sort(lambda x, y: cmp(x.upper(), y.upper()))
       return repos
+      
+   def getUserEmail(self, username):
+      if not self.userExists(username): return None
+      return self._getUserField(username, "userEmail")
 
    def getUserList(self):
       query = "SELECT UserName FROM users"
@@ -61,12 +66,29 @@ class mysqlUserDB:
       self._executeQuery(query, userRoot=userRoot, user=username)
       self.userRootCache[username] = userRoot # update cache
 
+   def setUserEmail(self, username, userEmail):
+      if not self.userExists(username): raise ValueError
+      query = "UPDATE users SET UserEmail=%(userEmail)s WHERE Username = %(user)s"
+      self._executeQuery(query, userEmail=userEmail, user=username)
+      
    def setUserRepos(self, username, repoPaths):
       if not self.userExists(username): raise ValueError
       userID = self._getUserID(username)
-      self._deleteUserRepos(username)
+      
+      # We don't want to just delete and recreate the repos, since that
+      # would lose notification information.      
+      existingRepos = self.getUserRepoPaths(username)      
+      reposToDelete = filter(lambda x: not x in repoPaths, existingRepos)
+      reposToAdd = filter(lambda x: not x in existingRepos, repoPaths)
+      
+      # delete any obsolete repos
+      for repo in reposToDelete:
+         query = "DELETE FROM repos WHERE UserID=%(userID)s AND RepoPath=%(repo)s"
+         self._executeQuery(query, repo=repo, userID=str(userID))
+      
+      # add in new repos
       query = "INSERT INTO repos (UserID, RepoPath) values (%s, %s)"
-      repoPaths = [ (str(userID), repo) for repo in repoPaths ]
+      repoPaths = [ (str(userID), repo) for repo in reposToAdd ]
       cursor = self.sqlConnection.cursor()
       cursor.executemany(query, repoPaths)
 
@@ -74,11 +96,22 @@ class mysqlUserDB:
       if not self.userExists(username): raise ValueError
       query = "UPDATE users SET Password=%(password)s WHERE Username=%(user)s"
       self._executeQuery(query, password=self._hashPassword(password), user=username)
-
+      
+   def setRepoMaxAge(self, username, repoPath, maxAge):
+      if not repoPath in self.getUserRepoPaths(username): raise ValueError
+      query = "UPDATE repos SET MaxAge=%(maxAge)s WHERE RepoPath = %(repoPath)s AND UserID = " + str(self._getUserID(username))
+      self._executeQuery(query, maxAge=maxAge, repoPath=repoPath)
+      
+   def getRepoMaxAge(self, username, repoPath):
+      query = "SELECT MaxAge FROM repos WHERE RepoPath = %(repoPath)s AND UserID = " + str(self._getUserID(username))
+      results = self._executeQuery(query, repoPath=repoPath)
+      assert len(results) == 1
+      return int(results[0][0])
+      
    def userIsAdmin(self, username):
       return bool(self._getUserField(username, "IsAdmin"))
 
-   ########## Helper functions ###########
+   ########## Helper functions ###########   
    def _deleteUserRepos(self, username):
       if not self.userExists(username): raise ValueError
       self._executeQuery("DELETE FROM repos WHERE UserID=%d" % self._getUserID(username))
@@ -126,16 +159,36 @@ class mysqlUserDB:
       return hasher.hexdigest()
 
    def _getCreateStatements(self):
-      return ["""create table users ( UserID int(11) NOT NULL auto_increment,
-               Username varchar (50) binary unique NOT NULL,
-               Password varchar (40) NOT NULL DEFAULT "",
-               UserRoot varchar (255) NOT NULL DEFAULT "",
-               IsAdmin tinyint NOT NULL DEFAULT FALSE,
-               primary key (UserID) )""",
-               """create table repos ( RepoID int(11) NOT NULL auto_increment,
-               UserID int(11) NOT NULL, 
-               RepoPath varchar (255) NOT NULL,
-               primary key (RepoID))"""]
+      return [
+"""create table users (
+UserID int(11) NOT NULL auto_increment,
+Username varchar (50) binary unique NOT NULL,
+Password varchar (40) NOT NULL DEFAULT "",
+UserRoot varchar (255) NOT NULL DEFAULT "",
+IsAdmin tinyint NOT NULL DEFAULT FALSE,
+UserEmail varchar (255) NOT NULL DEFAULT "",
+primary key (UserID) )""",
+"""create table repos (
+RepoID int(11) NOT NULL auto_increment,
+UserID int(11) NOT NULL, 
+RepoPath varchar (255) NOT NULL,
+primary key (RepoID))"""
+ ]
+               
+   def _updateToLatestFormat(self):
+      # Make sure that we have tables. If we don't, just quit.
+      tableNames = [table[0].lower() for table in self._executeQuery("show tables")]
+      if not tableNames: return
+      
+      # Make sure that the users table has a "email" column
+      columnNames = [column[0].lower() for column in self._executeQuery("describe users")]
+      if not "useremail" in columnNames:
+         self._executeQuery('alter table users add column UserEmail varchar (255) NOT NULL DEFAULT ""')
+         
+      # Make sure that the repos table has a "MaxAge" column
+      columnNames = [column[0].lower() for column in self._executeQuery("describe repos")]
+      if not "maxage" in columnNames:
+         self._executeQuery('alter table repos add column MaxAge tinyint NOT NULL DEFAULT 0')
 
 
 ##################### Unit Tests #########################
@@ -219,6 +272,20 @@ class mysqlUserDBTest(unittest.TestCase):
       userDataModule = mysqlUserDB(self.configFilePath)
       assert(not userDataModule.getUserRepoPaths("test2")) # should return None if user doesn't exist
       assert(not userDataModule.getUserRoot("")) # should return None if user doesn't exist
+      
+   def testUserRepos(self):
+      userDataModule = mysqlUserDB(self.configFilePath)
+      userDataModule.setUserRepos("test", [])
+      userDataModule.setUserRepos("test", ["a", "b", "c"])
+      self.assertEquals(userDataModule.getUserRepoPaths("test"), ["a", "b", "c"])
+      # Make sure that repo max ages are initialized to 0
+      maxAges = [ userDataModule.getRepoMaxAge("test", x) for x in userDataModule.getUserRepoPaths("test") ]
+      self.assertEquals(maxAges, [0, 0, 0])
+      userDataModule.setRepoMaxAge("test", "b", 1)
+      self.assertEquals(userDataModule.getRepoMaxAge("test", "b"), 1)
+      userDataModule.setUserRepos("test", ["b", "c", "d"])
+      self.assertEquals(userDataModule.getRepoMaxAge("test", "b"), 1)
+      self.assertEquals(userDataModule.getUserRepoPaths("test"), ["b", "c", "d"])
 
 if __name__ == "__main__":
    print "Called as standalone program; running unit tests..."
