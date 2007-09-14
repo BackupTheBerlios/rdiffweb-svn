@@ -14,7 +14,7 @@ if pythonVersion > 2.3:
       author_email='rdiffweb@rdiffweb.org',
       url='http://www.rdiffweb.org',
       packages=['rdiffWeb'],
-      package_data={'rdiffWeb': ['templates/*.html', 'templates/*.xml', 'static/*.png', 'static/*.js', 'static/*.css', 'static/images/*']},
+      package_data={'rdiffWeb': ['templates/*.html', 'templates/*.xml', 'templates/*.txt', 'static/*.png', 'static/*.js', 'static/*.css', 'static/images/*']},
       data_files=[('/etc/rdiffweb', ['rdw.conf.sample']),
                   ('/etc/init.d', ['init/rdiff-web'])
                   ],
@@ -40,6 +40,7 @@ else:
                   ('/etc/init.d', ['init/rdiff-web']),
                   (packageDataDir+'/templates', glob.glob('rdiffWeb/templates/*.html')),
                   (packageDataDir+'/templates', glob.glob('rdiffWeb/templates/*.xml')),
+                  (packageDataDir+'/templates', glob.glob('rdiffWeb/templates/*.txt')),
                   (packageDataDir+'/static', glob.glob('rdiffWeb/static/*.js')),
                   (packageDataDir+'/static', glob.glob('rdiffWeb/static/*.png')),
                   (packageDataDir+'/static', glob.glob('rdiffWeb/static/*.css')),

@@ -50,8 +50,6 @@ def emailNotifications():
       if oldRepos:
          userEmailAddress = dbBackend.getUserEmail(user)
          emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos, sender=emailSender, subject="Backup Failures")
-         #print emailText
-         #emailText = html_email.createhtmlmail("", textEmailPart, emailTitle)
 
          session = smtplib.SMTP(emailHost)
          session.login(emailUsername, emailPassword)

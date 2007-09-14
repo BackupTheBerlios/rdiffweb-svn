@@ -83,7 +83,7 @@ class mysqlUserDB:
       
       # delete any obsolete repos
       for repo in reposToDelete:
-         query = "DELETE FROM repos WHERE UserID=%(userID)s AND RepoPath=%(repo)s"
+         query = "DELETE FROM repos WHERE UserID=%(userID)s AND RepoPath= BINARY %(repo)s"
          self._executeQuery(query, repo=repo, userID=str(userID))
       
       # add in new repos
@@ -99,11 +99,11 @@ class mysqlUserDB:
       
    def setRepoMaxAge(self, username, repoPath, maxAge):
       if not repoPath in self.getUserRepoPaths(username): raise ValueError
-      query = "UPDATE repos SET MaxAge=%(maxAge)s WHERE RepoPath = %(repoPath)s AND UserID = " + str(self._getUserID(username))
+      query = "UPDATE repos SET MaxAge=%(maxAge)s WHERE RepoPath = BINARY %(repoPath)s AND UserID = " + str(self._getUserID(username))
       self._executeQuery(query, maxAge=maxAge, repoPath=repoPath)
       
    def getRepoMaxAge(self, username, repoPath):
-      query = "SELECT MaxAge FROM repos WHERE RepoPath = %(repoPath)s AND UserID = " + str(self._getUserID(username))
+      query = "SELECT MaxAge FROM repos WHERE RepoPath = BINARY %(repoPath)s AND UserID = " + str(self._getUserID(username))
       results = self._executeQuery(query, repoPath=repoPath)
       assert len(results) == 1
       return int(results[0][0])

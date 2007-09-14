@@ -62,7 +62,14 @@ class rdiffPreferencesPage(page_main.rdiffPage):
    def getPrefsPage(self, errorMessage="", statusMessage=""):
       title = "User Preferences"
       email = self.userDB.getUserEmail(self.getUsername());
-      parms = { "title" : title, "error" : errorMessage, "message" : statusMessage, "userEmail" : email, "notificationsEnabled" : False }
+      parms = {
+         "title" : title,
+         "error" : errorMessage,
+         "message" : statusMessage,
+         "userEmail" : email,
+         "notificationsEnabled" : False,
+         "backups" : []
+      }
       if email_notification.emailNotificationIsEnabled():
          repos = self.userDB.getUserRepoPaths(self.getUsername())
          backups = [{ "backupName" : repo, "maxDays" : self.userDB.getRepoMaxAge(self.getUsername(), repo) } for repo in repos]

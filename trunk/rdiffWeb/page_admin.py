@@ -71,7 +71,8 @@ class rdiffAdminPage(page_main.rdiffPage):
       page = self.startPage("Administration")
       userNames = self.userDB.getUserList()
       users = [ { "username" : user } for user in userNames ]
-      page = page + self.compileTemplate("admin_main.html", users=users, addUserUrl="/admin/addUser")
+      parms = { "users" : users, "addUserUrl" : "/admin/addUser" } ]
+      page = page + self.compileTemplate("admin_main.html", **parms)
       return page + self.endPage()
    index.exposed = True
 
