@@ -18,7 +18,7 @@ if pythonVersion > 2.3:
       data_files=[('/etc/rdiffweb', ['rdw.conf.sample']),
                   ('/etc/init.d', ['init/rdiff-web'])
                   ],
-      scripts=['rdiff-web', 'rdiff-web-config']
+      scripts=['rdiff-web', 'rdiff-web-config', 'rdiff-web-notify']
      )
 else:
    from distutils.dist import Distribution
@@ -45,5 +45,5 @@ else:
                   (packageDataDir+'/static', glob.glob('rdiffWeb/static/*.css')),
                   (packageDataDir+'/static/images', glob.glob('rdiffWeb/static/images/*')),
                   ],
-      scripts=['rdiff-web', 'rdiff-web-config']
+      scripts=['rdiff-web', 'rdiff-web-config', 'rdiff-web-notify']
      )
