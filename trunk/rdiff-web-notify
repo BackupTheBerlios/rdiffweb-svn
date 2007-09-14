@@ -7,9 +7,9 @@ import rdiffWeb.email_notification
 
 if __name__ == "__main__":
    # Because this script manipulates files in the /etc directory, it must be run as root.
-#   if os.getuid() != 0:
-#      print "Error: this script must be run as root."
-#      sys.exit(2)
+   if os.getuid() != 0:
+      print "Error: this script must be run as root."
+      sys.exit(2)
       
    if not rdiffWeb.email_notification.emailNotificationIsEnabled():
       print "Email notifications do not seem to be configured. Exiting."
