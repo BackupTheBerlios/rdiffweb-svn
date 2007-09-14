@@ -1,7 +1,32 @@
-ServerName=localhost
-ServerPort=8080
-UserDB=file
-Username=user
-Password=pass
-UserRoot=/var/repos
-UserRepoPaths=/home_backup
+
+# This is the name of the host that the server should bind to.
+# ServerName=localhost
+
+# This is the port that the server should listen on
+# ServerPort=8080
+
+# There are two options for user databases: file and MySQL.
+# The main limitation of the file-based user database is that it only supports
+# one user, while the MySQL-based user database has no limit. Automatic updating
+# of user repositories and email notifications are also not supported for
+# file-based databases.
+# UserDB=mysql
+
+
+# The following variables for only for file-based backends (they are stored
+# in the database when using MySQL.)
+#
+# Username=user
+# Password=pass
+# UserRoot=/var/backups
+# UserRepoPaths=/home_backup|/work_backup # A pipe-delimited list of repositories, relative to UserRoot
+
+
+# The server can be configured to email user when their repositories have not
+# been backed up for a user-specified period of time. To enable this feature,
+# set below settings to correct values.
+# 
+# emailHost=smtp.server.com
+# emailSender=john@doe.com
+# emailUsername=email_user # May be blank, if the smtp server does not require authentication
+# emailPassword=email_password # May be blank, if the smtp server does not require authentication
