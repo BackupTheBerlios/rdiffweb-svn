@@ -1,0 +1,9 @@
+From: ^sender$
+Subject: ^subject$
+
+The following backup locations have not been backed up recently:
+
+Backup Location      Last Backup Date
+<!--StartRepeat:repos-->
+^repo$		^lastBackupDate$
+<!--EndRepeat:repos-->

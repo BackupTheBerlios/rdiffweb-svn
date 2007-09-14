@@ -94,13 +94,13 @@ td.FlyoutContainer div
    text-decoration: none;
 }
 
-.warning,
-.error
+p.warning,
+p.error
 {
    color: red
 }
 
-.message
+p.message
 {
    color: blue
 }
