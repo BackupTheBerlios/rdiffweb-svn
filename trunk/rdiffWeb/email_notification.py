@@ -53,7 +53,7 @@ def emailNotifications():
 
          session = smtplib.SMTP(emailHost)
          session.login(emailUsername, emailPassword)
-         smtpresult = session.sendmail(emailSender, [userEmailAddress], emailText)
+         smtpresult = session.sendmail(emailSender, userEmailAddress.split(";"), emailText)
          if smtpresult:
             error = ""
             for recipient in smtpresult.keys():
