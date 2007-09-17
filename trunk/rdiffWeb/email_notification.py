@@ -45,11 +45,11 @@ def emailNotifications():
                   oldestGoodBackupTime = rdw_helpers.rdwTime()
                   oldestGoodBackupTime.initFromMidnightUTC(-maxDaysOld)
                   if lastBackup.date < oldestGoodBackupTime:
-                     oldRepos.append({"repo" : repo, "lastBackupDate" : lastBackup.date.getDisplayString()})
+                     oldRepos.append({"repo" : repo, "lastBackupDate" : lastBackup.date.getDisplayString(), "maxAge" : maxDaysOld })
                
       if oldRepos:
          userEmailAddress = dbBackend.getUserEmail(user)
-         emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos, sender=emailSender, subject="Backup Failures")
+         emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos, sender=emailSender, user=user)
 
          session = smtplib.SMTP(emailHost)
          session.login(emailUsername, emailPassword)

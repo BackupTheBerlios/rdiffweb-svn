@@ -2,6 +2,12 @@ body
 {
    font-family: sans-serif;
 }
+
+a
+{
+   text-decoration: none;
+}
+
 #NavBar
 {
       float: right;
@@ -40,6 +46,7 @@ table td
    padding-right: 2em;
 }
 
+/* Browse page */
 td.PopupLinkCell,
 td.PopupLinkCell td
 {
@@ -55,6 +62,17 @@ td.FlyoutContainer td
    padding-right: 0em;
 }
 
+td.FlyoutContainer div
+{
+   display:none;
+   position: absolute;
+   float:right;
+   color: black;
+   background-color: silver;
+   border: 1px solid gray;
+}
+
+/* Login page */
 table.Login td
 {
    padding-right: .5em;
@@ -69,15 +87,7 @@ table.Login td
    border: 10px double white;
 }
 
-td.FlyoutContainer div
-{
-   display:none;
-   position: absolute;
-   float:right;
-   color: black;
-   background-color: silver;
-   border: 1px solid gray;
-}
+
 
 .backupStatus_success,
 .backupStatus_success a:link,
@@ -94,6 +104,7 @@ td.FlyoutContainer div
    text-decoration: none;
 }
 
+/* Prefs page */
 p.warning,
 p.error
 {
@@ -102,12 +113,39 @@ p.error
 
 p.message
 {
-   color: blue
+   color: green
 }
 
-table.notificationsTable td
+table.emailTable td
 {
    vertical-align: top;
    padding-right: 0.5em;
    text-align: right;
+}
+
+tr.notificationsRow td
+{
+   border-top:1px solid #ccc;
+   padding-bottom: 5px;
+   padding-top: 5px;
+   padding-right: 1em;
+}
+
+.groupboxDiv
+{
+   border: 1px solid black;
+   display: table-cell;
+   padding: 0.5em;
+}
+
+h2,
+h3,
+table thead
+{
+   color: #3162a6;
+}
+
+input.textInput
+{
+   width: 17em;
 }

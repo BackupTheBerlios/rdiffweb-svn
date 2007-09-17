@@ -32,66 +32,72 @@ window.onload = function()
 <!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
 <h3>Change Password</h3>
 <form action="changePassword" method="post">
+<div class="groupboxDiv">
 <table>
 <tr>
    <td>Current Password:</td>
-   <td><input type="password" name="currentPassword"/></td>
+   <td><input class="textInput" type="password" name="currentPassword"/></td>
 </tr>
 <tr>
    <td>New Password:</td>
-   <td><input type="password" name="newPassword"/></td>
+   <td><input class="textInput" type="password" name="newPassword"/></td>
 </tr>
 <tr>
    <td>Confirm New Password:</td>
-   <td><input type="password" name="confirmPassword"/></td>
+   <td><input class="textInput" type="password" name="confirmPassword"/></td>
+</tr>
+<tr>
+   <td style="height: 2em"> <input type="submit" value="Change Password" /></td>
 </tr>
 </table>
-<br>
-
-<input type="submit" value="Change Password" />
+</div>
 </form>
 
+
 <h3>Update Backup Locations</h3>
-<a href="updateRepos">Find and update backup locations</a>
+<form action="updateRepos" method="post">
+<input type="submit" value="Find and Update Backup Locations" />
+</form>
 
 <!--StartIncludeIf:notificationsEnabled-->
 <h3>Backup Notifications</h3>
 <form action="setNotifications" method="post">
+<div class="groupboxDiv">
 
-<table class="notificationsTable">
-<tr>
-   <td>Notify me at</td>
-<!--StartIncludeIf:userEmail-->
-   <td><input name="userEmail" value="^userEmail$"></td>
-<!--EndIncludeIf:userEmail-->
-<!--StartDeleteIf:userEmail-->
-   <td><input name="userEmail" value="joe@example.com"></td>
-<!--EndDeleteIf:userEmail-->
-   <td align="left">
-      when my backups do not get backed up for:
-   </td>
-</tr>
-</table>
-<table class="notificationsTable">
-<!--StartRepeat:backups-->
-<tr>
-   <td>^backupName$ : </td>
-   <td>
-      <select name="^backupName$numDays" id="^backupName$Select">
-         <option selected>Don't notify
-         <option>1 day
-         <option>2 days
-         <option>3 days
-         <option>4 days
-         <option>5 days
-         <option>6 days
-         <option>7 days
-      </select>
-   </td>
-</tr>
-<!--EndRepeat:backups-->
-</table>
-</table>
-<input type="submit" value="Change Notifications" />
+   <table class="emailTable">
+      <tr>
+         <td>Notify me at</td>
+      <!--StartIncludeIf:userEmail-->
+         <td><input class="textInput" name="userEmail" value="^userEmail$"></td>
+      <!--EndIncludeIf:userEmail-->
+         <td align="left">
+            when my backups do not get backed up for:
+         </td>
+      </tr>
+   </table>
+   <table class="notificationsTable">
+      <tr></tr>
+      <!--StartRepeat:backups-->
+      <tr class="notificationsRow">
+         <td>^backupName$ : </td>
+         <td>
+            <select name="^backupName$numDays" id="^backupName$Select">
+               <option selected>Don't notify
+               <option>1 day
+               <option>2 days
+               <option>3 days
+               <option>4 days
+               <option>5 days
+               <option>6 days
+               <option>7 days
+            </select>
+         </td>
+      </tr>
+      <!--EndRepeat:backups-->
+      <tr style="height: 2em">
+         <td><input type="submit" value="Change Notifications" /></td>
+      </tr>
+   </table>
+</div>
 </form>
 <!--EndIncludeIf:notificationsEnabled-->
