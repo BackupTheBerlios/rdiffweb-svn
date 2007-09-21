@@ -30,9 +30,9 @@ window.onload = function()
 <p>
 <!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
 <!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
-<h3>Change Password</h3>
 <form action="changePassword" method="post">
 <div class="groupboxDiv">
+<h3 class="groupboxHeader">Change Password</h3>
 <table>
 <tr>
    <td>Current Password:</td>
@@ -47,7 +47,7 @@ window.onload = function()
    <td><input class="textInput" type="password" name="confirmPassword"/></td>
 </tr>
 <tr>
-   <td style="height: 2em"> <input type="submit" value="Change Password" /></td>
+   <td style="height: 2em"> <input class="groupboxButton" type="submit" value="Change Password" /></td>
 </tr>
 </table>
 </div>
@@ -56,20 +56,17 @@ window.onload = function()
 
 <h3>Update Backup Locations</h3>
 <form action="updateRepos" method="post">
-<input type="submit" value="Find and Update Backup Locations" />
+<input type="submit" class="groupboxButton" value="Find and Update Backup Locations" />
 </form>
 
 <!--StartIncludeIf:notificationsEnabled-->
-<h3>Backup Notifications</h3>
 <form action="setNotifications" method="post">
 <div class="groupboxDiv">
-
+<h3 class="groupboxHeader">Backup Notifications</h3>
    <table class="emailTable">
       <tr>
          <td>Notify me at</td>
-      <!--StartIncludeIf:userEmail-->
          <td><input class="textInput" name="userEmail" value="^userEmail$"></td>
-      <!--EndIncludeIf:userEmail-->
          <td align="left">
             when my backups do not get backed up for:
          </td>
@@ -95,7 +92,7 @@ window.onload = function()
       </tr>
       <!--EndRepeat:backups-->
       <tr style="height: 2em">
-         <td><input type="submit" value="Change Notifications" /></td>
+         <td><input type="submit" class="groupboxButton" value="Change Notifications" /></td>
       </tr>
    </table>
 </div>

@@ -136,6 +136,8 @@ tr.notificationsRow td
    border: 1px solid black;
    display: table-cell;
    padding: 0.5em;
+   color: silver;
+   margin: 10em;
 }
 
 h2,
@@ -148,4 +150,13 @@ table thead
 input.textInput
 {
    width: 17em;
+}
+
+.groupboxHeader
+{
+   margin-top: 0px;
+}
+
+.groupboxButton
+{
 }
