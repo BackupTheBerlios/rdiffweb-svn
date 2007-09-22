@@ -73,7 +73,7 @@ class rdwAuthenticationFilter(BaseFilter):
 
       # write login page
       loginPage = page_main.rdiffPage()
-      cherrypy.response.body = loginPage.compileTemplate("login.html", **loginParms)
+      cherrypy.response.body = loginPage.compileTemplate("page_start.html", title="Login required - rdiffWeb", rssLink='', rssTitle='', **loginParms) + loginPage.compileTemplate("login.html", **loginParms)
       cherrypy.request.execute_main = False      
 
    def _getHTTPAuthorizationCredentials(self, authHeader):

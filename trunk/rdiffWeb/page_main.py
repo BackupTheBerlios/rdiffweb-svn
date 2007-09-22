@@ -69,7 +69,7 @@ class rdiffPage:
          pages.append(("/prefs", "Preferences"))
       if self.userDB.userIsAdmin(self.getUsername()):
          pages.append(("/admin", "Admin"))
-      pages.append(("/doLogout", "Log out"))
+      pages.append(("/doLogout", "Log Out"))
       links = []
       for page in pages:
          (url, title) = page

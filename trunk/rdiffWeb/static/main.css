@@ -8,12 +8,15 @@ a
    text-decoration: none;
 }
 
-#NavBar
+#NavBar .roundedBorderBackground
+{
+   background-color: #ccc;
+}
+
+#NavBar 
 {
       float: right;
-      background-color: silver;
       padding: 0.25em;
-      border: 1px solid gray;
 }
 #logo
 {
@@ -133,11 +136,11 @@ tr.notificationsRow td
 
 .groupboxDiv
 {
-   border: 1px solid black;
    display: table-cell;
-   padding: 0.5em;
-   color: silver;
-   margin: 10em;
+}
+.groupboxDiv .roundedBorderBackground
+{
+   background-color: #FFF;
 }
 
 h2,

@@ -45,7 +45,6 @@ class rdiffPreferencesPage(page_main.rdiffPage):
             self.userDB.setUserEmail(self.getUsername(), parms[parmName])
          if parmName.endswith("numDays"):
             backupName = parmName[:-7]
-            print "setting backup", backupName
             if backupName in repos:
                if parms[parmName] == "Don't notify":
                   maxDays = 0
@@ -72,7 +71,24 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       }
       if email_notification.emailNotificationIsEnabled():
          repos = self.userDB.getUserRepoPaths(self.getUsername())
-         backups = [{ "backupName" : repo, "maxDays" : self.userDB.getRepoMaxAge(self.getUsername(), repo) } for repo in repos]
+         backups = []
+         for repo in repos:
+            maxAge = self.userDB.getRepoMaxAge(self.getUsername(), repo)
+            notifyOptions = []
+            for i in range(0, 8):
+               notifyStr = "Don't notify"
+               if i == 1:
+                  notifyStr = "1 day"
+               elif i > 1:
+                  notifyStr = str(i) + " days"
+                  
+               selectedStr = ""
+               if i == maxAge:
+                  selectedStr = "selected"
+               
+               notifyOptions.append({ "optionStr": notifyStr, "selectedStr": selectedStr })
+               
+            backups.append({ "backupName" : repo, "notifyOptions" : notifyOptions })
          
          parms.update({ "notificationsEnabled" : True, "backups" : backups })
          

@@ -6,32 +6,13 @@
 <body>
 <!--EndDelete-->
 
-<!--StartIncludeIf:notificationsEnabled-->
-<script type="text/javascript" language="javascript">
-
-var backupData = {
-<!--StartRepeat:backups-->
-"^backupName$" : ^maxDays$,
-<!--EndRepeat:backups-->
-}
-
-window.onload = function()
-{
-   for (i in backupData)
-   {
-      droplist = document.getElementById(i+"Select");
-      droplist.selectedIndex = backupData[i]
-   }
-}
-</script>
-<!--EndIncludeIf:notificationsEnabled-->
-
 <h2>User Preferences</h2>
 <p>
 <!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
 <!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
 <form action="changePassword" method="post">
 <div class="groupboxDiv">
+<div class="roundedBorderContents">
 <h3 class="groupboxHeader">Change Password</h3>
 <table>
 <tr>
@@ -51,22 +32,33 @@ window.onload = function()
 </tr>
 </table>
 </div>
+</div>
 </form>
 
 
-<h3>Update Backup Locations</h3>
 <form action="updateRepos" method="post">
+<div class="groupboxDiv">
+<div class="roundedBorderContents">
+<h3 class="groupboxHeader">Update Backup Locations</h3>
 <input type="submit" class="groupboxButton" value="Find and Update Backup Locations" />
+</div>
+</div>
 </form>
 
 <!--StartIncludeIf:notificationsEnabled-->
 <form action="setNotifications" method="post">
 <div class="groupboxDiv">
+<div class="roundedBorderContents">
 <h3 class="groupboxHeader">Backup Notifications</h3>
    <table class="emailTable">
       <tr>
          <td>Notify me at</td>
+<!--StartIncludeIf:userEmail-->
          <td><input class="textInput" name="userEmail" value="^userEmail$"></td>
+<!--EndIncludeIf:userEmail-->
+<!--StartDeleteIf:userEmail-->
+         <td><input class="textInput" name="userEmail" style="color: #aaa" value="joe@example.com" onfocus="javascript: if(this.value='joe@example.com') { this.value=''; this.style.color = '#000'; };"></td>
+<!--EndDeleteIf:userEmail-->
          <td align="left">
             when my backups do not get backed up for:
          </td>
@@ -79,14 +71,9 @@ window.onload = function()
          <td>^backupName$ : </td>
          <td>
             <select name="^backupName$numDays" id="^backupName$Select">
-               <option selected>Don't notify
-               <option>1 day
-               <option>2 days
-               <option>3 days
-               <option>4 days
-               <option>5 days
-               <option>6 days
-               <option>7 days
+               <!--StartRepeat:notifyOptions-->
+               <option ^selectedStr$>^optionStr$</option>
+               <!--EndRepeat:notifyOptions-->
             </select>
          </td>
       </tr>
@@ -95,6 +82,7 @@ window.onload = function()
          <td><input type="submit" class="groupboxButton" value="Change Notifications" /></td>
       </tr>
    </table>
+</div>
 </div>
 </form>
 <!--EndIncludeIf:notificationsEnabled-->
