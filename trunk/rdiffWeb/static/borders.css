@@ -91,4 +91,13 @@
 .roundedBorderContents
 {
    padding: .3em .5em .3em .5em;
+   /* Use a default background color and border, for times when javascript is turned off. 
+   These will be overridden below when the borders are added.*/
+   background-color: #ccc;
+   border: 1px solid black;
+}
+.roundedBorderInner .roundedBorderContents
+{
+   background-color: inherit;
+   border: 0px solid silver;
 }

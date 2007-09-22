@@ -47,7 +47,7 @@ function roundDivBorders()
    }
 }
 
-window.onload = function()
+addOnLoadEvent(function()
 {
    roundDivBorders();
-}
+});

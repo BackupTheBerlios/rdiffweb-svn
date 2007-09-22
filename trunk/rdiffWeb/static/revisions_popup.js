@@ -92,7 +92,7 @@ function onTableMouseOut(event)
 }
 
 
-window.onload = function()
+addOnLoadEvent(function()
 {
    var table = document.getElementById("PopupTable");
    if (table)
@@ -100,4 +100,4 @@ window.onload = function()
       table.onmouseover = onTableMouseOver;
       table.onmouseout = onTableMouseOut;
    }
-};
+});
