@@ -42,7 +42,7 @@ class rdwAuthenticationFilter(BaseFilter):
 
          cherrypy.response.status = "401 Unauthorized"
          cherrypy.response.body = "Not Authorized\n" + error
-         cherrypy.response.headerMap["WWW-Authenticate"] = 'Basic realm="cherrypy"'
+         cherrypy.response.headerMap["WWW-Authenticate"] = 'Basic realm="rdiffWeb"'
          cherrypy.request.execute_main = False
          return
 
