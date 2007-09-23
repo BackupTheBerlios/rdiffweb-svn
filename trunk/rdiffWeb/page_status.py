@@ -30,8 +30,13 @@ class rdiffStatusPage(page_main.rdiffPage):
          startTime.timeInSeconds = entryTime.timeInSeconds
          startTime.tzOffset = entryTime.tzOffset
          startTime.setTime(0, 0, 0)
-         endTime = startTime
+         
+         endTime = rdw_helpers.rdwTime() 	 
+         endTime.timeInSeconds = entryTime.timeInSeconds 	 
+         endTime.tzOffset = entryTime.tzOffset
          endTime.setTime(23, 59, 59)
+         
+         print startTime.getDisplayString(), endTime.getDisplayString()
 
          userMessages = self._getUserMessages(userRepos, True, False, startTime, endTime)
       else:
@@ -124,3 +129,4 @@ class rdiffStatusPage(page_main.rdiffPage):
       # sort messages by date
       userMessages.sort(lambda x, y: cmp(y["date"], x["date"]))
       return userMessages
+
