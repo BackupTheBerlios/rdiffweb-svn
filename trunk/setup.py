@@ -8,7 +8,7 @@ import glob, sys
 pythonVersion = sys.version_info[0]+sys.version_info[1]/10.0
 if pythonVersion > 2.3:
    setup(name='rdiffWeb',
-      version='0.3.5',
+      version='0.4.0',
       description='A web interface to rdiff-backup repositories',
       author='Josh Nisly',
       author_email='rdiffweb@rdiffweb.org',
@@ -30,7 +30,7 @@ else:
    packageDataDir = installer.config_vars['prefix']+"/lib/python"+installer.config_vars['py_version_short']+"/site-packages/rdiffWeb"
 
    setup(name='rdiffWeb',
-      version='0.3.5',
+      version='0.4.0',
       description='A web interface to rdiff-backup repositories',
       author='Josh Nisly',
       author_email='rdiffweb@rdiffweb.org',
