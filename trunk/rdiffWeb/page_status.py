@@ -6,12 +6,9 @@ import rdw_helpers
 import cherrypy
 
 class rdiffStatusPage(page_main.rdiffPage):
-   def index(self):
-      userMessages = self._getRecentUserMessages()
-      page = self.startPage("Backup Status", rssUrl=self._buildStatusFeedUrl(), rssTitle = "Backup status for "+self.getUsername())
-      page = page + self.compileTemplate("status.html", messages=userMessages, feedLink=self._buildStatusFeedUrl(), statusLink="", title="Backup Status")
-      page = page + self.endPage()
-      return page
+   def index(self, failures=""):
+      userMessages = self._getRecentUserMessages(failures != "")
+      return self._compileStatusPageTemplate(True, userMessages, failures != "")
    index.exposed = True
 
    def entry(self, date="", repo=""):
@@ -23,22 +20,7 @@ class rdiffStatusPage(page_main.rdiffPage):
          return self.writeErrorPage("Invalid date parameter.")
 
       if not repo:
-         userRepos = self.userDB.getUserRepoPaths(self.getUsername())
-
-         # Set the start and end time to be the start and end of the day, respectively, to get all entries for that day
-         startTime = rdw_helpers.rdwTime()
-         startTime.timeInSeconds = entryTime.timeInSeconds
-         startTime.tzOffset = entryTime.tzOffset
-         startTime.setTime(0, 0, 0)
-         
-         endTime = rdw_helpers.rdwTime() 	 
-         endTime.timeInSeconds = entryTime.timeInSeconds 	 
-         endTime.tzOffset = entryTime.tzOffset
-         endTime.setTime(23, 59, 59)
-         
-         print startTime.getDisplayString(), endTime.getDisplayString()
-
-         userMessages = self._getUserMessages(userRepos, True, False, startTime, endTime)
+         userMessages = self._getUserMessagesForDay(date)
       else:
          # Validate repo parameter
          if not repo: return self.writeErrorPage("Backup location not specified.")
@@ -51,36 +33,73 @@ class rdiffStatusPage(page_main.rdiffPage):
 
          userMessages = self._getUserMessages([repo], False, True, entryTime, entryTime)
 
-      page = self.startPage("Backup Status Entry", rssUrl="", rssTitle="")
-      page = page + self.compileTemplate("status.html", messages=userMessages, feedLink="", statusLink=self._buildAbsoluteStatusUrl(), title="Backup Status Entry")
-      page = page + self.endPage()
-      return page
+      return self._compileStatusPageTemplate(False, userMessages, False)
    entry.exposed = True
 
-   def feed(self, user=""):
+   def feed(self, successful=""):
       cherrypy.response.headerMap["Content-Type"] = "text/xml"
-      if user and user != self.getUsername():
-         return self.writeErrorPage("Invalid username.")
-      userMessages = self._getRecentUserMessages()
-      statusUrl = self._buildAbsoluteStatusUrl()
+      userMessages = self._getRecentUserMessages(successful != "")
+      statusUrl = self._buildAbsoluteStatusUrl(successful != "")
       return self.compileTemplate("status.xml", username=self.getUsername(), link=statusUrl, messages=userMessages)
    feed.exposed = True
+   
+   def _compileStatusPageTemplate(self, isMainPage, messages, failuresOnly):
+      mainStatusLink = ""
+      failuresStatusLink = ""
+      if (not isMainPage) or failuresOnly: mainStatusLink = self._buildAbsolutePageUrl(False)
+      else: failuresStatusLink = self._buildAbsolutePageUrl(True)
+      
+      if isMainPage: title = "Backup Status"
+      else: title = "Backup Status Entry"
+      feedLink = ""
+      feedTitle = ""
+      if isMainPage:
+         feedLink = self._buildStatusFeedUrl(failuresOnly)
+         feedTitle = "Backup status for "+self.getUsername()
+      
+      page = self.startPage("Backup Status", rssUrl=feedLink, rssTitle = feedTitle)
+      page = page + self.compileTemplate("status.html", messages=messages, feedLink=feedLink, statusLink=mainStatusLink, failuresOnlyLink=failuresStatusLink, failuresOnly=failuresOnly, title=title)
+      return page + self.endPage()
 
-   def _buildAbsoluteStatusUrl(self):
-      return cherrypy.request.base + "/status/"
+   def _buildAbsolutePageUrl(self, failuresOnly):
+      url = cherrypy.request.base + "/status/"
+      if failuresOnly:
+         url = url + "?failures=T"
+      return url
 
-   def _buildStatusFeedUrl(self):
-      return "/status/feed"
+   def _buildStatusFeedUrl(self, failuresOnly):
+      url = "/status/feed"
+      if failuresOnly:
+         url = url + "?failures=T"
+      return url
 
    def _buildStatusEntryUrl(self, repo, date):
       return self._buildAbsoluteStatusUrl() + "entry?repo="+rdw_helpers.encodeUrl(repo)+"&date="+rdw_helpers.encodeUrl(date.getUrlString())
+   
+   def _getUserMessagesForDay(self, date):
+      userRepos = self.userDB.getUserRepoPaths(self.getUsername())
 
-   def _getRecentUserMessages(self):
+      # Set the start and end time to be the start and end of the day, respectively, to get all entries for that day
+      startTime = rdw_helpers.rdwTime()
+      startTime.timeInSeconds = entryTime.timeInSeconds
+      startTime.tzOffset = entryTime.tzOffset
+      startTime.setTime(0, 0, 0)
+      
+      endTime = rdw_helpers.rdwTime() 	 
+      endTime.timeInSeconds = entryTime.timeInSeconds 	 
+      endTime.tzOffset = entryTime.tzOffset
+      endTime.setTime(23, 59, 59)
+      
+      print startTime.getDisplayString(), endTime.getDisplayString()
+
+      return self._getUserMessages(userRepos, True, False, startTime, endTime)
+
+   def _getRecentUserMessages(self, failuresOnly):
       userRepos = self.userDB.getUserRepoPaths(self.getUsername())
       asOfDate = rdw_helpers.rdwTime()
       asOfDate.initFromMidnightUTC(-5)
 
-      return self._getUserMessages(userRepos, True, True, asOfDate, None)
+      return self._getUserMessages(userRepos, not failuresOnly, True, asOfDate, None)
 
    def _getUserMessages(self, repos, includeSuccess, includeFailure, earliestDate, latestDate):
       userRoot = self.userDB.getUserRoot(self.getUsername())
@@ -129,4 +148,3 @@ class rdiffStatusPage(page_main.rdiffPage):
       # sort messages by date
       userMessages.sort(lambda x, y: cmp(y["date"], x["date"]))
       return userMessages
-

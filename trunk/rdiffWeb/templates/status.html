@@ -8,9 +8,19 @@
 
 
 <h2>^title$</h2>
+
+<!--StartDeleteIf:failuresOnly-->
 <!--StartIncludeIf:statusLink-->
-<h3><a href="^statusLink$">Recent Backup Status</a><h3>
+<h3><a href="^statusLink$">Recent Backup Status</a></h3>
 <!--EndIncludeIf:statusLink-->
+<!--EndDeleteIf:failuresOnly-->
+
+<!--StartIncludeIf:failuresOnly-->
+<a href="^statusLink$">Include Successful Backups</a>
+<!--EndIncludeIf:failuresOnly-->
+<!--StartDeleteIf:failuresOnly-->
+<a href="^failuresOnlyLink$">Show Only Errors</a>
+<!--EndDeleteIf:failuresOnly-->
 <!--StartDeleteIf:messages--><p>There are no recent backups to display.</p><!--EndDeleteIf:messages-->
 <!--StartRepeat:messages-->
 
