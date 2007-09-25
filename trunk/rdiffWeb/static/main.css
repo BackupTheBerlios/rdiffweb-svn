@@ -8,7 +8,8 @@ a
    text-decoration: none;
 }
 
-#NavBar .roundedBorderBackground
+#NavBar .roundedBorderBackground,
+#NavBar .roundedBorderContents
 {
    background-color: #ccc;
 }
