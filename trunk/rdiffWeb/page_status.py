@@ -39,7 +39,7 @@ class rdiffStatusPage(page_main.rdiffPage):
    def feed(self, successful=""):
       cherrypy.response.headerMap["Content-Type"] = "text/xml"
       userMessages = self._getRecentUserMessages(successful != "")
-      statusUrl = self._buildAbsoluteStatusUrl(successful != "")
+      statusUrl = self._buildAbsolutePageUrl(successful != "")
       return self.compileTemplate("status.xml", username=self.getUsername(), link=statusUrl, messages=userMessages)
    feed.exposed = True
    
@@ -74,7 +74,7 @@ class rdiffStatusPage(page_main.rdiffPage):
       return url
 
    def _buildStatusEntryUrl(self, repo, date):
-      return self._buildAbsoluteStatusUrl() + "entry?repo="+rdw_helpers.encodeUrl(repo)+"&date="+rdw_helpers.encodeUrl(date.getUrlString())
+      return self._buildAbsolutePageUrl() + "entry?repo="+rdw_helpers.encodeUrl(repo)+"&date="+rdw_helpers.encodeUrl(date.getUrlString())
    
    def _getUserMessagesForDay(self, date):
       userRepos = self.userDB.getUserRepoPaths(self.getUsername())
