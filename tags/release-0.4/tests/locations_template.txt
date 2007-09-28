@@ -1,0 +1,6 @@
+Name	Last Backup	Last Backup Size
+
+<!--StartRepeat:repos-->^repoName$	^repoDate$	^repoSize$
+<!--EndRepeat:repos-->
+<!--StartRepeat:badrepos-->^repoName$	^repoDate$	^repoSize$
+<!--EndRepeat:badrepos-->
