@@ -1,3 +1,0 @@
-Name	Last Backup	Last Backup Size
-
-repo	2007-08-21 21:55:35	0 bytes

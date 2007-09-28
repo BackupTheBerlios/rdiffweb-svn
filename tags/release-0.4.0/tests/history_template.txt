@@ -1,6 +1,0 @@
-Title: ^title$
-
-Date	Size	Errors	In Progress?
-<!--StartRepeat:history-->
-^date$	^size$	^errors$	^inProgress$
-<!--EndRepeat:history-->

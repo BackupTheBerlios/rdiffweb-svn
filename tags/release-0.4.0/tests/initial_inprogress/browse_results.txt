@@ -1,5 +1,0 @@
-Title:Browse repo
-Path: / Backup Locations / repo
-Viewing
-Warning: a backup is currently in progress to this location.  The displayed data may be inconsistent.
-Name	Size	Revision	Number_Previous_Revisions	Exists?
