@@ -1,0 +1,21 @@
+<center><h1>Admin Panel</h1></center>
+
+<h3>Edit user ^username$</h3>
+<!--StartIncludeIf:error--><p style="color:red">^error$</p><!--EndIncludeIf:error-->
+<form action="^submitUrl$?user=^username$" method="post">
+<table>
+   <tr>
+      <td>User Root Directory:</td>
+      <td><input name="userRoot" value="^userRoot$"></td>
+   </tr>
+   <tr>
+      <td>
+      <!--StartIncludeIf:isAdmin--><input checked type="checkbox" name="isAdmin"><!--EndIncludeIf:isAdmin-->
+      <!--StartDeleteIf:isAdmin--><input type="checkbox" name="isAdmin"><!--EndDeleteIf:isAdmin-->
+         User is admin?
+      </td>
+   </tr>
+</table>
+<br>
+<input type="submit" value="^action$" />
+</form>
