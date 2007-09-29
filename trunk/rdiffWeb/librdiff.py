@@ -287,8 +287,11 @@ def backupIsInProgress(repo, date):
    mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
    if not mirrorMarkers:
       return True
-   mirrorMarkers = mirrorMarkers[1:]
-   return len(filter(lambda x: x.startswith("current_mirror."+date.getUrlString()), mirrorMarkers)) > 0
+   mirrorMarkers = mirrorMarkers[1:] # Skip the oldest one, since that one is completed
+   for marker in mirrorMarkers:
+      if incrementEntry(marker).getDate().getSeconds() == date.getSeconds():
+         return True
+   return False
 
 def getBackupHistory(repoRoot):
    return _getBackupHistory(repoRoot)
