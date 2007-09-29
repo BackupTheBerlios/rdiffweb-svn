@@ -280,11 +280,9 @@ def backupIsInProgressForRepo(repo):
    mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
    return not mirrorMarkers or len(mirrorMarkers) > 1
 
-def backupIsInProgress(repo, date):
-   rdiffDir = joinPaths(repo, rdiffDataDirName)
-   mirrorMarkers = os.listdir(rdiffDir)
+def backupIsInProgress(repo, date, rdiffDirListing):
+   mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), rdiffDirListing)
    mirrorMarkers.sort()
-   mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
    if not mirrorMarkers:
       return True
    mirrorMarkers = mirrorMarkers[1:] # Skip the oldest one, since that one is completed
@@ -318,8 +316,8 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
 
    # Get a listing of error log files, and use that to build backup history
    rdiffDir = joinPaths(repoRoot, rdiffDataDirName)
-   curEntries = os.listdir(rdiffDir)
-   curEntries = filter(lambda x: x.startswith("error_log."), curEntries)
+   rdiffDirEntries = os.listdir(rdiffDir)
+   curEntries = filter(lambda x: x.startswith("error_log."), rdiffDirEntries)
    curEntries.sort()
 
    entries = []
@@ -347,7 +345,7 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
          expression = 0
       newEntry = backupHistoryEntry()
       newEntry.date = entry.getDate()
-      newEntry.inProgress = backupIsInProgress(repoRoot, entry.getDate())
+      newEntry.inProgress = backupIsInProgress(repoRoot, entry.getDate(), rdiffDirEntries)
       if newEntry.inProgress:
          newEntry.errors = ""
       else:
