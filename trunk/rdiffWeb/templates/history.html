@@ -1,11 +1,12 @@
 <!--StartDelete-->
 <html>
 <head>
-   <link rel="stylesheet" href="static/main.css" type="text/css" />
+   <link rel="stylesheet" href="../static/main.css" type="text/css" />
 </head>
 <body>
+<script type="text/javascript" language="javascript" src="../static/globals.js"></script>
 <!--EndDelete-->
-<script type="text/javascript" language="javascript" src="/static/revisions_popup.js"></script>
+<script type="text/javascript" language="javascript" src="../static/popups.js"></script>
 
 <h2>^title$</h2>
 
@@ -15,6 +16,12 @@
       <td></td>
       <td>Date</td>
       <td>Size</td>
+      <td>Increment Size<a class="PopupLink" href="javascript:void 0">?</a></td>
+      <td class="FlyoutContainer">
+         <div style="font-weight: normal" id="incrementSizePopup">
+            For each backup entry, the <b>increment size</b> is the amount of data that changed in the subsequent backup. Said another way, the increment size is the amount of disk space that could be freed if the ability to restore to that backup date would be removed.
+         </div>
+      </td>
       <td>Result</td>
    </tr>
 </thead>
@@ -24,6 +31,8 @@
       <td class="Icon" valign="middle"><img src="/static/images/history.png"></img></td>
       <td>^date$</td>
       <td>^size$</td>
+      <td>^incrementSize$</td>
+      <td class="FlyoutContainer"></td>
       <!--StartIncludeIf:errors-->
       <td class="BackupResult">
          <a class="PopupLink" href="javascript:void 0">Errors...</a>

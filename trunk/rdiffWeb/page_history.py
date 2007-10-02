@@ -30,13 +30,16 @@ class rdiffHistoryPage(page_main.rdiffPage):
       rdiffHistory.reverse()
       entries = []
       for historyItem in rdiffHistory:
-         sizeStr = ""
+         fileSize = ""
+         incrementSize = ""
          if not historyItem.inProgress:
-            sizeStr = rdw_helpers.formatFileSizeStr(historyItem.size)
+            fileSize = rdw_helpers.formatFileSizeStr(historyItem.size)
+            incrementSize = rdw_helpers.formatFileSizeStr(historyItem.incrementSize)
          entries.append({ "date" : historyItem.date.getDisplayString(),
                           "inProgress" : historyItem.inProgress,
                           "errors" : historyItem.errors,
-                          "size" : sizeStr })
+                          "incrementSize" : incrementSize,
+                          "size" : fileSize })
       return {"title" : "Backup history for "+repoName, "history" : entries}
       
 

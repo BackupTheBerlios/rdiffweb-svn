@@ -76,6 +76,16 @@ td.FlyoutContainer div
    border: 1px solid gray;
 }
 
+div#incrementSizePopup
+{
+   color: black;
+   background-color: #E8EEFA;
+   font-weight: normal;
+   text-align: left;
+   width: 40em;
+   padding: 0.5em;
+}
+
 /* Login page */
 table.Login td
 {
@@ -163,4 +173,16 @@ input.textInput
 
 .groupboxButton
 {
+}
+
+/* Admin page */
+
+table.usersTable td
+{
+   vertical-align: top;
+   text-align: right;
+   border-bottom:1px solid #ccc;
+   padding-bottom: 5px;
+   padding-top: 5px;
+   padding-right: 1em;
 }

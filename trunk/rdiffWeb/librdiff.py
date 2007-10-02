@@ -46,7 +46,12 @@ class dirEntry:
       self.changeDates = changeDates
 
 class backupHistoryEntry:
-   """Includes date, size (in bytes), and errors"""
+   def __init__(self):
+      self.date = None
+      self.size = None
+      self.errors = None
+      self.incrementSize = None
+      self.inProgress = None
    pass
 
 ##### Other objects #####
@@ -340,9 +345,11 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
       try:
          sessionStatsPath = getSessionStatsFile(rdiffDir, entry)
          session_stats = open(sessionStatsPath, "r").read()
-         expression = re.compile("SourceFileSize ([0-9]+) ").findall(session_stats)[0]
+         fileSize = re.compile("SourceFileSize ([0-9]+) ").findall(session_stats)[0]
+         incrementSize = re.compile("IncrementFileSize ([0-9]+) ").findall(session_stats)[0]
       except IOError:
-         expression = 0
+         fileSize = 0
+         incrementSize = 0
       newEntry = backupHistoryEntry()
       newEntry.date = entry.getDate()
       newEntry.inProgress = backupIsInProgress(repoRoot, entry.getDate(), rdiffDirEntries)
@@ -350,7 +357,8 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
          newEntry.errors = ""
       else:
          newEntry.errors = errors
-      newEntry.size = int(expression)
+      newEntry.size = int(fileSize)
+      newEntry.incrementSize = int(incrementSize)
       entries.append(newEntry)
 
    if len(entries) > 0 and not includeInProgress and backupIsInProgressForRepo(repoRoot):

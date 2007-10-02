@@ -31,7 +31,7 @@ class rdiffPreferencesPage(page_main.rdiffPage):
    
    def updateRepos(self):
       rdw_spider_repos.findReposForUser(self.getUsername(), self.userDB)
-      return self.getPrefsPage(statusMessage="Successfully updated repositories.")
+      return self.getPrefsPage(statusMessage="Successfully updated backup locations.")
    updateRepos.exposed = True
    
    def setNotifications(self, **parms):
