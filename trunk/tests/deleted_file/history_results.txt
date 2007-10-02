@@ -1,6 +1,6 @@
 Title: Backup history for repo
 
 Date	Size	Errors	In Progress?
-2007-08-21 16:31:27	0 bytes		False
-2007-08-21 16:31:24	0 bytes		False
-2007-08-21 16:31:23	141 bytes		False
+2007-08-21 16:31:27	0 bytes		False	120 bytes
+2007-08-21 16:31:24	0 bytes		False	211 bytes
+2007-08-21 16:31:23	141 bytes		False	0 bytes
