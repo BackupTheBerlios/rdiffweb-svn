@@ -4,3 +4,4 @@ Date	Size	Errors	In Progress?
 <!--StartRepeat:history-->
 ^date$	^size$	^errors$	^inProgress$	^incrementSize$
 <!--EndRepeat:history-->
+^totalBackups$ backups, with ^totalIncrementSize$ in increments

@@ -2,14 +2,15 @@
 <html>
 <head>
    <link rel="stylesheet" href="../static/main.css" type="text/css" />
+   <link rel="stylesheet" href="../static/borders.css" type="text/css" />
 </head>
 <body>
 <script type="text/javascript" language="javascript" src="../static/globals.js"></script>
+<script type="text/javascript" language="javascript" src="../static/borders.js"></script>
 <!--EndDelete-->
 <script type="text/javascript" language="javascript" src="../static/popups.js"></script>
 
 <h2>^title$</h2>
-
 <table id="PopupTable">
 <thead>
    <tr>
@@ -18,8 +19,9 @@
       <td>Size</td>
       <td>Increment Size<a class="PopupLink" href="javascript:void 0">?</a></td>
       <td class="FlyoutContainer">
-         <div style="font-weight: normal" id="incrementSizePopup">
-            For each backup entry, the <b>increment size</b> is the amount of data that changed in the subsequent backup. Said another way, the increment size is the amount of disk space that could be freed if the ability to restore to that backup date would be removed.
+         <div id="incrementSizePopup">
+            For each backup entry, the <b>increment size</b> is the amount of data that changed in the subsequent backup. Said another way, the increment size is the amount of disk space that could be freed if the ability to restore to that backup date would be removed.<br>
+            <b>You would free ^totalIncrementSize$ if you removed the ability to restore from any prior backup.</b>
          </div>
       </td>
       <td>Result</td>
@@ -60,4 +62,5 @@
    <!--EndRepeat:history-->
 </tbody>
 </table>
+
 

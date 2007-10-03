@@ -4,3 +4,4 @@ Date	Size	Errors	In Progress?
 2007-08-21 14:01:42	0 bytes		False	110 bytes
 2007-08-21 14:01:32	0 bytes		False	200 bytes
 2007-08-21 14:01:21	141 bytes		False	0 bytes
+3 backups, with 310 bytes in increments

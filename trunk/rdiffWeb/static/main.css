@@ -176,13 +176,32 @@ input.textInput
 }
 
 /* Admin page */
+table.usersTable
+{
+   border-collapse: collapse;
+}
 
 table.usersTable td
 {
    vertical-align: top;
-   text-align: right;
-   border-bottom:1px solid #ccc;
+   /*text-align: right;*/
+   border-bottom: 1px solid #ccc;
    padding-bottom: 5px;
    padding-top: 5px;
    padding-right: 1em;
+}
+
+table.usersTable tr.userEditingRow td
+{
+   border-bottom: 0px;
+}
+
+table.usersTable tr.notEditingRow,
+table.usersTable tr.notChangingPasswordRow
+{
+   display: none;
+}
+table.usersTable tr.editingRow,
+table.usersTable tr.changingPasswordRow
+{
 }

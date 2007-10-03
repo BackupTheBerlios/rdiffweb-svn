@@ -2,3 +2,4 @@ Title: Backup history for repo
 
 Date	Size	Errors	In Progress?
 2007-08-23 10:05:06			True	
+1 backups, with 0 bytes in increments
