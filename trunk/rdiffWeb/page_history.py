@@ -29,20 +29,22 @@ class rdiffHistoryPage(page_main.rdiffPage):
       rdiffHistory = librdiff.getBackupHistory(repoPath)
       rdiffHistory.reverse()
       entries = []
-      totalIncrementSize = 0
+      cumulativeSize = 0
+      if len(rdiffHistory) > 0: cumulativeSize = rdiffHistory[0].size
+      
       for historyItem in rdiffHistory:
          fileSize = ""
          incrementSize = ""
          if not historyItem.inProgress:
             fileSize = rdw_helpers.formatFileSizeStr(historyItem.size)
             incrementSize = rdw_helpers.formatFileSizeStr(historyItem.incrementSize)
-            totalIncrementSize += historyItem.incrementSize
+            cumulativeSize += historyItem.incrementSize
          entries.append({ "date" : historyItem.date.getDisplayString(),
                           "inProgress" : historyItem.inProgress,
                           "errors" : historyItem.errors,
-                          "incrementSize" : incrementSize,
+                          "cumulativeSize" : rdw_helpers.formatFileSizeStr(cumulativeSize),
                           "size" : fileSize })
-      return {"title" : "Backup history for "+repoName, "history" : entries, "totalBackups" : len(rdiffHistory), "totalIncrementSize" : rdw_helpers.formatFileSizeStr(totalIncrementSize)}
+      return {"title" : "Backup history for "+repoName, "history" : entries, "totalBackups" : len(rdiffHistory)}
       
 
 class historyPageTest(page_main.pageTest, rdiffHistoryPage):

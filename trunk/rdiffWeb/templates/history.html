@@ -17,11 +17,10 @@
       <td></td>
       <td>Date</td>
       <td>Size</td>
-      <td>Increment Size<a class="PopupLink" href="javascript:void 0">?</a></td>
+      <td>Cumulative Size<a class="PopupLink" href="javascript:void 0">?</a></td>
       <td class="FlyoutContainer">
          <div id="incrementSizePopup">
-            For each backup entry, the <b>increment size</b> is the amount of data that changed in the subsequent backup. Said another way, the increment size is the amount of disk space that could be freed if the ability to restore to that backup date would be removed.<br>
-            <b>You would free ^totalIncrementSize$ if you removed the ability to restore from any prior backup.</b>
+            For each backup entry, the <b>cumulative size</b> is the size of the current backup, plus the amount of data that is required to restore to that point in time.
          </div>
       </td>
       <td>Result</td>
@@ -33,7 +32,7 @@
       <td class="Icon" valign="middle"><img src="/static/images/history.png"></img></td>
       <td>^date$</td>
       <td>^size$</td>
-      <td>^incrementSize$</td>
+      <td>^cumulativeSize$</td>
       <td class="FlyoutContainer"></td>
       <!--StartIncludeIf:errors-->
       <td class="BackupResult">
