@@ -15,28 +15,29 @@
 <!--EndIncludeIf:statusLink-->
 <!--EndDeleteIf:failuresOnly-->
 
+<!--StartDeleteIf:isEntry-->
 <!--StartIncludeIf:failuresOnly-->
 <a href="^statusLink$">Include successful backups</a>
 <!--EndIncludeIf:failuresOnly-->
 <!--StartDeleteIf:failuresOnly-->
 <a href="^failuresOnlyLink$">Show only backups with errors</a>
 <!--EndDeleteIf:failuresOnly-->
-<!--StartDeleteIf:messages--><p>There are no recent backups to display.</p><!--EndDeleteIf:messages-->
-<!--StartRepeat:messages-->
+<!--EndDeleteIf:isEntry-->
 
-<!-- BACKUP SUCCESS -->
-<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success"><a href="^link$">Successful Backups for ^dateString$<a></h3>
+<!--StartDeleteIf:messages--><p>There are no recent backups<!--StartDeleteIf:failuresOnly--> to display<!--EndDeleteIf:failuresOnly--><!--StartIncludeIf:failuresOnly--> with errors<!--EndIncludeIf:failuresOnly-->.</p><!--EndDeleteIf:messages-->
+
+<!--StartRepeat:messages-->
+<!--StartIncludeIf:isSuccess--><h3 class="backupStatus_success"><a href="^link$">Successful Backups for ^dateString$</a></h3>
 <div>
 <p>The following backups have completed successfully:</p>
 <ul>
    <!--StartRepeat:backups-->
-   <li>^displayDate$ - ^repo$ - ^size$</li>
+   <li><a class="statusRepoLink" href="^repoLink$">^displayDate$ - ^repo$ - ^size$</a></li>
    <!--EndRepeat:backups-->
 </ul>
 </div>
 <!--EndIncludeIf:isSuccess-->
 
-<!-- BACKUP FAILURE -->
 <!--StartDeleteIf:isSuccess--><h3 class="backupStatus_failure"><a href="^link$">Backup Completed with Errors: ^repo$</a></h3>
 <div>
    <p>The backup to <strong>^repo$</strong> on <strong>^displayDate$</strong>
@@ -49,7 +50,7 @@
    <p>There following repositories contain errors:</p>
    <ul>
       <!--StartRepeat:repoErrors-->
-      <li>^repo$: ^multiline:error$</li>
+      <li><a class="statusRepoLink" href="^repoLink$">^repo$: ^multiline:error$</a></li>
       <!--EndRepeat:repoErrors-->
    </ul>
    <!--EndIncludeIf:repoErrors-->

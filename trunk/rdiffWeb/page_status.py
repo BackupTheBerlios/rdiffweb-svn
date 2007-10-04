@@ -20,7 +20,7 @@ class rdiffStatusPage(page_main.rdiffPage):
          return self.writeErrorPage("Invalid date parameter.")
 
       if not repo:
-         userMessages = self._getUserMessagesForDay(date)
+         userMessages = self._getUserMessagesForDay(entryTime)
       else:
          # Validate repo parameter
          if not repo: return self.writeErrorPage("Backup location not specified.")
@@ -58,7 +58,14 @@ class rdiffStatusPage(page_main.rdiffPage):
          feedTitle = "Backup status for "+self.getUsername()
       
       page = self.startPage("Backup Status", rssUrl=feedLink, rssTitle = feedTitle)
-      page = page + self.compileTemplate("status.html", messages=messages, feedLink=feedLink, statusLink=mainStatusLink, failuresOnlyLink=failuresStatusLink, failuresOnly=failuresOnly, title=title)
+      page = page + self.compileTemplate("status.html", 
+                                         messages=messages,
+                                         feedLink=feedLink,
+                                         statusLink=mainStatusLink,
+                                         failuresOnlyLink=failuresStatusLink,
+                                         failuresOnly=failuresOnly,
+                                         title=title,
+                                         isEntry=not isMainPage)
       return page + self.endPage()
 
    def _buildAbsolutePageUrl(self, failuresOnly):
@@ -81,13 +88,13 @@ class rdiffStatusPage(page_main.rdiffPage):
 
       # Set the start and end time to be the start and end of the day, respectively, to get all entries for that day
       startTime = rdw_helpers.rdwTime()
-      startTime.timeInSeconds = entryTime.timeInSeconds
-      startTime.tzOffset = entryTime.tzOffset
+      startTime.timeInSeconds = date.timeInSeconds
+      startTime.tzOffset = date.tzOffset
       startTime.setTime(0, 0, 0)
       
       endTime = rdw_helpers.rdwTime() 	 
-      endTime.timeInSeconds = entryTime.timeInSeconds 	 
-      endTime.tzOffset = entryTime.tzOffset
+      endTime.timeInSeconds = date.timeInSeconds 	 
+      endTime.tzOffset = date.tzOffset
       endTime.setTime(23, 59, 59)
       
       print startTime.getDisplayString(), endTime.getDisplayString()
@@ -110,9 +117,10 @@ class rdiffStatusPage(page_main.rdiffPage):
          try:
             backups = librdiff.getBackupHistoryForDateRange(rdw_helpers.joinPaths(userRoot, repo), earliestDate, latestDate);
             allBackups += [{"repo": repo, "date": backup.date, "displayDate": backup.date.getDisplayString(),
-               "size": rdw_helpers.formatFileSizeStr(backup.size), "errors": backup.errors} for backup in backups]
+               "size": rdw_helpers.formatFileSizeStr(backup.size), "errors": backup.errors,
+               "repoLink" : self.buildBrowseUrl(repo, "/", False)} for backup in backups]
          except librdiff.FileError, error:
-            repoErrors.append({"repo": repo, "error": error.getErrorString()})
+            repoErrors.append({"repo": repo, "error": error.getErrorString(), "repoLink" : self.buildBrowseUrl(repo, "/", False)})
 
       allBackups.sort(lambda x, y: cmp(y["date"], x["date"]))
       failedBackups = filter(lambda x: x["errors"], allBackups)
