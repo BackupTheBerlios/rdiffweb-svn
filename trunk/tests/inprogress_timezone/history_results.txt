@@ -1,6 +1,5 @@
 Title: Backup history for repo
 
-Date	Size	Errors	In Progress?
+Date	Size	Errors	In Progress?	Cumulative Size
 2007-09-29 17:13:22			True	
 2007-09-29 17:09:27	0 bytes		False	0 bytes
-2 backups, with 0 bytes in increments
