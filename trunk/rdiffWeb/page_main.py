@@ -110,7 +110,9 @@ class pageTest(unittest.TestCase):
    # templates for each of the pages to test
 
    def _getBackupTests(self):
-      return filter(lambda x: not x.startswith(".") and os.path.isdir(rdw_helpers.joinPaths(self.destRoot, x)), os.listdir(self.destRoot))
+      tests = filter(lambda x: not x.startswith(".") and os.path.isdir(rdw_helpers.joinPaths(self.destRoot, x)), os.listdir(self.destRoot))
+      tests.sort()
+      return tests
    
    def _getFileText(self, testName, templateName):
       return open(rdw_helpers.joinPaths(self.destRoot, testName, templateName)).read()
