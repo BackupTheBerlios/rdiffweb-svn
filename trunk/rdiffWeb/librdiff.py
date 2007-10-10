@@ -27,9 +27,6 @@ class UnknownError(FileError):
       self.errorString = "An unknown error occurred."
 
 ##### Helper Functions #####
-def getSessionStatsFileName(dateString):
-   return "session_statistics."+dateString+".data"
-
 def rsplit(string, sep, count=-1):
     L = [part[::-1] for part in string[::-1].split(sep[::-1], count)]
     L.reverse()
@@ -127,12 +124,15 @@ class rdiffQuotedPath:
       
       charsToQuotePath = joinPaths(repoRoot, rdiffDataDirName, "chars_to_quote")
       if os.path.exists(charsToQuotePath):
-         self.quoteRegex = re.compile("[^/%s]|;" % open(charsToQuotePath).read(), re.S)
+         charsToQuoteStr = open(charsToQuotePath).read()
+         if charsToQuoteStr:
+            self.quoteRegex = re.compile("[^/%s]|;" % charsToQuoteStr, re.S)
       
    def getUnquotedPath(self, quotedPath):
       return self.unquoteRegex.sub(self.getUnquotedChar, quotedPath)
    
    def getQuotedPath(self, unQuotedPath):
+      if not hasattr(self, "quoteRegex"): return unQuotedPath
       return self.quoteRegex.sub(self.getQuotedChar, unQuotedPath)
    
    # This function just gives back the original text if it can decode it
@@ -224,11 +224,14 @@ class rdiffDirEntries:
       return self._getFirstBackupAfterDate(incrementEntry(self.pathQuoter, files[-1]).getDate())
 
 
-def getSessionStatsFile(rdiffDataDir, entry):
+def getSessionStatsFile(rdiffDataDir, entry, pathQuoter):
    """Attempts to get the sessions statistics file for a given backup. Tries the following to find a match:
       1. The date with no timezone information
       2. The date, 1 hour in the past, with no timezone information
       3. The date with timezone information"""
+   def getSessionStatsFileName(dateString):
+      return "session_statistics."+pathQuoter.getQuotedPath(dateString)+".data"
+
    sessionStatsPath = joinPaths(rdiffDataDir, getSessionStatsFileName(entry.getDateStringNoTZ()))
    if os.access(sessionStatsPath, os.F_OK):
       return sessionStatsPath
@@ -377,7 +380,7 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
       except IOError:
          errors = "[Unable to read errors file.]"
       try:
-         sessionStatsPath = getSessionStatsFile(rdiffDir, entry)
+         sessionStatsPath = getSessionStatsFile(rdiffDir, entry, pathQuoter)
          session_stats = open(sessionStatsPath, "r").read()
          fileSize = re.compile("SourceFileSize ([0-9]+) ").findall(session_stats)[0]
          incrementSize = re.compile("IncrementFileSize ([0-9]+) ").findall(session_stats)[0]
