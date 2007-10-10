@@ -38,8 +38,8 @@ def rsplit(string, sep, count=-1):
 ##### Interfaced objects #####
 class dirEntry:
    """Includes name, isDir, fileSize, exists, and dict (changeDates) of sorted local dates when backed up"""
-   def __init__(self, name, isDir, fileSize, exists, changeDates):
-      self.name = name
+   def __init__(self, name, quoter, isDir, fileSize, exists, changeDates):
+      self.name = quoter.getUnquotedPath(name)
       self.isDir = isDir
       self.fileSize = fileSize
       self.exists = exists
@@ -60,8 +60,8 @@ class incrementEntry:
    missingSuffix = ".missing"
    suffixes = [".missing", ".snapshot.gz", ".snapshot", ".diff.gz", ".data.gz", ".data", ".dir", ".diff"];
 
-   def __init__(self, incrementName):
-      self.entryName = incrementName
+   def __init__(self, pathQuoter, incrementName):
+      self.entryName = pathQuoter.getUnquotedPath(incrementName)
 
    def shouldShowIncrement(self):
       return self.hasIncrementSuffix(self.entryName) and not self.isMissingIncrement()
@@ -118,15 +118,44 @@ class incrementEntry:
             return filename[0:-len(suffix)]
       return filename
 
-
 rdiffDataDirName = "rdiff-backup-data"
 rdiffIncrementsDirName = joinPaths(rdiffDataDirName, "increments")
+
+class rdiffQuotedPath:
+   def __init__(self, repoRoot):
+      self.unquoteRegex = re.compile(";[0-9]{3}", re.S)
+      
+      charsToQuotePath = joinPaths(repoRoot, rdiffDataDirName, "chars_to_quote")
+      if os.path.exists(charsToQuotePath):
+         self.quoteRegex = re.compile("[^/%s]|;" % open(charsToQuotePath).read(), re.S)
+      
+   def getUnquotedPath(self, quotedPath):
+      return self.unquoteRegex.sub(self.getUnquotedChar, quotedPath)
+   
+   def getQuotedPath(self, unQuotedPath):
+      return self.quoteRegex.sub(self.getQuotedChar, unQuotedPath)
+   
+   # This function just gives back the original text if it can decode it
+   def getUnquotedChar(self, match):
+      if not len(match.group()) == 4:
+         return match.group
+      try:
+         return chr(int(match.group()[1:]))
+      except ValueError:
+         return match.group
+   
+   def getQuotedChar(self, match):
+      return ";%03d" % (ord(match.group()))
 
 class rdiffDirEntries:
    """This class is responsible for building a listing of directory entries.
       All knowledge of how increments work is contained in this class."""
+      
+   # dirPath must be quoted!
    def init(self, repo, dirPath):
       # Var assignment and validation
+      self.pathQuoter = rdiffQuotedPath(repo)
+      
       self.repo = repo
       self.dirPath = dirPath
       self.completePath = joinPaths(repo, dirPath)
@@ -142,8 +171,8 @@ class rdiffDirEntries:
       if os.access(incrementsDir, os.F_OK): # the increments may not exist if the folder has existed forever and never been changed
          self.incrementEntries = os.listdir(incrementsDir)
 
-      self.groupedIncrementEntries = rdw_helpers.groupby(self.incrementEntries, lambda x: incrementEntry(x).getFilename())
-      self.backupTimes = [ incrementEntry(x).getDate() for x in filter(lambda x: x.startswith("mirror_metadata"), self.dataDirEntries) ]
+      self.groupedIncrementEntries = rdw_helpers.groupby(self.incrementEntries, lambda x: incrementEntry(self.pathQuoter, x).getFilename())
+      self.backupTimes = [ incrementEntry(self.pathQuoter, x).getDate() for x in filter(lambda x: x.startswith("mirror_metadata"), self.dataDirEntries) ]
       self.backupTimes.sort()
 
    def getDirEntries(self):
@@ -154,13 +183,13 @@ class rdiffDirEntries:
       for entryName in self.entries:
          if entryName == rdiffDataDirName: continue
          entryPath = joinPaths(self.repo, self.dirPath, entryName)
-         newEntry = dirEntry(entryName, os.path.isdir(entryPath), os.lstat(entryPath)[6], True,
+         newEntry = dirEntry(entryName, self.pathQuoter, os.path.isdir(entryPath), os.lstat(entryPath)[6], True,
                              [self._getLastChangedBackupTime(entryName)])
-         entriesDict[entryName] = newEntry
+         entriesDict[newEntry.name] = newEntry
 
       # Go through the increments dir.  If we find any files that didn't exist in dirPath (i.e. have been deleted), add them
       for entryFile in self.incrementEntries:
-         entry = incrementEntry(entryFile)
+         entry = incrementEntry(self.pathQuoter, entryFile)
          entryName = entry.getFilename()
          if entry.shouldShowIncrement() or entry.isMissingIncrement():
             entryDate = entry.getDate()
@@ -171,7 +200,7 @@ class rdiffDirEntries:
                   entryDate = entry.getDate()
             if not entryName in entriesDict.keys():
                entryPath = joinPaths(self.repo, rdiffIncrementsDirName, self.dirPath, entryName)
-               newEntry = dirEntry(entryName, os.path.isdir(entryPath), 0, False, [entryDate])
+               newEntry = dirEntry(entryName, self.pathQuoter, os.path.isdir(entryPath), 0, False, [entryDate])
                entriesDict[entryName] = newEntry
             else:
                if not entryDate in entriesDict[entryName].changeDates:
@@ -192,7 +221,7 @@ class rdiffDirEntries:
       files.sort()
       if not files:
          return self._getFirstBackupAfterDate(None)
-      return self._getFirstBackupAfterDate(incrementEntry(files[-1]).getDate())
+      return self._getFirstBackupAfterDate(incrementEntry(self.pathQuoter, files[-1]).getDate())
 
 
 def getSessionStatsFile(rdiffDataDir, entry):
@@ -243,6 +272,7 @@ def checkRepoPath(repoRoot, filePath):
 ##### Interfaced Functions #####
 def getDirEntries(repoRoot, dirPath):
    """Returns list of rdiffDirEntry objects.  dirPath is relative to repoPath."""
+   dirPath = rdiffQuotedPath(repoRoot).getQuotedPath(dirPath)
    checkRepoPath(repoRoot, dirPath)
 
    entryLister = rdiffDirEntries()
@@ -260,7 +290,9 @@ def getDirEntries(repoRoot, dirPath):
 import tempfile
 def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate):
    """ returns a file path to the file.  User is responsible for deleting file, as well as containing dir, after use. """
-   checkRepoPath(repoRoot, joinPaths(dirPath, filename))
+   filePath = joinPaths(dirPath, filename)
+   filePath = rdiffQuotedPath(repoRoot).getQuotedPath(filePath)
+   checkRepoPath(repoRoot, filePath)
 
    restoredFilename = filename
    if restoredFilename == "/":
@@ -292,7 +324,7 @@ def backupIsInProgress(repo, date, rdiffDirListing):
       return True
    mirrorMarkers = mirrorMarkers[1:] # Skip the oldest one, since that one is completed
    for marker in mirrorMarkers:
-      if incrementEntry(marker).getDate().getSeconds() == date.getSeconds():
+      if incrementEntry(rdiffQuotedPath(repo), marker).getDate().getSeconds() == date.getSeconds():
          return True
    return False
 
@@ -318,6 +350,8 @@ def getBackupHistoryForDateRange(repoRoot, earliestDate, latestDate):
 def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDate=None, includeInProgress=True):
    """Returns a list of backupHistoryEntry's"""
    checkRepoPath(repoRoot, "")
+   
+   pathQuoter = rdiffQuotedPath(repoRoot)
 
    # Get a listing of error log files, and use that to build backup history
    rdiffDir = joinPaths(repoRoot, rdiffDataDirName)
@@ -327,7 +361,7 @@ def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDa
 
    entries = []
    for entryFile in curEntries:
-      entry = incrementEntry(entryFile)
+      entry = incrementEntry(pathQuoter, entryFile)
       # compare local times because of discrepency between client/server time zones
       if earliestDate and entry.getDate().getLocalSeconds() < earliestDate.getLocalSeconds():
          continue
