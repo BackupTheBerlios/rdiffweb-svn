@@ -19,7 +19,10 @@ class rdiffBrowsePage(page_main.rdiffPage):
       if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
          return self.writeErrorPage("Access is denied.")
 
-      parms = self.getParmsForPage(self.userDB.getUserRoot(self.getUsername()), repo, path, restore)
+      try:
+         parms = self.getParmsForPage(self.userDB.getUserRoot(self.getUsername()), repo, path, restore)
+      except librdiff.FileError, error:
+         return self.writeErrorPage(str(error))
       page = self.startPage(parms["title"])
       page = page + self.compileTemplate("dir_listing.html", **parms)
       page = page + self.endPage()
@@ -61,11 +64,8 @@ class rdiffBrowsePage(page_main.rdiffPage):
          restoreDates = []
 
          # Get list of actual directory entries
-         try:
-            fullRepoPath = joinPaths(userRoot, repo)
-            libEntries = librdiff.getDirEntries(fullRepoPath, path)
-         except librdiff.FileError, error:
-            return self.writeErrorPage(str(error))
+         fullRepoPath = joinPaths(userRoot, repo)
+         libEntries = librdiff.getDirEntries(fullRepoPath, path)
 
          entries = []
          for libEntry in libEntries:
