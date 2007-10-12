@@ -1,2 +1,20 @@
 Starting restore of /home/joshn/projects/rdiffweb_official/tests/quoting/repo/CapCaseDir/CapCaseFile to /tmp/tmpWDXPKl/CapCaseFile as it was as of Sun Oct  7 15:55:50 2007.
 Starting restore of /home/joshn/projects/rdiffweb_official/tests/quoting/repo/CapCaseDir/CapCaseFile to /tmp/tmpzQtVvx/CapCaseFile as it was as of Fri Oct  5 09:56:29 2007.
+Starting restore of /home/joshn/projects/rdiffweb_official/tests/quoting/repo/CapCaseDir/CapCaseFile to /tmp/tmpwVogxu/CapCaseFile as it was as of Fri Oct  5 09:56:29 2007.
+Starting restore of /home/joshn/projects/rdiffweb_official/tests/quoting/repo/CapCaseDir/CapCaseFile to /tmp/tmpFof4UX/CapCaseFile as it was as of Sun Oct  7 15:55:50 2007.
+Tue Oct  9 20:51:30 2007  Starting restore of /home/joshn/projects/rdiffweb_official/tests/quoting/repo/CapCaseDir/CapCaseFile to /tmp/tmpyrdH_C/CapCaseFile as it was as of Sun Oct  7 15:55:50 2007.
+Tue Oct  9 20:51:30 2007  Processing changed file .
+Tue Oct  9 20:51:30 2007  Regular copying () to /tmp/tmpyrdH_C/rdiff-backup.tmp.1
+Tue Oct  9 20:51:30 2007  Writing file object to /tmp/tmpyrdH_C/rdiff-backup.tmp.1
+Tue Oct  9 20:51:30 2007  Copying attributes from () to /tmp/tmpyrdH_C/rdiff-backup.tmp.1
+Tue Oct  9 20:51:30 2007  Setting time of /tmp/tmpyrdH_C/rdiff-backup.tmp.1 to 1191790450
+Tue Oct  9 20:51:30 2007  Removing directory /tmp/tmpyrdH_C/CapCaseFile
+Tue Oct  9 20:51:30 2007  Renaming /tmp/tmpyrdH_C/rdiff-backup.tmp.1 to /tmp/tmpyrdH_C/CapCaseFile
+Tue Oct  9 20:51:30 2007  Restore finished
+Tue Oct  9 20:51:30 2007  Cleaning up
+Tue Oct  9 20:51:33 2007  Starting restore of /home/joshn/projects/rdiffweb_official/tests/quoting/repo/CapCaseDir/CapCaseFile to /tmp/tmpMZZeUT/CapCaseFile as it was as of Fri Oct  5 09:56:29 2007.
+Tue Oct  9 20:51:33 2007  Processing changed file .
+Tue Oct  9 20:51:33 2007  Regular copying () to /tmp/tmpMZZeUT/rdiff-backup.tmp.1
+Tue Oct  9 20:51:33 2007  Removing directory /tmp/tmpMZZeUT/CapCaseFile
+Tue Oct  9 20:51:33 2007  Restore finished
+Tue Oct  9 20:51:33 2007  Cleaning up

@@ -1,5 +1,6 @@
 Title: Backup history for repo
 
 Date	Size	Errors	In Progress?	Cumulative Size
-2007-10-07 15:55:50	0 bytes		False	0 bytes
-2007-10-05 09:56:29	0 bytes		False	0 bytes
+2007-10-10 07:43:38	21 bytes		False	217 bytes
+2007-10-07 15:55:50	0 bytes		False	217 bytes
+2007-10-05 09:56:29	0 bytes		False	217 bytes
