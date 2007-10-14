@@ -6,19 +6,13 @@ import os
 import rdiffWeb.rdw_config
 import sys
 
-def isValidSessionDir(sessionDir):
-   return os.path.exists(sessionDir) and os.path.isdir(sessionDir) and os.access(sessionDir, os.W_OK)
-
 if __name__ == "__main__":
-
    # First make sure we have a valid config file.  If not, tell the user to run the config script
    if not rdiffWeb.rdw_config.getConfigFile():
-      import os
       if os.getuid() != 0:
          print "Error: rdiffWeb must be run as root."
       else:
          print """Error: rdiffWeb has been installed, but no configuration file exists. \nPlease run 'rdiff-web-config' to configure rdiffWeb."""
-      import sys
       sys.exit(2)
 
 
@@ -45,7 +39,7 @@ if __name__ == "__main__":
    if pidFile:
       # Write our process id to specified file, so we can be killed later
       open(pidFile, 'a').write(str(os.getpid())+"\n")
-
+      
    # We import the rdiffWeb modules now instead of at the top of the file because it needs to access
    # the config file, and the config file may not exist
    import rdiffWeb.page_admin
@@ -89,7 +83,7 @@ if __name__ == "__main__":
 
    if rdiffWeb.rdw_config.getConfigSetting("SessionStorage").lower() == "disk":
       sessionDir = rdiffWeb.rdw_config.getConfigSetting("SessionDir")
-      if isValidSessionDir(sessionDir):
+      if os.path.exists(sessionDir) and os.path.isdir(sessionDir) and os.access(sessionDir, os.W_OK):
          cherrypy.log("Setting session mode to disk in directory %s" % sessionDir)
          settings['sessionFilter'] = True
          settings['sessionFilter.storageType'] = 'File'
@@ -103,5 +97,5 @@ if __name__ == "__main__":
    cherrypy.root.status = rdiffWeb.page_status.rdiffStatusPage()
    cherrypy.root.admin = rdiffWeb.page_admin.rdiffAdminPage()
    cherrypy.root.prefs = rdiffWeb.page_prefs.rdiffPreferencesPage()
+   
    cherrypy.server.start()
-
