@@ -7,13 +7,14 @@ import db
 import rdw_templating
 import rdw_helpers
 import rdw_config
-from filter_https import rdwHttpsFilter
-from filter_authentication import rdwAuthenticationFilter
+import filter_https
+import filter_authentication
+import cherrypy.filters.encodingfilter
 
 def getFilters():
-   filters = [rdwAuthenticationFilter()]
+   filters = [filter_authentication.rdwAuthenticationFilter(), cherrypy.filters.encodingfilter.EncodingFilter()]
    if rdw_config.getConfigSetting("UseHttps").upper() == "TRUE":
-      filters.append(rdwHttpsFilter())
+      filters.append(filter_https.rdwHttpsFilter())
    return filters
 
 
@@ -130,7 +131,7 @@ class pageTest(unittest.TestCase):
 
    def setUp(self):
       self.destRoot = rdw_helpers.joinPaths(os.path.realpath(tempfile.gettempdir()), "rdiffWeb")
-      self.masterDirPath = os.path.realpath("tests") # TODO: do this right, including tying tests into "python setup.py test"
+      self.masterDirPath = os.path.realpath("tests")
       self.tearDown()
       
       # Copy and set up each test
