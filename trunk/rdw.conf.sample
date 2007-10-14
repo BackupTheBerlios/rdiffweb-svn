@@ -30,3 +30,7 @@
 # emailSender=john@doe.com
 # emailUsername=email_user # May be blank, if the smtp server does not require authentication
 # emailPassword=email_password # May be blank, if the smtp server does not require authentication
+
+# rdiffWeb can automatically update all user repositories. Automatic updates can be be
+# enabled by setting the interval in minutes between updates.
+# autoUpdateRepos=15 # Update user repositories every 15 minutes

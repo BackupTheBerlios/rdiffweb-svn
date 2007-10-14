@@ -1,12 +1,37 @@
 #!/usr/bin/python
 
 import os
-import db_mysql, rdw_helpers, librdiff
+import db
+import rdw_helpers
+import librdiff
+import rdw_config
+import time
+import threading
+
+# Returns pid of started process, or 0 if no process was started
+def startRepoSpiderThread(killEvent):
+   newThread = spiderReposThread(killEvent)
+   newThread.start()
+
+class spiderReposThread(threading.Thread):
+   def __init__(self, killEvent):
+      self.killEvent = killEvent
+      threading.Thread.__init__(self)
+      
+   def run(self):
+      spiderInterval = rdw_config.getConfigSetting("autoUpdateRepos")
+      if spiderInterval:
+         spiderInterval = int(spiderInterval)         
+         while True:
+            findReposForAllUsers()
+            self.killEvent.wait(60*spiderInterval)
+            if self.killEvent.isSet():
+               return
+      
 
 def _findRdiffRepos(dirToSearch, outRepoPaths):
    dirEntries = os.listdir(dirToSearch)
    if librdiff.rdiffDataDirName in dirEntries:
-      print "   Found repo at " + dirToSearch
       outRepoPaths.append(dirToSearch)
       return
 
@@ -30,12 +55,10 @@ def findReposForUser(user, userDBModule):
 
 
 def findReposForAllUsers():
-   userDBModule = db_mysql.mysqlUserDB()
+   userDBModule = db.userDB().getUserDBModule()
+   if not userDBModule.modificationsSupported(): return
+   
    users = userDBModule.getUserList()
    for user in users:
-      print "Adding repos for user %s..." % user
       findReposForUser(user, userDBModule)
 
-
-if __name__ == "__main__":
-   findReposForAllUsers()

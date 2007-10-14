@@ -5,6 +5,8 @@ import getopt
 import os
 import rdiffWeb.rdw_config
 import sys
+import rdiffWeb.rdw_spider_repos
+import threading
 
 if __name__ == "__main__":
    # First make sure we have a valid config file.  If not, tell the user to run the config script
@@ -99,5 +101,11 @@ if __name__ == "__main__":
    cherrypy.root.status = rdiffWeb.page_status.rdiffStatusPage()
    cherrypy.root.admin = rdiffWeb.page_admin.rdiffAdminPage()
    cherrypy.root.prefs = rdiffWeb.page_prefs.rdiffPreferencesPage()
+   
+   # Start repo spider thread
+   killEvent = threading.Event()
+
+   rdiffWeb.rdw_spider_repos.startRepoSpiderThread(killEvent)
+   cherrypy.server.on_stop_server_list.append(lambda: killEvent.set())
    
    cherrypy.server.start()
