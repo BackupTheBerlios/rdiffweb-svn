@@ -24,7 +24,7 @@ if __name__ == "__main__":
    # First make sure we have a valid config file.  If not, tell the user to run the config script
    if not rdiffWeb.rdw_config.getConfigFile():
       if os.getuid() != 0:
-         error = "Error: rdiffWeb must be run as root."
+         error = "<h2>Error: rdiffWeb must be run as root.</h2>"
       else:
          error =  "<h2>Error: rdiffWeb has been installed, but no configuration file exists.<br/>Please run 'rdiff-web-config' to configure settings, then restart rdiffWeb.</h2>"
       cherrypy.root = rdiffWeb.page_error.rdiffErrorPage(error)
