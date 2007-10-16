@@ -7,14 +7,28 @@ import rdiffWeb.rdw_config
 import sys
 import rdiffWeb.rdw_spider_repos
 import threading
+import rdiffWeb.page_error
 
 if __name__ == "__main__":
+   
+   # Initialize config options for static files, so that if we error out, then we can at least display a basic web page.
+   cherrypy.config.update({
+      '/static' : {
+         'staticFilter.on' : True,
+         'staticFilter.root': rdiffWeb.rdw_helpers.getStaticRootPath(),
+         'staticFilter.dir': "static",
+         'rdwAuthenticateFilter.on' : False
+      }
+   })
+   
    # First make sure we have a valid config file.  If not, tell the user to run the config script
    if not rdiffWeb.rdw_config.getConfigFile():
       if os.getuid() != 0:
-         print "Error: rdiffWeb must be run as root."
+         error = "Error: rdiffWeb must be run as root."
       else:
-         print """Error: rdiffWeb has been installed, but no configuration file exists. \nPlease run 'rdiff-web-config' to configure rdiffWeb."""
+         error =  "<h2>Error: rdiffWeb has been installed, but no configuration file exists.<br/>Please run 'rdiff-web-config' to configure settings, then restart rdiffWeb.</h2>"
+      cherrypy.root = rdiffWeb.page_error.rdiffErrorPage(error)
+      cherrypy.server.start()
       sys.exit(2)
 
 
@@ -65,12 +79,6 @@ if __name__ == "__main__":
       'server.socketHost' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
       'server.socketPort' : serverPort,
       'server.logFile' : logFile,
-      '/static' : {
-         'staticFilter.on' : True,
-         'staticFilter.root': rdiffWeb.rdw_helpers.getStaticRootPath(),
-         'staticFilter.dir': "static",
-         'rdwAuthenticateFilter.on' : False
-      },
       '/': {
          'rdwAuthenticateFilter.on' : True,
          'rdwAuthenticateFilter.checkLoginAndPassword' : server.checkAuthentication
