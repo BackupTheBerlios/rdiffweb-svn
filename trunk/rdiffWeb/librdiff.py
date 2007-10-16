@@ -112,7 +112,7 @@ class incrementEntry:
       """ returns None if there was no suffix to remove. """
       for suffix in self.suffixes:
          if filename.endswith(suffix):
-            return filename[0:-len(suffix)]
+            return filename[:-len(suffix)]
       return filename
 
 rdiffDataDirName = "rdiff-backup-data"
@@ -224,25 +224,6 @@ class rdiffDirEntries:
       return self._getFirstBackupAfterDate(incrementEntry(self.pathQuoter, files[-1]).getDate())
 
 
-def getSessionStatsFile(rdiffDataDir, entry, pathQuoter):
-   """Attempts to get the sessions statistics file for a given backup. Tries the following to find a match:
-      1. The date with no timezone information
-      2. The date, 1 hour in the past, with no timezone information
-      3. The date with timezone information"""
-   def getSessionStatsFileName(dateString):
-      return "session_statistics."+pathQuoter.getQuotedPath(dateString)+".data"
-
-   sessionStatsPath = joinPaths(rdiffDataDir, getSessionStatsFileName(entry.getDateStringNoTZ()))
-   if os.access(sessionStatsPath, os.F_OK):
-      return sessionStatsPath
-   sessionStatsPath = joinPaths(rdiffDataDir, getSessionStatsFileName(entry.getDateStringNoTZ(-60*60)))
-   if os.access(sessionStatsPath, os.F_OK):
-      return sessionStatsPath
-   sessionStatsPath = joinPaths(rdiffDataDir, getSessionStatsFileName(entry.getDateString()))
-   if os.access(sessionStatsPath, os.F_OK):
-      return sessionStatsPath
-   return ""
-
 def checkRepoPath(repoRoot, filePath):
    # Make sure repoRoot is a valid rdiff-backup repository
    dataPath = joinPaths(repoRoot, rdiffDataDirName)
@@ -320,90 +301,115 @@ def backupIsInProgressForRepo(repo):
    mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), mirrorMarkers)
    return not mirrorMarkers or len(mirrorMarkers) > 1
 
-def backupIsInProgress(repo, date, rdiffDirListing):
-   mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), rdiffDirListing)
-   mirrorMarkers.sort()
-   if not mirrorMarkers:
-      return True
-   mirrorMarkers = mirrorMarkers[1:] # Skip the oldest one, since that one is completed
-   for marker in mirrorMarkers:
-      if incrementEntry(rdiffQuotedPath(repo), marker).getDate().getSeconds() == date.getSeconds():
-         return True
-   return False
-
 def getBackupHistory(repoRoot):
-   return _getBackupHistory(repoRoot)
+   historyEntries = backupHistoryEntries(repoRoot)
+   return historyEntries.getBackupHistory()
 
 def getLastBackupHistoryEntry(repoRoot, includeInProgress=True):
-   history = _getBackupHistory(repoRoot, 1, None, None, includeInProgress)
+   historyEntries = backupHistoryEntries(repoRoot)
+   history = historyEntries.getBackupHistory(1, None, None, includeInProgress)
    if not history: raise FileError # We may not have any backup entries if the first backup for the repository is in progress
    return history[0]
 
 def getBackupHistoryForDay(repoRoot, date):
-   return _getBackupHistory(repoRoot, -1, date)
+   historyEntries = backupHistoryEntries(repoRoot)
+   return historyEntries.getBackupHistory(-1, date)
 
 def getBackupHistorySinceDate(repoRoot, date):
-   return _getBackupHistory(repoRoot, -1, date)
+   historyEntries = backupHistoryEntries(repoRoot)
+   return historyEntries.getBackupHistory(-1, date)
 
 def getBackupHistoryForDateRange(repoRoot, earliestDate, latestDate):
-   return _getBackupHistory(repoRoot, -1, earliestDate, latestDate, False)
+   historyEntries = backupHistoryEntries(repoRoot)
+   return historyEntries.getBackupHistory(-1, earliestDate, latestDate, False)
 
-# earliestDate and latestDate are inclusive
-# if limiting by numLatestEntries, will any in-progress backups will be ignored
-def _getBackupHistory(repoRoot, numLatestEntries=-1, earliestDate=None, latestDate=None, includeInProgress=True):
-   """Returns a list of backupHistoryEntry's"""
-   checkRepoPath(repoRoot, "")
+class backupHistoryEntries:
+   def __init__(self, repoRoot):
+      checkRepoPath(repoRoot, "")
+      self.repoRoot = repoRoot
+      self.pathQuoter = rdiffQuotedPath(repoRoot)
+      self.rdiffDir = joinPaths(repoRoot, rdiffDataDirName)
+      self.dirEntries = os.listdir(self.rdiffDir)
+      self.dirEntries.sort()
+      self.mirrorMarkers = filter(lambda x: x.startswith("current_mirror."), self.dirEntries)
+
+   def getBackupHistory(self, numLatestEntries=-1, earliestDate=None, latestDate=None, includeInProgress=True):
+      """Returns a list of backupHistoryEntry's
+         earliestDate and latestDate are inclusive."""
    
-   pathQuoter = rdiffQuotedPath(repoRoot)
-
-   # Get a listing of error log files, and use that to build backup history
-   rdiffDir = joinPaths(repoRoot, rdiffDataDirName)
-   rdiffDirEntries = os.listdir(rdiffDir)
-   curEntries = filter(lambda x: x.startswith("error_log."), rdiffDirEntries)
-   curEntries.sort()
-
-   entries = []
-   for entryFile in curEntries:
-      entry = incrementEntry(pathQuoter, entryFile)
-      # compare local times because of discrepency between client/server time zones
-      if earliestDate and entry.getDate().getLocalSeconds() < earliestDate.getLocalSeconds():
-         continue
-
-      if latestDate and entry.getDate().getLocalSeconds() > latestDate.getLocalSeconds():
-         continue
-
-      try:
-         if entry.isCompressed():
-            errors = gzip.open(joinPaths(rdiffDir, entryFile), "r").read()
+      # Get a listing of error log files, and use that to build backup history
+      curEntries = filter(lambda x: x.startswith("error_log."), self.dirEntries)
+      curEntries.reverse()
+   
+      entries = []
+      for entryFile in curEntries:
+         entry = incrementEntry(self.pathQuoter, entryFile)
+         # compare local times because of discrepency between client/server time zones
+         if earliestDate and entry.getDate().getLocalSeconds() < earliestDate.getLocalSeconds():
+            continue
+   
+         if latestDate and entry.getDate().getLocalSeconds() > latestDate.getLocalSeconds():
+            continue
+   
+         try:
+            if entry.isCompressed():
+               errors = gzip.open(joinPaths(self.rdiffDir, entryFile), "r").read()
+            else:
+               errors = open(joinPaths(self.rdiffDir, entryFile), "r").read()
+         except IOError:
+            errors = "[Unable to read errors file.]"
+         try:
+            sessionStatsFile = self._getSessionStatsFile(entry)
+            session_stats = open(joinPaths(self.rdiffDir, sessionStatsFile), "r").read()
+            fileSize = re.compile("SourceFileSize ([0-9]+) ").findall(session_stats)[0]
+            incrementSize = re.compile("IncrementFileSize ([0-9]+) ").findall(session_stats)[0]
+         except IOError:
+            fileSize = 0
+            incrementSize = 0
+         newEntry = backupHistoryEntry()
+         newEntry.date = entry.getDate()
+         newEntry.inProgress = self._backupIsInProgress(entry.getDate())
+         if not includeInProgress and newEntry.inProgress:
+            continue
+   
+         if newEntry.inProgress:
+            newEntry.errors = ""
          else:
-            errors = open(joinPaths(rdiffDir, entryFile), "r").read()
-      except IOError:
-         errors = "[Unable to read errors file.]"
-      try:
-         sessionStatsPath = getSessionStatsFile(rdiffDir, entry, pathQuoter)
-         session_stats = open(sessionStatsPath, "r").read()
-         fileSize = re.compile("SourceFileSize ([0-9]+) ").findall(session_stats)[0]
-         incrementSize = re.compile("IncrementFileSize ([0-9]+) ").findall(session_stats)[0]
-      except IOError:
-         fileSize = 0
-         incrementSize = 0
-      newEntry = backupHistoryEntry()
-      newEntry.date = entry.getDate()
-      newEntry.inProgress = backupIsInProgress(repoRoot, entry.getDate(), rdiffDirEntries)
-      if newEntry.inProgress:
-         newEntry.errors = ""
-      else:
-         newEntry.errors = errors
-      newEntry.size = int(fileSize)
-      newEntry.incrementSize = int(incrementSize)
-      entries.append(newEntry)
-
-   if len(entries) > 0 and not includeInProgress and backupIsInProgressForRepo(repoRoot):
-      entries.pop()
+            newEntry.errors = errors
+         newEntry.size = int(fileSize)
+         newEntry.incrementSize = int(incrementSize)
+         entries.insert(0, newEntry)
+         
+         if numLatestEntries != -1 and len(entries) == numLatestEntries:
+            return entries
    
-   if numLatestEntries != -1:
-      entries = entries[-numLatestEntries:]
-   return entries
+      return entries
+
+   def _getSessionStatsFile(self, entry):
+      """Attempts to get the sessions statistics file for a given backup. Tries the following to find a match:
+         1. The date with no timezone information
+         2. The date, 1 hour in the past, with no timezone information
+         3. The date with timezone information"""
+      def getSessionStatsFileName(dateString):
+         return "session_statistics."+self.pathQuoter.getQuotedPath(dateString)+".data"
+   
+      possibleStatsPaths = [getSessionStatsFileName(entry.getDateString()),
+                            getSessionStatsFileName(entry.getDateStringNoTZ()),
+                            getSessionStatsFileName(entry.getDateStringNoTZ(-60*60))]
+      
+      for statsPath in possibleStatsPaths:
+         if statsPath in self.dirEntries:
+            return statsPath
+      return ""
+
+   def _backupIsInProgress(self, date):
+      if not self.mirrorMarkers:
+         return True
+      for marker in self.mirrorMarkers[1:]:
+         if incrementEntry(self.pathQuoter, marker).getDate().getSeconds() == date.getSeconds():
+            return True
+      return False
+
 
 def getDirRestoreDates(repo, path):
    backupHistory = [ x.date for x in getBackupHistory(repo) ]
