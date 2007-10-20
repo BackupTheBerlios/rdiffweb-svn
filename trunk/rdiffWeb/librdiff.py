@@ -169,7 +169,7 @@ class rdiffDirEntries:
       incrementsDir = joinPaths(repo, rdiffIncrementsDirName, dirPath)
       self.incrementEntries = []
       if os.access(incrementsDir, os.F_OK): # the increments may not exist if the folder has existed forever and never been changed
-         self.incrementEntries = os.listdir(incrementsDir)
+         self.incrementEntries = filter(lambda x: not os.path.isdir(joinPaths(incrementsDir, x)), os.listdir(incrementsDir)) # ignore directories
 
       self.groupedIncrementEntries = rdw_helpers.groupby(self.incrementEntries, lambda x: incrementEntry(self.pathQuoter, x).getFilename())
       self.backupTimes = [ incrementEntry(self.pathQuoter, x).getDate() for x in filter(lambda x: x.startswith("mirror_metadata"), self.dataDirEntries) ]
