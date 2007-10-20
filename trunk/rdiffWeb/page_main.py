@@ -149,6 +149,9 @@ class pageTest(unittest.TestCase):
          encounteredText = rdw_templating.templateParser().parseTemplate(self._getFileText("", self.getTemplateName()), **parms)
          expectedText = self._getFileText(test, self.getExpectedResultsName())
          
+         encounteredText = encounteredText.replace('\n', '')
+         expectedText = expectedText.replace('\n', '')
+         
          self.assertEquals(encounteredText, expectedText)
          assert encounteredText == expectedText, "Got:\n" + encounteredText + "\nExpected:\n" + expectedText + "\nEnd"
       
