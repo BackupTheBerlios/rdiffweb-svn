@@ -1,38 +1,4 @@
 
-
-.roundedOuter h1,
-.roundedOuter h2,
-.roundedOuter p
-{
-   margin:0 10px;
-   letter-spacing:1px;
-}
-
-.roundedOuter h1
-{
-   font-size:2.5em;
-   color:#fff;
-}
-.roundedOuter h2
-{
-   font-size:2em;
-   color:#06a;
-   border:0;
-}
-.roundedOuter p
-{
-   padding-bottom: 0.5em;
-}
-.roundedOuter h2
-{
-   padding-top: 0.5em;
-}
-.roundedOuter
-{
-   background: transparent;
-   margin: 1em;
-}
-
 .xtop,
 .xbottom
 {
