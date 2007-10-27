@@ -10,6 +10,8 @@ import email_notification
 
 class rdiffPreferencesPage(page_main.rdiffPage):
    
+   sampleEmail = 'joe@example.com'
+   
    def index(self):
       return self.getPrefsPage("", "")
    index.exposed = True
@@ -42,6 +44,8 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       
       for parmName in parms.keys():
          if parmName == "userEmail":
+            if parms[parmName] == self.sampleEmail:
+               parms[parmName] = ''
             self.userDB.setUserEmail(self.getUsername(), parms[parmName])
          if parmName.endswith("numDays"):
             backupName = parmName[:-7]
@@ -67,9 +71,10 @@ class rdiffPreferencesPage(page_main.rdiffPage):
          "message" : statusMessage,
          "userEmail" : email,
          "notificationsEnabled" : False,
-         "backups" : []
+         "backups" : [],
+         "sampleEmail": self.sampleEmail
       }
-      if email_notification.emailNotificationIsEnabled():
+      if email_notification.emailNotifier().notificationsEnabled():
          repos = self.userDB.getUserRepoPaths(self.getUsername())
          backups = []
          for repo in repos:
