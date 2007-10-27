@@ -6,6 +6,7 @@ import os
 import rdiffWeb.rdw_config
 import sys
 import rdiffWeb.rdw_spider_repos
+import rdiffWeb.email_notification
 import threading
 import rdiffWeb.page_error
 
@@ -35,13 +36,16 @@ if __name__ == "__main__":
    # Parse command line options
    verbose = True
    debug = False
+   autoReload = False
    pidFile = ""
    logFile = ""
 
-   opts, extraparams = getopt.getopt(sys.argv[1:], 'vd', ['debug', 'log-file=', 'pid-file=', 'background'])
+   opts, extraparams = getopt.getopt(sys.argv[1:], 'vdr', ['debug', 'log-file=', 'pid-file=', 'background', 'autoreload'])
    for option,value in opts:
       if option in ['-d','--debug']:
          debug = True
+      if option in ['-r','--autoreload']:
+         autoReload = True
       elif option in ['--log-file']:
          logFile = value
       elif option in ['--pid-file']:
@@ -76,6 +80,7 @@ if __name__ == "__main__":
       'sessionFilter.on' : True,
       'gzipFilter.on': True,
       'encodingFilter.on' : True,
+      'autoreload.on' : autoReload,
       'server.socketHost' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
       'server.socketPort' : serverPort,
       'server.logFile' : logFile,
@@ -114,6 +119,7 @@ if __name__ == "__main__":
    killEvent = threading.Event()
 
    rdiffWeb.rdw_spider_repos.startRepoSpiderThread(killEvent)
+   rdiffWeb.email_notification.startEmailNotificationThread(killEvent)
    cherrypy.server.on_stop_server_list.append(lambda: killEvent.set())
    
    cherrypy.server.start()
