@@ -69,6 +69,7 @@ class rdiffBrowsePage(page_main.rdiffPage):
 
          entries = []
          for libEntry in libEntries:
+            altEntry = (len(entries) % 2 != 0)
             entryLink = ""
             if libEntry.isDir:
                entryLink = self.buildBrowseUrl(repo, joinPaths(path, libEntry.name), False)
@@ -95,7 +96,8 @@ class rdiffBrowsePage(page_main.rdiffPage):
                            "numPrevRevisions" : str(len(changeDates)), 
                            "hasMultipleRevisions" : len(changeDates) > 1,
                            "showRevisionsText" : showRevisionsText,
-                           "changeDates" : changeDates })
+                           "changeDates" : changeDates,
+                           "altRow": altEntry })
 
       return { "title" : title, "files" : entries, "parentDirs" : parentDirs, "restoreUrl" : restoreUrl, "viewUrl" : viewUrl, "restoreDates" : restoreDates, "warning" : backupWarning }
 

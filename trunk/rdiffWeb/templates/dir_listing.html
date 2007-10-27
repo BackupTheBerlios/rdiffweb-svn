@@ -30,11 +30,12 @@
       <td>Name</td>
       <td>Size</td>
       <td>Last Revision</td>
+      <td>Previous Revisions</td>
    </tr>
 </thead>
 <tbody>
    <!--StartRepeat:files-->
-   <!--StartIncludeIf:exists--><tr><!--EndIncludeIf:exists--><!--StartDeleteIf:exists--><tr style="color: #999" ><!--EndDeleteIf:exists-->
+   <tr StartDeleteIf:exists- style="color: #999" EndDeleteIf:exists- StartIncludeIf:altRow- class="altRow" EndIncludeIf:altRow- >
       <td class="Icon"><img src="/static/images/^filetype$.png" valign=middle alt="^filetype$" ></td>
       <td><a href="^fileRestoreUrl$">^filename$</a></td>
       <td>^size$</td>
@@ -55,12 +56,12 @@
          </div>
       </td>
       <!--EndIncludeIf:hasPrevRevisions-->
-      <!--StartDeleteIf:showRevisionsText-->
+      <!--StartDeleteIf:hasPrevRevisions-->
    <!-- ENTRIES WITH NO REVISIONS -->
-      <td class="FlyoutContainer">
+      <td class="PopupLinkCell">
          No Previous Revisions
       </td>
-      <!--EndDeleteIf:showRevisionsText-->
+      <!--EndDeleteIf:hasPrevRevisions-->
       </tr>
    <!--EndRepeat:files-->
 </tbody>

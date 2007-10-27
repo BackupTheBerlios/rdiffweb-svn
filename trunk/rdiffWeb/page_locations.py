@@ -17,6 +17,7 @@ class rdiffLocationsPage(page_main.rdiffPage):
       repoList = []
       repoErrors = []
       for userRepo in repos:
+         altEntry = (len(repoList) % 2 != 0)
          try:
             repoHistory = librdiff.getLastBackupHistoryEntry(rdw_helpers.joinPaths(root, userRepo))
          except librdiff.FileError:
@@ -26,7 +27,8 @@ class rdiffLocationsPage(page_main.rdiffPage):
                            "repoSize" : repoSize,
                            "repoDate" : repoDate,
                            "repoBrowseUrl" : self.buildBrowseUrl(userRepo, "/", False),
-                           "repoHistoryUrl" : self.buildHistoryUrl(userRepo) })
+                           "repoHistoryUrl" : self.buildHistoryUrl(userRepo),
+                           "altRow": altEntry })
          else:
             repoSize = rdw_helpers.formatFileSizeStr(repoHistory.size)
             if repoHistory.inProgress:
@@ -36,7 +38,8 @@ class rdiffLocationsPage(page_main.rdiffPage):
                               "repoSize" : repoSize,
                               "repoDate" : repoDate,
                               "repoBrowseUrl" : self.buildBrowseUrl(userRepo, "/", False),
-                              "repoHistoryUrl" : self.buildHistoryUrl(userRepo) })
+                              "repoHistoryUrl" : self.buildHistoryUrl(userRepo),
+                              "altRow": altEntry })
       return { "title" : "browse", "repos" : repoList, "badrepos" : repoErrors }
       
 

@@ -46,21 +46,36 @@ a:hover
 /* all tables have padding by default */
 table thead
 {
-   text-align: center;
+   text-align: left;
+   font-size: 14pt;
    font-weight: bold;
+   background-color: #DCE4F9;
+   border-bottom: 2px solid #F5F5F5;
 }
 
 table td
 {
-   padding-right: 2em;
+   padding: 0.25em 2em 0.25em 0em;
+   vertical-align: bottom;
+   font-size: 12pt;
 }
 
-/* Browse page */
+/* Listing pages */
 td.PopupLinkCell,
 td.PopupLinkCell td
 {
    padding-right: 0em;
    text-align: right;
+}
+
+.altRow td
+{
+   background-color: #EFEFEF;
+}
+
+table
+{
+   border-collapse: collapse;
 }
 
 /* disable padding on icons and flyouts */
@@ -71,6 +86,18 @@ td.FlyoutContainer td
    padding-right: 0em;
 }
 
+td.Icon
+{
+   padding-top: 0em;
+   padding-bottom: 0em;
+}
+
+td.Icon img
+{
+   height: 24px;
+   width: 24px;
+}
+
 td.FlyoutContainer div
 {
    display:none;
@@ -79,6 +106,7 @@ td.FlyoutContainer div
    color: black;
    background-color: silver;
    border: 1px solid gray;
+   padding: .25em;
 }
 
 div#incrementSizePopup
@@ -104,6 +132,16 @@ table.Login td
    spacing: 0.5em;
    float: left;
    border: 10px double white;
+}
+
+#Login input.submit
+{
+   background-image: url("/static/images/login_button.gif");
+   border: 0em;
+   width: 100px;
+   height: 30px;
+   color: #FFF;
+   font-weight: bold;
 }
 
 
