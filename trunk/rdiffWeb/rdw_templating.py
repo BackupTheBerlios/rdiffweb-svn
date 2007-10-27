@@ -15,8 +15,10 @@ class templateDefinitionError(templateError):
 
 class templateParser:
    def __init__(self):
-      self.deleteIfRegex = re.compile(r"<!--StartDeleteIf:(.*?)-->(.*?)<!--EndDeleteIf:\1-->", re.S)
-      self.includeIfRegex = re.compile(r"<!--StartIncludeIf:(.*?)-->(.*?)<!--EndIncludeIf:\1-->", re.S)
+      self.deleteIfRegexes = [re.compile(r"<!--StartDeleteIf:(.*?)-->(.*?)<!--EndDeleteIf:\1-->", re.S),
+                              re.compile(r"StartDeleteIf:(.*?)-(.*?)EndDeleteIf:\1-", re.S)]
+      self.includeIfRegexes = [re.compile(r"<!--StartIncludeIf:(.*?)-->(.*?)<!--EndIncludeIf:\1-->", re.S),
+                               re.compile(r"StartIncludeIf:(.*?)-(.*?)EndIncludeIf:\1-", re.S)]
       self.replacements = []
 
    def parseTemplate(self, templateString, **kwargs):
@@ -38,12 +40,23 @@ class templateParser:
 
    def parseSingleTemplate(self, templateString):
       # Handle conditional includes/deletes
-      templateString = self.deleteIfRegex.sub(self._handleDeleteIf, templateString)
-      templateString = self.includeIfRegex.sub(self._handleIncludeIf, templateString)
+      for regex in self.deleteIfRegexes:
+         templateString = regex.sub(self._handleDeleteIf, templateString)
+      for regex in self.includeIfRegexes:
+         templateString = regex.sub(self._handleIncludeIf, templateString)
 
       # Process any individual keywords
       result = re.compile("\^(.*?)\$").sub(self._replaceTemplateKeyword, templateString)
       return result
+
+   def hasConditionalDirectives(self, templateString):
+      for regex in self.deleteIfRegexes:
+         if regex.search(templateString):
+            return True
+      for regex in self.includeIfRegexes:
+         if regex.search(templateString):
+            return True
+      return False
 
    def _handleListMatch(self, match):
       replacements = self.replacements[-1]
@@ -85,7 +98,7 @@ class templateParser:
       textToInclude = match.group(2).rstrip("\n")
       if (replacements[conditional] and includeIfTrue) or (not replacements[conditional] and not includeIfTrue):
          # The included text may contain additional include/delete statements. Check for those, and if they exist, recurse.
-         if self.deleteIfRegex.search(textToInclude) != None or self.includeIfRegex.search(textToInclude) != None:
+         if self.hasConditionalDirectives(textToInclude):
             return self.parseSingleTemplate(textToInclude)
          return textToInclude
       return ""
@@ -121,6 +134,15 @@ class templateParsingTest(unittest.TestCase):
 
       template = """<!--StartDeleteIf:include-->text<!--EndDeleteIf:include-->"""
       self.assertEquals(templateParser().parseTemplate(template, include=False), "text")
+      assert(templateParser().parseTemplate(template, include=True) == "")
+
+   def testAttributeStyleDirectives(self):
+      template = """StartIncludeIf:include- text EndIncludeIf:include-"""
+      assert(templateParser().parseTemplate(template, include=True) == " text ")
+      assert(templateParser().parseTemplate(template, include=False) == "")
+
+      template = """StartDeleteIf:include- text EndDeleteIf:include-"""
+      self.assertEquals(templateParser().parseTemplate(template, include=False), " text ")
       assert(templateParser().parseTemplate(template, include=True) == "")
       
    def testNestedIncludes(self):
