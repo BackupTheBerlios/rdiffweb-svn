@@ -7,6 +7,7 @@ import re
 import time
 import urllib
 import zipfile
+import subprocess
 
 import rdw_templating
 
@@ -252,6 +253,17 @@ def recursiveZipDir(dirPath, zipFilename):
          assert fullPath.startswith(dirPath)
          relPath = fullPath[len(dirPath):]
          zipObj.write(fullPath, relPath)
+
+def execute(command, *args):
+   parms = [command]
+   parms.extend(args)
+   execution = subprocess.Popen(parms, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+   results = {}
+   results['exitCode'] = execution.wait()
+   (results['stdout'], results['stderr']) = execution.communicate()
+   print results, parms
+   return results
 
 
 import unittest

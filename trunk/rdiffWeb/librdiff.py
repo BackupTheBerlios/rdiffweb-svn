@@ -10,21 +10,23 @@ import rdw_helpers
 ##### Error definitions #####
 class FileError:
    def getErrorString(self):
-      return self.errorString
+      return self.error
    def __str__(self):
       return self.getErrorString()
 
 class AccessDeniedError(FileError):
    def __init__(self):
-      self.errorString = "Access is denied."
+      self.error = "Access is denied."
 
 class DoesNotExistError(FileError):
    def __init__(self):
-      self.errorString = "The backup location does not exist."
+      self.error = "The backup location does not exist."
 
 class UnknownError(FileError):
-   def __init__(self):
-      self.errorString = "An unknown error occurred."
+   def __init__(self, error=None):
+      self.error = error
+      if not self.error:
+         self.error = "An unknown error occurred."
 
 ##### Helper Functions #####
 def rsplit(string, sep, count=-1):
@@ -285,10 +287,12 @@ def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate):
    fileToRestore = joinPaths(repoRoot, dirPath, filename)
    dateString = str(restoreDate.getSeconds())
    rdiffOutputFile = joinPaths(tempfile.mkdtemp(), restoredFilename) # TODO: make so this includes the username
-   args = [ "rdiff-backup", "--restore-as-of="+dateString, fileToRestore, rdiffOutputFile ]
-   os.spawnvp(os.P_WAIT, args[0], args)
-   if not os.access(rdiffOutputFile, os.F_OK):
-      raise UnknownError()
+   results = rdw_helpers.execute("rdiff-backup", "--restore-as-of="+dateString, fileToRestore, rdiffOutputFile)
+   if results['exitCode'] != 0 or not os.access(rdiffOutputFile, os.F_OK):
+      error = results['stderr']
+      if not error:
+         error = 'rdiff-backup claimed success, but did not restore anything. This indicates a bug in rdiffWeb. Please report this to a developer.'
+      raise UnknownError('Unable to restore! rdiff-backup output:\n'+error)
    if os.path.isdir(rdiffOutputFile):
       rdw_helpers.recursiveZipDir(rdiffOutputFile, rdiffOutputFile+".zip")
       rdw_helpers.removeDir(rdiffOutputFile)
