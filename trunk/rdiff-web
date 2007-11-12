@@ -90,6 +90,9 @@ if __name__ == "__main__":
       },
       '/status/feed': {
          'rdwAuthenticateFilter.method' : 'HTTP Header'
+      },
+      '/restore': {
+         'encodingFilter.on': False,
       }
    }
    if not debug:
