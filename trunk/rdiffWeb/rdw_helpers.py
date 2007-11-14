@@ -251,7 +251,7 @@ def recursiveZipDir(dirPath, zipFilename):
       for name in files:
          fullPath = joinPaths(root, name)
          assert fullPath.startswith(dirPath)
-         relPath = fullPath[len(dirPath):]
+         relPath = fullPath[len(dirPath)+1:]
          zipObj.write(fullPath, relPath)
 
 def execute(command, *args):
