@@ -15,20 +15,18 @@ class rdiffLocationsPage(page_main.rdiffPage):
    
    def getParmsForPage(self, root, repos):
       repoList = []
-      repoErrors = []
       for userRepo in repos:
-         altEntry = (len(repoList) % 2 != 0)
          try:
             repoHistory = librdiff.getLastBackupHistoryEntry(rdw_helpers.joinPaths(root, userRepo))
          except librdiff.FileError:
             repoSize = "0"
             repoDate = "Error"
-            repoErrors.append({ "repoName" : userRepo,
+            repoList.append({ "repoName" : userRepo,
                            "repoSize" : repoSize,
                            "repoDate" : repoDate,
                            "repoBrowseUrl" : self.buildBrowseUrl(userRepo, "/", False),
                            "repoHistoryUrl" : self.buildHistoryUrl(userRepo),
-                           "altRow": altEntry })
+                           'failed': True})
          else:
             repoSize = rdw_helpers.formatFileSizeStr(repoHistory.size)
             if repoHistory.inProgress:
@@ -39,8 +37,22 @@ class rdiffLocationsPage(page_main.rdiffPage):
                               "repoDate" : repoDate,
                               "repoBrowseUrl" : self.buildBrowseUrl(userRepo, "/", False),
                               "repoHistoryUrl" : self.buildHistoryUrl(userRepo),
-                              "altRow": altEntry })
-      return { "title" : "browse", "repos" : repoList, "badrepos" : repoErrors }
+                              'failed': False})
+
+      self._sortLocations(repoList)
+      # Make second pass through list, setting the 'altRow' attribute
+      for i in range(0, len(repoList)):
+         repoList[i]['altRow'] = (i % 2 == 0)
+      return { "title" : "browse", "repos" : repoList }
+            
+            
+   def _sortLocations(self, locations):
+      def compare(left, right):
+         if left['failed'] != right['failed']:
+            return cmp(left['failed'], right['failed'])
+         return cmp(left['repoName'], right['repoName'])
+      
+      locations.sort(compare)
       
 
 class locationsPageTest(page_main.pageTest, rdiffLocationsPage):
