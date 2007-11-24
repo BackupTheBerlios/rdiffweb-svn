@@ -274,7 +274,7 @@ def getDirEntries(repoRoot, dirPath):
    return entriesList
 
 import tempfile
-def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate):
+def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate, useZip):
    """ returns a file path to the file.  User is responsible for deleting file, as well as containing dir, after use. """
    filePath = joinPaths(dirPath, filename)
    filePath = rdiffQuotedPath(repoRoot).getQuotedPath(filePath)
@@ -294,9 +294,14 @@ def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate):
          error = 'rdiff-backup claimed success, but did not restore anything. This indicates a bug in rdiffWeb. Please report this to a developer.'
       raise UnknownError('Unable to restore! rdiff-backup output:\n'+error)
    if os.path.isdir(rdiffOutputFile):
-      rdw_helpers.recursiveZipDir(rdiffOutputFile, rdiffOutputFile+".zip")
-      rdw_helpers.removeDir(rdiffOutputFile)
-      rdiffOutputFile = rdiffOutputFile+".zip"
+      if useZip:
+         rdw_helpers.recursiveZipDir(rdiffOutputFile, rdiffOutputFile+".zip")
+         rdw_helpers.removeDir(rdiffOutputFile)
+         rdiffOutputFile = rdiffOutputFile+".zip"
+      else:
+         rdw_helpers.recursiveTarDir(rdiffOutputFile, rdiffOutputFile+".tar.gz")
+         rdw_helpers.removeDir(rdiffOutputFile)
+         rdiffOutputFile = rdiffOutputFile+".tar.gz"
    return rdiffOutputFile
 
 def backupIsInProgressForRepo(repo):

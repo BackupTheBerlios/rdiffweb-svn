@@ -32,7 +32,9 @@ class rdiffRestorePage(page_main.rdiffPage):
          if not file:
             file = path
             path = "/"
-         filePath = librdiff.restoreFileOrDir(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo), path, file, restoreTime)
+         fullPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)
+         useZipFormat = self.userDB.useZipFormat(self.getUsername())
+         filePath = librdiff.restoreFileOrDir(fullPath, path, file, restoreTime, useZipFormat)
       except librdiff.FileError, error:
          return self.writeErrorPage(error.getErrorString())
       except ValueError:
