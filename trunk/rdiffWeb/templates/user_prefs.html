@@ -10,22 +10,23 @@
 <p>
 <!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
 <!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
-<form action="changePassword" method="post">
+<form action="" method="post">
+<input style="display:none" name="form" value="setPassword"/>
 <div class="groupboxDiv">
 <div class="roundedBorderContents">
 <h3 class="groupboxHeader">Change Password</h3>
 <table>
 <tr>
    <td>Current Password:</td>
-   <td><input class="textInput" type="password" name="currentPassword"/></td>
+   <td><input class="textInput" type="password" name="current"/></td>
 </tr>
 <tr>
    <td>New Password:</td>
-   <td><input class="textInput" type="password" name="newPassword"/></td>
+   <td><input class="textInput" type="password" name="new"/></td>
 </tr>
 <tr>
    <td>Confirm New Password:</td>
-   <td><input class="textInput" type="password" name="confirmPassword"/></td>
+   <td><input class="textInput" type="password" name="confirm"/></td>
 </tr>
 <tr>
    <td style="height: 2em"> <input class="groupboxButton" type="submit" value="Change Password" /></td>
@@ -36,7 +37,8 @@
 </form>
 
 
-<form action="updateRepos" method="post">
+<form action="" method="post">
+<input style="display:none" name="form" value="updateRepos"/>
 <div class="groupboxDiv">
 <div class="roundedBorderContents">
 <h3 class="groupboxHeader">Update Backup Locations</h3>
@@ -45,11 +47,30 @@
 </div>
 </form>
 
+<!--StartDelete-->
+<form action="" method="post">
+<input style="display:none" name="form" value="setRestoreType"/>
+<div class="groupboxDiv">
+   <div class="roundedBorderContents">
+      <h3 class="groupboxHeader">Directory Restore Format</h3>
+         <label><input type="radio" name="zipRestoreType"></input>Restore my directories in <b>.zip</b> format</label>
+      <br/>
+         <label><input type="radio" name="tgzRestoreType"></input>Restore my directories in <b>.tar.gz</b> format</label>
+      <br/><br/>
+         (If unsure, select the .zip format.)
+      <br/>
+      <input type="submit" class="groupboxButton" value="Update Restore Preferences" />
+   </div>
+</div>
+</form>
+<!--EndDelete-->
+
 <!--StartIncludeIf:notificationsEnabled-->
-<form action="setNotifications" method="post">
+<form action="" method="post">
+<input style="display:none" name="form" value="setNotifications"/>
 <div class="groupboxDiv">
 <div class="roundedBorderContents">
-<h3 class="groupboxHeader">Backup Notifications</h3>
+   <h3 class="groupboxHeader">Backup Notifications</h3>
    <table class="emailTable">
       <tr>
          <td>Notify me at</td>
