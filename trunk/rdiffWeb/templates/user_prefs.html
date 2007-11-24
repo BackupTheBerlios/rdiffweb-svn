@@ -47,15 +47,16 @@
 </div>
 </form>
 
-<!--StartDelete-->
 <form action="" method="post">
 <input style="display:none" name="form" value="setRestoreType"/>
 <div class="groupboxDiv">
    <div class="roundedBorderContents">
       <h3 class="groupboxHeader">Directory Restore Format</h3>
-         <label><input type="radio" name="zipRestoreType"></input>Restore my directories in <b>.zip</b> format</label>
+         <label><input type="radio" name="restoreType" StartIncludeIf:useZipFormat- checked='checked' EndIncludeIf:useZipFormat- value="zip">
+                </input>Restore my directories in <b>.zip</b> format</label>
       <br/>
-         <label><input type="radio" name="tgzRestoreType"></input>Restore my directories in <b>.tar.gz</b> format</label>
+         <label><input type="radio" name="restoreType" StartDeleteIf:useZipFormat- checked='checked' EndDeleteIf:useZipFormat- value="tgz">
+                </input>Restore my directories in <b>.tar.gz</b> format</label>
       <br/><br/>
          (If unsure, select the .zip format.)
       <br/>
@@ -63,7 +64,6 @@
    </div>
 </div>
 </form>
-<!--EndDelete-->
 
 <!--StartIncludeIf:notificationsEnabled-->
 <form action="" method="post">

@@ -28,6 +28,9 @@ class userDB:
    def getUserEmail(self, username):
       raise NotImplementedError
    
+   def useZipFormat(self, username):
+      raise NotImplementedError
+   
    def getUserList(self):
       raise NotImplementedError
 
@@ -47,6 +50,9 @@ class userDB:
       raise NotImplementedError
 
    def setUserPassword(self, username, password):
+      raise NotImplementedError
+   
+   def setUseZipFormat(self, username, useZip):
       raise NotImplementedError
 
    def getUserRoot(self, username):

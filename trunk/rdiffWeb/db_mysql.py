@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import rdw_config
+import types
 
 """We do no length validation for incoming parameters, since truncated values will
 at worst lead to slightly confusing results, but no security risks"""
@@ -39,6 +40,10 @@ class mysqlUserDB:
    def getUserEmail(self, username):
       if not self.userExists(username): return None
       return self._getUserField(username, "userEmail")
+   
+   def useZipFormat(self, username):
+      if not self.userExists(username): return False
+      return bool(self._getUserField(username, "restoreFormat"))
 
    def getUserList(self):
       query = "SELECT UserName FROM users"
@@ -68,8 +73,7 @@ class mysqlUserDB:
 
    def setUserEmail(self, username, userEmail):
       if not self.userExists(username): raise ValueError
-      query = "UPDATE users SET UserEmail=%(userEmail)s WHERE Username = %(user)s"
-      self._executeQuery(query, userEmail=userEmail, user=username)
+      self._setUserField(username, 'UserEmail', userEmail)
       
    def setUserRepos(self, username, repoPaths):
       if not self.userExists(username): raise ValueError
@@ -94,8 +98,11 @@ class mysqlUserDB:
 
    def setUserPassword(self, username, password):
       if not self.userExists(username): raise ValueError
-      query = "UPDATE users SET Password=%(password)s WHERE Username=%(user)s"
-      self._executeQuery(query, password=self._hashPassword(password), user=username)
+      self._setUserField(username, 'Password', self._hashPassword(password))
+   
+   def setUseZipFormat(self, username, useZip):
+      if not self.userExists(username): raise ValueError
+      self._setUserField(username, 'RestoreFormat', bool(useZip))
       
    def setRepoMaxAge(self, username, repoPath, maxAge):
       if not repoPath in self.getUserRepoPaths(username): raise ValueError
@@ -116,19 +123,28 @@ class mysqlUserDB:
       if not self.userExists(username): raise ValueError
       self._executeQuery("DELETE FROM repos WHERE UserID=%d" % self._getUserID(username))
 
+   def _getUserID(self, username):
+      assert self.userExists(username)
+      return self._getUserField(username, 'UserID')
+
    def _getUserField(self, username, fieldName):
       if not self.userExists(username): return None
       query = "SELECT "+fieldName+" FROM users WHERE Username = %(user)s"
       results = self._executeQuery(query, user=username)
       assert len(results) == 1
       return results[0][0]
-
-   def _getUserID(self, username):
-      assert self.userExists(username)
-      query = "SELECT UserID FROM users WHERE Username = %(user)s"
-      results = self._executeQuery(query, user=username)
-      assert len(results) == 1
-      return int(results[0][0])
+      
+   def _setUserField(self, username, fieldName, value):
+      if not self.userExists(username): raise ValueError
+      if type(value) == types.BooleanType:
+         if value:
+            valueStr = '1'
+         else:
+            valueStr = '0'
+      else:
+         valueStr = str(value)
+      query = 'UPDATE users SET '+fieldName+'=%(value)s WHERE Username=%(user)s'
+      self._executeQuery(query, value=valueStr, user=username)
 
    def _internalExecuteQuery(self, query, **kwargs):
       cursor = self.sqlConnection.cursor()
@@ -167,11 +183,13 @@ Password varchar (40) NOT NULL DEFAULT "",
 UserRoot varchar (255) NOT NULL DEFAULT "",
 IsAdmin tinyint NOT NULL DEFAULT FALSE,
 UserEmail varchar (255) NOT NULL DEFAULT "",
+RestoreFormat tinyint NOT NULL DEFAULT TRUE,
 primary key (UserID) )""",
 """create table repos (
 RepoID int(11) NOT NULL auto_increment,
 UserID int(11) NOT NULL, 
 RepoPath varchar (255) NOT NULL,
+MaxAge tinyint NOT NULL DEFAULT 0,
 primary key (RepoID))"""
  ]
                
@@ -189,6 +207,11 @@ primary key (RepoID))"""
       columnNames = [column[0].lower() for column in self._executeQuery("describe repos")]
       if not "maxage" in columnNames:
          self._executeQuery('alter table repos add column MaxAge tinyint NOT NULL DEFAULT 0')
+      
+      # Make sure that the users table has a "restoreFormat" column
+      columnNames = [column[0].lower() for column in self._executeQuery("describe users")]
+      if not "restoreformat" in columnNames:
+         self._executeQuery('alter table users add column RestoreFormat tinyint NOT NULL DEFAULT TRUE')
 
 
 ##################### Unit Tests #########################
@@ -221,8 +244,11 @@ class mysqlUserDBTest(unittest.TestCase):
 
    def tearDown(self):
       userData = mysqlUserDB(self.configFilePath)
-      userData._executeQuery("DROP TABLE IF EXISTS users;")
-      userData._executeQuery("DROP TABLE IF EXISTS repos;")
+      tableNames = [table[0].lower() for table in userData._executeQuery("show tables")]
+      if 'users' in tableNames:
+         userData._executeQuery("DROP TABLE IF EXISTS users;")
+      if 'repos' in tableNames:
+         userData._executeQuery("DROP TABLE IF EXISTS repos;")
       if (os.access(self.configFilePath, os.F_OK)):
          os.remove(self.configFilePath)
 
@@ -286,6 +312,13 @@ class mysqlUserDBTest(unittest.TestCase):
       userDataModule.setUserRepos("test", ["b", "c", "d"])
       self.assertEquals(userDataModule.getRepoMaxAge("test", "b"), 1)
       self.assertEquals(userDataModule.getUserRepoPaths("test"), ["b", "c", "d"])
+      
+   def testRestoreFormat(self):
+      userDataModule = mysqlUserDB(self.configFilePath)
+      assert(userDataModule.useZipFormat('test')) # Should default to using zip format
+      userDataModule.setUseZipFormat('test', False)
+      assert(not userDataModule.useZipFormat('test'))
+      
 
 if __name__ == "__main__":
    print "Called as standalone program; running unit tests..."
