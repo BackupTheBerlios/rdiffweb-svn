@@ -7,6 +7,7 @@ import re
 import time
 import urllib
 import zipfile
+import tarfile
 import subprocess
 
 import rdw_templating
@@ -253,6 +254,16 @@ def recursiveZipDir(dirPath, zipFilename):
          assert fullPath.startswith(dirPath)
          relPath = fullPath[len(dirPath)+1:]
          zipObj.write(fullPath, relPath)
+         
+def recursiveTarDir(dirPath, tarFilename):
+   assert os.path.isdir(dirPath)
+
+   dirPath = os.path.normpath(dirPath)
+   targetFile = tarfile.open(tarFilename, "w:gz")
+   files = os.listdir(dirPath)
+   for file in files:
+      targetFile.add(joinPaths(dirPath, file), file) # Pass in file as name explicitly so we get relative paths
+   
 
 def execute(command, *args):
    parms = [command]
