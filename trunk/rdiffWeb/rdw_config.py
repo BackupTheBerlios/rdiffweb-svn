@@ -111,9 +111,3 @@ class configFileTest(unittest.TestCase):
          getConfigSetting("SpacesValue", "/tmp/rdw_config.conf")
       except SettingsError: pass
       else: assert(False)
-
-if __name__ == "__main__":
-   print "Called as standalone program; running unit tests..."
-   testSuite = unittest.makeSuite(configFileTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(testSuite)

@@ -106,9 +106,3 @@ class rdwAuthenticationFilterTest(unittest.TestCase):
       assert filter._getHTTPAuthorizationCredentials("Basic " + base64.encodestring("username")) == { "login": "username", "password": "" }
       assert filter._getHTTPAuthorizationCredentials("Basic " + base64.encodestring("user:pass")) == { "login": "user", "password": "pass" }
       assert filter._getHTTPAuthorizationCredentials("Basic " + base64.encodestring("user:pass:word")) == { "login": "user", "password": "pass:word" }
-
-if __name__ == "__main__":
-   print "Called as standalone program; running unit tests..."
-   fileUserDataTest = unittest.makeSuite(rdwAuthenticationFilterTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(fileUserDataTest)

@@ -319,9 +319,3 @@ class mysqlUserDBTest(unittest.TestCase):
       userDataModule.setUseZipFormat('test', False)
       assert(not userDataModule.useZipFormat('test'))
       
-
-if __name__ == "__main__":
-   print "Called as standalone program; running unit tests..."
-   mysqlDataTest = unittest.makeSuite(mysqlUserDBTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(mysqlDataTest)

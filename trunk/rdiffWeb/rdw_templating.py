@@ -206,9 +206,4 @@ class templateParsingTest(unittest.TestCase):
       except templateError: pass
       else: assert(False)
 
-if __name__ == "__main__":
-   import os
-   print "Called as standalone program; running unit tests..."
-   testSuite = unittest.makeSuite(templateParsingTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(testSuite)
+

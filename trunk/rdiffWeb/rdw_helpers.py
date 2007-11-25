@@ -420,12 +420,7 @@ class helpersTest(unittest.TestCase):
       contents = zipObj.infolist()
       assert len(contents) == 3
       contents = [ (x.filename, x.file_size) for x in contents ]
-      assert ("/test.txt", 5) in contents
-      assert ("/test2.txt", 6) in contents
-      assert ("/subdir/test3.txt", 7) in contents
+      assert ("test.txt", 5) in contents
+      assert ("test2.txt", 6) in contents
+      assert ("subdir/test3.txt", 7) in contents
 
-if __name__ == "__main__":
-   print "Called as standalone program; running unit tests..."
-   testSuite = unittest.makeSuite(helpersTest, 'test')
-   testRunner = unittest.TextTestRunner()
-   testRunner.run(testSuite)
