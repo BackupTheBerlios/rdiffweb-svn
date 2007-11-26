@@ -73,6 +73,11 @@ td.PopupLinkCell td
    background-color: #EFEFEF;
 }
 
+.altRow .FlyoutContainer td
+{
+   background-color: silver;
+}
+
 table
 {
    border-collapse: collapse;
