@@ -91,16 +91,17 @@ td.FlyoutContainer td
    padding-right: 0em;
 }
 
-td.Icon
+table td.Icon
 {
    padding-top: 0em;
    padding-bottom: 0em;
+   vertical-align: middle;
 }
 
 td.Icon img
 {
-   height: 24px;
-   width: 24px;
+   height: 22px;
+   width: 22px;
 }
 
 td.FlyoutContainer div
