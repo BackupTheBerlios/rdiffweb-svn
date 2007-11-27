@@ -10,12 +10,23 @@ function makeDivRounded(oDiv)
 {
    var oDivParent = oDiv.parentNode;
    
-   // Stick the outer border in where the div was, and yank
+   // Stick the container in where the div was, and yank
    // out the div temporarily (we'll reattach it later.)
-   var oOuterBorder = document.createElement('div');
-   oOuterBorder.className = 'roundedBorderOuter';
-   oDivParent.insertBefore(oOuterBorder, oDiv);
+   var oContainingTable = document.createElement('table');
+   oContainingTable.className = 'roundedBorderContainer';
+   oDivParent.insertBefore(oContainingTable, oDiv);
    oDiv.parentNode.removeChild(oDiv);
+   
+   var oTBody = document.createElement('tbody');
+   var oTR = document.createElement('tr');
+   var oTD = document.createElement('td');
+   oContainingTable.appendChild(oTBody);
+   oTBody.appendChild(oTR);
+   oTR.appendChild(oTD);
+   
+   var oOuterBorder = document.createElement('div');
+   oTD.appendChild(oOuterBorder)
+   oOuterBorder.className = 'roundedBorderOuter';
    
    var oTop = document.createElement('b');
    oTop.className = 'xtop'
