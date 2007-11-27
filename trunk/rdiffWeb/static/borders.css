@@ -24,13 +24,13 @@
 .xb3,
 .xb4
 {
-   border-left:1px solid #000;
-   border-right:1px solid #000;
+   border-left:1px solid #555;
+   border-right:1px solid #555;
 }
 .xb1
 {
    margin:0 5px;
-   background:#000;
+   background:#555;
 }
 .xb2
 {
@@ -50,7 +50,7 @@
 .roundedBorderInner
 {
    display:block;
-   border:0 solid #000;
+   border:0 solid #555;
    border-width:0 1px;
 }
 
@@ -59,7 +59,7 @@
    padding: .3em .5em .3em .5em;
    /* Use a default border, for times when javascript is turned off. 
    These will be overridden below when the borders are added.*/
-   border: 1px solid black;
+   border: 1px solid #555;
 }
 .roundedBorderInner .roundedBorderContents
 {
