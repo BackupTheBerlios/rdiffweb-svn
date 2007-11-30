@@ -273,7 +273,6 @@ def execute(command, *args):
    results = {}
    results['exitCode'] = execution.wait()
    (results['stdout'], results['stderr']) = execution.communicate()
-   print results, parms
    return results
 
 
