@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import rdw_config
-import types
 
 """We do no length validation for incoming parameters, since truncated values will
 at worst lead to slightly confusing results, but no security risks"""
@@ -136,7 +135,7 @@ class mysqlUserDB:
       
    def _setUserField(self, username, fieldName, value):
       if not self.userExists(username): raise ValueError
-      if type(value) == types.BooleanType:
+      if isinstance(value, bool):
          if value:
             valueStr = '1'
          else:
