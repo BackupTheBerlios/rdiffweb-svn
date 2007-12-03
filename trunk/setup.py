@@ -16,10 +16,11 @@ if pythonVersion > 2.3:
       packages=['rdiffWeb'],
       package_data={'rdiffWeb': ['templates/*.html', 'templates/*.xml', 'templates/*.txt', 'static/*.png', 'static/*.js', 'static/*.css', 'static/images/*']},
       data_files=[('/etc/rdiffweb', ['rdw.conf.sample']),
-                  ('/etc/init.d', ['init/rdiff-web'])
+                  ('/etc/init.d', ['init/rdiff-web']),
+                  ('/usr/bin', ['rdiff-web']), # Manually place rdiff-web in /usr/bin, so the init script can find it
                   ],
-      scripts=['rdiff-web', 'rdiff-web-config']
-     )
+      scripts=['rdiff-web-config']
+   )
 else:
    from distutils.dist import Distribution
    import distutils.command.install
@@ -38,6 +39,7 @@ else:
       packages=['rdiffWeb'],
       data_files=[('/etc/rdiffweb', ['rdw.conf.sample']),
                   ('/etc/init.d', ['init/rdiff-web']),
+                  ('/usr/bin', ['rdiff-web']),
                   (packageDataDir+'/templates', glob.glob('rdiffWeb/templates/*.html')),
                   (packageDataDir+'/templates', glob.glob('rdiffWeb/templates/*.xml')),
                   (packageDataDir+'/templates', glob.glob('rdiffWeb/templates/*.txt')),
@@ -46,5 +48,5 @@ else:
                   (packageDataDir+'/static', glob.glob('rdiffWeb/static/*.css')),
                   (packageDataDir+'/static/images', glob.glob('rdiffWeb/static/images/*')),
                   ],
-      scripts=['rdiff-web', 'rdiff-web-config']
-     )
+      scripts=['rdiff-web-config']
+   )
