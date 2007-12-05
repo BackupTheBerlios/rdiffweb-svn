@@ -23,7 +23,6 @@ class rdiffStatusPage(page_main.rdiffPage):
          userMessages = self._getUserMessagesForDay(entryTime)
       else:
          # Validate repo parameter
-         if not repo: return self.writeErrorPage("Backup location not specified.")
          if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
             return self.writeErrorPage("Access is denied.")
          try:
