@@ -9,27 +9,23 @@ import rdiffWeb.rdw_spider_repos
 import rdiffWeb.email_notification
 import threading
 import rdiffWeb.page_error
+import rdiffWeb.filter_authentication
 
 if __name__ == "__main__":
-   
-   # Initialize config options for static files, so that if we error out, then we can at least display a basic web page.
-   cherrypy.config.update({
-      '/static' : {
-         'staticFilter.on' : True,
-         'staticFilter.root': rdiffWeb.rdw_helpers.getStaticRootPath(),
-         'staticFilter.dir': "static",
-         'rdwAuthenticateFilter.on' : False
-      }
-   })
-   
    # First make sure we have a valid config file.  If not, tell the user to run the config script
    if not rdiffWeb.rdw_config.getConfigFile():
       if os.getuid() != 0:
          error = "<h2>Error: rdiffWeb must be run as root.</h2>"
       else:
          error =  "<h2>Error: rdiffWeb has been installed, but no configuration file exists.<br/>Please run 'rdiff-web-config' to configure settings, then restart rdiffWeb.</h2>"
-      cherrypy.root = rdiffWeb.page_error.rdiffErrorPage(error)
-      cherrypy.server.start()
+      root = rdiffWeb.page_error.rdiffErrorPage(error)
+      cherrypy.quickstart(root, config={
+         '/static' : {
+            'tools.staticdir.on' : True,
+            'tools.staticdir.root': rdiffWeb.rdw_helpers.getStaticRootPath(),
+            'tools.staticdir.dir': "static",
+         }
+      })
       sys.exit(2)
 
 
@@ -70,59 +66,67 @@ if __name__ == "__main__":
    import rdiffWeb.page_status
    import rdiffWeb.page_prefs
 
-   # OK, we're good to go.  Start the server.
-   server = rdiffWeb.page_locations.rdiffLocationsPage()
-
    serverPort = 8080
    if rdiffWeb.rdw_config.getConfigSetting("ServerPort") != "":
       serverPort = int(rdiffWeb.rdw_config.getConfigSetting("ServerPort"))
-   settings = {
-      'sessionFilter.on' : True,
-      'gzipFilter.on': True,
-      'encodingFilter.on' : True,
+   environment = "development"
+   if not debug:
+      environment = "production"
+   global_settings = {
+      'tools.encode.on' : True,
+      'tools.gzip.on': True,
+      'tools.sessions.on' : True,
+      'tools.authenticate.on' : True,
       'autoreload.on' : autoReload,
-      'server.socketHost' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
-      'server.socketPort' : serverPort,
-      'server.logFile' : logFile,
+      'server.socket_host' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
+      'server.socket_port' : serverPort,
+      'server.log_file' : logFile,
+      'log.screen': True,
+      'server.environment': environment,
+   }
+   
+   page_settings = {
       '/': {
-         'rdwAuthenticateFilter.on' : True,
-         'rdwAuthenticateFilter.checkLoginAndPassword' : server.checkAuthentication
+         'tools.authenticate.checkAuth' : rdiffWeb.page_locations.rdiffLocationsPage().checkAuthentication,
+         'tools.authenticate.on' : True,
       },
       '/status/feed': {
-         'rdwAuthenticateFilter.method' : 'HTTP Header'
+         'tools.authenticate.authMethod' : 'HTTP Header'
       },
       '/restore': {
-         'encodingFilter.on': False,
+         'tools.encode.on': False,
+      },
+      '/static' : {
+         'tools.staticdir.on' : True,
+         'tools.staticdir.root': rdiffWeb.rdw_helpers.getStaticRootPath(),
+         'tools.staticdir.dir': "static",
+         'tools.authenticate.on' : False,
       }
    }
-   if not debug:
-      settings['server.environment'] = "production"
-
-   if not verbose:
-      settings['server.logToScreen'] = False
 
    if rdiffWeb.rdw_config.getConfigSetting("SessionStorage").lower() == "disk":
       sessionDir = rdiffWeb.rdw_config.getConfigSetting("SessionDir")
       if os.path.exists(sessionDir) and os.path.isdir(sessionDir) and os.access(sessionDir, os.W_OK):
          cherrypy.log("Setting session mode to disk in directory %s" % sessionDir)
-         settings['sessionFilter'] = True
-         settings['sessionFilter.storageType'] = 'File'
-         settings['sessionFilter.storagePath'] = sessionDir
+         global_settings['tools.sessions.on'] = True
+         global_settings['tools.sessions.storage_type'] = 'file'
+         global_settings['tools.sessions.storage_path'] = sessionDir
 
-   cherrypy.config.update(settings)
-   cherrypy.root = rdiffWeb.page_locations.rdiffLocationsPage()
-   cherrypy.root.browse = rdiffWeb.page_browse.rdiffBrowsePage()
-   cherrypy.root.restore = rdiffWeb.page_restore.rdiffRestorePage()
-   cherrypy.root.history = rdiffWeb.page_history.rdiffHistoryPage()
-   cherrypy.root.status = rdiffWeb.page_status.rdiffStatusPage()
-   cherrypy.root.admin = rdiffWeb.page_admin.rdiffAdminPage()
-   cherrypy.root.prefs = rdiffWeb.page_prefs.rdiffPreferencesPage()
+   cherrypy.config.update(global_settings)
+   root = rdiffWeb.page_locations.rdiffLocationsPage()
+   root.browse = rdiffWeb.page_browse.rdiffBrowsePage()
+   root.restore = rdiffWeb.page_restore.rdiffRestorePage()
+   root.history = rdiffWeb.page_history.rdiffHistoryPage()
+   root.status = rdiffWeb.page_status.rdiffStatusPage()
+   root.admin = rdiffWeb.page_admin.rdiffAdminPage()
+   root.prefs = rdiffWeb.page_prefs.rdiffPreferencesPage()
    
    # Start repo spider thread
-   killEvent = threading.Event()
-
-   rdiffWeb.rdw_spider_repos.startRepoSpiderThread(killEvent)
-   rdiffWeb.email_notification.startEmailNotificationThread(killEvent)
-   cherrypy.server.on_stop_server_list.append(lambda: killEvent.set())
+   if not debug:
+      killEvent = threading.Event()
    
-   cherrypy.server.start()
+      rdiffWeb.rdw_spider_repos.startRepoSpiderThread(killEvent)
+      rdiffWeb.email_notification.startEmailNotificationThread(killEvent)
+      cherrypy.server.on_stop_server_list.append(lambda: killEvent.set())
+
+   cherrypy.quickstart(root, config=page_settings)

@@ -7,19 +7,9 @@ import db
 import rdw_templating
 import rdw_helpers
 import rdw_config
-import filter_https
-import filter_authentication
-import cherrypy.filters.encodingfilter
-
-def getFilters():
-   filters = [filter_authentication.rdwAuthenticationFilter(), cherrypy.filters.encodingfilter.EncodingFilter()]
-   if rdw_config.getConfigSetting("UseHttps").upper() == "TRUE":
-      filters.append(filter_https.rdwHttpsFilter())
-   return filters
-
 
 class rdiffPage:
-   _cpFilterList = getFilters()
+
    def __init__(self):
       self.userDB = db.userDB().getUserDBModule()
 
@@ -70,7 +60,7 @@ class rdiffPage:
          pages.append(("/prefs", "Preferences"))
       if self.userDB.userIsAdmin(self.getUsername()):
          pages.append(("/admin", "Admin"))
-      pages.append(("/doLogout", "Log Out"))
+      pages.append(("/logout", "Log Out"))
       links = []
       for page in pages:
          (url, title) = page

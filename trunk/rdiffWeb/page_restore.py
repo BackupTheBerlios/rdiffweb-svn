@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from cherrypy.lib.cptools import serveFile
+from cherrypy.lib.static import serve_file
 import rdw_helpers, page_main, librdiff
 import os
 
@@ -43,6 +43,6 @@ class rdiffRestorePage(page_main.rdiffPage):
       (directory, filename) = os.path.split(filePath)
       file = autoDeleteDir(directory)
       filename = "\""+filename.replace("\"", "\\\"")+"\"" # quote file to handle files with spaces, while escaping quotes in filename
-      return serveFile(filePath, None, disposition="attachment", name=filename)
+      return serve_file(filePath, None, disposition="attachment", name=filename)
    index.exposed = True
 

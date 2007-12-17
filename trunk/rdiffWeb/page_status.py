@@ -36,7 +36,7 @@ class rdiffStatusPage(page_main.rdiffPage):
    entry.exposed = True
 
    def feed(self, failures=""):
-      cherrypy.response.headerMap["Content-Type"] = "text/xml"
+      cherrypy.response.headers["Content-Type"] = "text/xml"
       userMessages = self._getRecentUserMessages(failures != "")
       statusUrl = self._buildAbsolutePageUrl(failures != "")
       return self.compileTemplate("status.xml", username=self.getUsername(), link=statusUrl, messages=userMessages)
@@ -96,8 +96,6 @@ class rdiffStatusPage(page_main.rdiffPage):
       endTime.tzOffset = date.tzOffset
       endTime.setTime(23, 59, 59)
       
-      print startTime.getDisplayString(), endTime.getDisplayString()
-
       return self._getUserMessages(userRepos, True, False, startTime, endTime)
 
    def _getRecentUserMessages(self, failuresOnly):

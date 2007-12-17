@@ -1,96 +1,93 @@
 #!/usr/bin/python
 
 import cherrypy
-try:
-   from cherrypy.filters.basefilter import BaseFilter
-except:
-   from cherrypy.lib.filter.basefilter import BaseFilter
 import page_main
 import rdw_helpers
 import base64
 
-class rdwAuthenticationFilter(BaseFilter):
-   loginUrl = "/doLogin"
-   logoutUrl = "/doLogout"
-   sessionUserNameKey = "username"
+_loginUrl = "/login"
+_logoutUrl = "/logout"
+_sessionUserNameKey = "username"
 
-   def beforeMain(self):
-      if not cherrypy.config.get("rdwAuthenticateFilter.on", False):
-         return
-      checkLoginAndPassword = cherrypy.config.get("rdwAuthenticateFilter.checkLoginAndPassword", lambda username, password: u"Invalid username or password")
+def handle_authentication(authMethod='', checkAuth=None):
+   checkLoginAndPassword = checkAuth
+   if not checkLoginAndPassword:
+      checkLoginAndPassword = (lambda username, password: u"Invalid username or password")
 
-      if cherrypy.request.path == self.logoutUrl:
-         cherrypy.session[self.sessionUserNameKey] = None
-         cherrypy.request.user = None
+   if cherrypy.request.path_info == _logoutUrl:
+      cherrypy.session[_sessionUserNameKey] = None
+      cherrypy.request.user = None
+      raise cherrypy.HTTPRedirect("/")
+
+   elif cherrypy.session.get(_sessionUserNameKey):
+      # page passes credentials; allow to be processed
+      if cherrypy.request.path_info == _loginUrl:
          raise cherrypy.HTTPRedirect("/")
+      return False
 
-      elif cherrypy.session.get(self.sessionUserNameKey):
-         # page passes credentials; allow to be processed
-         if cherrypy.request.path == self.loginUrl:
-            raise cherrypy.HTTPRedirect("/")
-         return
+   if authMethod == "HTTP Header":
+      # if not already authenticated, authenticate via the Authorization header
+      httpAuth = _getHTTPAuthorizationCredentials(cherrypy.request.headers.get("Authorization", ""))
+      if httpAuth:
+         error = checkLoginAndPassword(httpAuth["login"], httpAuth["password"])
+         if not error:
+            return False
+      else:
+         error = ""
 
-      if cherrypy.config.get("rdwAuthenticateFilter.method", "") == "HTTP Header":
-         # if not already authenticated, authenticate via the Authorization header
-         httpAuth = self._getHTTPAuthorizationCredentials(cherrypy.request.headerMap.get("Authorization", ""))
-         if httpAuth:
-            error = checkLoginAndPassword(httpAuth["login"], httpAuth["password"])
-            if not error:
-               return
-         else:
-            error = ""
+      cherrypy.response.status = "401 Unauthorized"
+      cherrypy.response.body = "Not Authorized\n" + error
+      cherrypy.response.headers["WWW-Authenticate"] = 'Basic realm="rdiffWeb"'
+      return True
 
-         cherrypy.response.status = "401 Unauthorized"
-         cherrypy.response.body = "Not Authorized\n" + error
-         cherrypy.response.headerMap["WWW-Authenticate"] = 'Basic realm="rdiffWeb"'
-         cherrypy.request.execute_main = False
-         return
+   loginKey = "login"
+   passwordKey = "password"
+   redirectKey = "redirect"
 
-      loginKey = "login"
-      passwordKey = "password"
-      redirectKey = "redirect"
+   loginParms = {"message": "", "action": _loginUrl,
+      "loginKey": loginKey, "passwordKey": passwordKey, "redirectKey": redirectKey,
+      "loginValue": "", "redirectValue": cherrypy.request.path_info + "?" + cherrypy.request.query_string }
 
-      loginParms = {"message": "", "action": self.loginUrl,
-         "loginKey": loginKey, "passwordKey": passwordKey, "redirectKey": redirectKey,
-         "loginValue": "", "redirectValue": cherrypy.request.path + "?" + cherrypy.request.queryString }
+   if cherrypy.request.path_info == _loginUrl and cherrypy.request.method == "POST":
+      # check for login credentials
+      loginValue = cherrypy.request.params[loginKey]
+      passwordValue = cherrypy.request.params[passwordKey]
+      redirectValue = cherrypy.request.params[redirectKey]
+      errorMsg = checkLoginAndPassword(loginValue, passwordValue)
+      if not errorMsg:
+         cherrypy.session[_sessionUserNameKey] = loginValue
+         if not redirectValue:
+            redirectValue = "/"
+         raise cherrypy.HTTPRedirect(redirectValue)
 
-      if cherrypy.request.path == self.loginUrl and cherrypy.request.method == "POST":
-         # check for login credentials
-         loginValue = cherrypy.request.paramMap[loginKey]
-         passwordValue = cherrypy.request.paramMap[passwordKey]
-         redirectValue = cherrypy.request.paramMap[redirectKey]
-         errorMsg = checkLoginAndPassword(loginValue, passwordValue)
-         if not errorMsg:
-            cherrypy.session[self.sessionUserNameKey] = loginValue
-            if not redirectValue:
-               redirectValue = "/"
-            raise cherrypy.HTTPRedirect(redirectValue)
+      # update form values
+      loginParms["message"] = errorMsg
+      loginParms["loginValue"] = loginValue
+      loginParms["redirectValue"] = redirectValue
 
-         # update form values
-         loginParms["message"] = errorMsg
-         loginParms["loginValue"] = loginValue
-         loginParms["redirectValue"] = redirectValue
+   # write login page
+   loginPage = page_main.rdiffPage()
+   cherrypy.response.body = loginPage.compileTemplate("page_start.html", title="Login Required - rdiffWeb", rssLink='', rssTitle='', **loginParms) + loginPage.compileTemplate("login.html", **loginParms)
+   return True
 
-      # write login page
-      loginPage = page_main.rdiffPage()
-      cherrypy.response.body = loginPage.compileTemplate("page_start.html", title="Login Required - rdiffWeb", rssLink='', rssTitle='', **loginParms) + loginPage.compileTemplate("login.html", **loginParms)
-      cherrypy.request.execute_main = False      
+cherrypy.tools.authenticate = cherrypy._cptools.HandlerTool(handle_authentication)
 
-   def _getHTTPAuthorizationCredentials(self, authHeader):
-      try:
-         (realm, authEnc) = authHeader.split()
-      except ValueError:
-         return None
 
-      if realm.lower() == "basic":
-         auth = base64.decodestring(authEnc)
-         colon = auth.find(":")
-         if colon != -1:
-            return { "login": auth[:colon], "password": auth[colon+1:] }
-         else:
-            return { "login": auth, "password": "" }
-
+def _getHTTPAuthorizationCredentials(authHeader):
+   try:
+      (realm, authEnc) = authHeader.split()
+   except ValueError:
       return None
+
+   if realm.lower() == "basic":
+      auth = base64.decodestring(authEnc)
+      colon = auth.find(":")
+      if colon != -1:
+         return { "login": auth[:colon], "password": auth[colon+1:] }
+      else:
+         return { "login": auth, "password": "" }
+
+   return None
 
 ##################### Unit Tests #########################
 
@@ -99,10 +96,9 @@ class rdwAuthenticationFilterTest(unittest.TestCase):
    """Unit tests for the rdwAuthenticationFilter class"""
 
    def testAuthorization(self):
-      filter = rdwAuthenticationFilter()
-      assert not filter._getHTTPAuthorizationCredentials("")
-      assert not filter._getHTTPAuthorizationCredentials("Basic Username Password")
-      assert not filter._getHTTPAuthorizationCredentials("Digest " + base64.encodestring("username"))
-      assert filter._getHTTPAuthorizationCredentials("Basic " + base64.encodestring("username")) == { "login": "username", "password": "" }
-      assert filter._getHTTPAuthorizationCredentials("Basic " + base64.encodestring("user:pass")) == { "login": "user", "password": "pass" }
-      assert filter._getHTTPAuthorizationCredentials("Basic " + base64.encodestring("user:pass:word")) == { "login": "user", "password": "pass:word" }
+      assert not _getHTTPAuthorizationCredentials("")
+      assert not _getHTTPAuthorizationCredentials("Basic Username Password")
+      assert not _getHTTPAuthorizationCredentials("Digest " + base64.encodestring("username"))
+      assert _getHTTPAuthorizationCredentials("Basic " + base64.encodestring("username")) == { "login": "username", "password": "" }
+      assert _getHTTPAuthorizationCredentials("Basic " + base64.encodestring("user:pass")) == { "login": "user", "password": "pass" }
+      assert _getHTTPAuthorizationCredentials("Basic " + base64.encodestring("user:pass:word")) == { "login": "user", "password": "pass:word" }
