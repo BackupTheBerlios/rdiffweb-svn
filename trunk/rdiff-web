@@ -3,11 +3,12 @@
 import cherrypy
 import getopt
 import os
-import rdiffWeb.rdw_config
 import sys
+import threading
+
+import rdiffWeb.rdw_config
 import rdiffWeb.rdw_spider_repos
 import rdiffWeb.email_notification
-import threading
 import rdiffWeb.page_error
 import rdiffWeb.filter_authentication
 
