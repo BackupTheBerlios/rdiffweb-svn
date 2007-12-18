@@ -82,6 +82,8 @@ if __name__ == "__main__":
       'server.socket_host' : rdiffWeb.rdw_config.getConfigSetting("ServerName"),
       'server.socket_port' : serverPort,
       'server.log_file' : logFile,
+      'server.ssl_certificate': rdiffWeb.rdw_config.getConfigSetting("SslCertificate"),
+      'server.ssl_private_key': rdiffWeb.rdw_config.getConfigSetting("SslPrivateKey"),
       'log.screen': True,
       'server.environment': environment,
    }
