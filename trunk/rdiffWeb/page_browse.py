@@ -16,11 +16,11 @@ class rdiffBrowsePage(page_main.rdiffPage):
 
       # NOTE: a blank path parm is allowed, since that just results in a listing of the repo root
       if not repo: return self.writeErrorPage("Backup location not specified.")
-      if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
+      if not repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
          return self.writeErrorPage("Access is denied.")
 
       try:
-         parms = self.getParmsForPage(self.userDB.getUserRoot(self.getUsername()), repo, path, restore)
+         parms = self.getParmsForPage(self.getUserDB().getUserRoot(self.getUsername()), repo, path, restore)
       except librdiff.FileError, error:
          return self.writeErrorPage(str(error))
       page = self.startPage(parms["title"])

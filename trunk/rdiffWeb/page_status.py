@@ -23,7 +23,7 @@ class rdiffStatusPage(page_main.rdiffPage):
          userMessages = self._getUserMessagesForDay(entryTime)
       else:
          # Validate repo parameter
-         if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
+         if not repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
             return self.writeErrorPage("Access is denied.")
          try:
             self.validateUserPath(repo)
@@ -83,7 +83,7 @@ class rdiffStatusPage(page_main.rdiffPage):
       return self._buildAbsolutePageUrl(False) + "entry?repo="+rdw_helpers.encodeUrl(repo)+"&date="+rdw_helpers.encodeUrl(date.getUrlString())
    
    def _getUserMessagesForDay(self, date):
-      userRepos = self.userDB.getUserRepoPaths(self.getUsername())
+      userRepos = self.getUserDB().getUserRepoPaths(self.getUsername())
 
       # Set the start and end time to be the start and end of the day, respectively, to get all entries for that day
       startTime = rdw_helpers.rdwTime()
@@ -99,14 +99,14 @@ class rdiffStatusPage(page_main.rdiffPage):
       return self._getUserMessages(userRepos, True, False, startTime, endTime)
 
    def _getRecentUserMessages(self, failuresOnly):
-      userRepos = self.userDB.getUserRepoPaths(self.getUsername())
+      userRepos = self.getUserDB().getUserRepoPaths(self.getUsername())
       asOfDate = rdw_helpers.rdwTime()
       asOfDate.initFromMidnightUTC(-5)
 
       return self._getUserMessages(userRepos, not failuresOnly, True, asOfDate, None)
 
    def _getUserMessages(self, repos, includeSuccess, includeFailure, earliestDate, latestDate):
-      userRoot = self.userDB.getUserRoot(self.getUsername())
+      userRoot = self.getUserDB().getUserRoot(self.getUsername())
 
       repoErrors = []
       allBackups = []

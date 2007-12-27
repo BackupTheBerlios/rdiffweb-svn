@@ -10,9 +10,6 @@ import rdw_config
 
 class rdiffPage:
 
-   def __init__(self):
-      self.userDB = db.userDB().getUserDBModule()
-
    ############################## HELPER FUNCTIONS ###################################
    def buildBrowseUrl(self, repo, path, isRestoreView):
       url = "/browse/?repo="+rdw_helpers.encodeUrl(repo, "/")+"&path="+rdw_helpers.encodeUrl(path, "/")
@@ -34,7 +31,7 @@ class rdiffPage:
          
    def validateUserPath(self, path):
       '''Takes a path relative to the user's root dir and validates that it is valid and within the user's root'''
-      path = rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), path)
+      path = rdw_helpers.joinPaths(self.getUserDB().getUserRoot(self.getUsername()), path)
       path = path.rstrip("/")
       realPath = os.path.realpath(path)
       if realPath != path:
@@ -43,8 +40,14 @@ class rdiffPage:
       # Make sure that the path starts with the user root
       # This check should be accomplished by ensurePathValid, but adding for a sanity check
       realDestPath = os.path.realpath(path)
-      if realDestPath.find(self.userDB.getUserRoot(self.getUsername())) != 0:      
+      if realDestPath.find(self.getUserDB().getUserRoot(self.getUsername())) != 0:      
          raise rdw_helpers.accessDeniedError
+      
+      
+   def getUserDB(self):
+      if not hasattr(cherrypy.thread_data, 'db'):
+         cherrypy.thread_data.db = db.userDB().getUserDBModule()
+      return cherrypy.thread_data.db
 
 
    ########################## PAGE HELPER FUNCTIONS ##################################
@@ -56,9 +59,9 @@ class rdiffPage:
 
    def writeTopLinks(self):
       pages = [("/status/", "Backup Status")]
-      if self.userDB.modificationsSupported():
+      if self.getUserDB().modificationsSupported():
          pages.append(("/prefs", "Preferences"))
-      if self.userDB.userIsAdmin(self.getUsername()):
+      if self.getUserDB().userIsAdmin(self.getUsername()):
          pages.append(("/admin", "Admin"))
       pages.append(("/logout", "Log Out"))
       links = []
@@ -82,7 +85,7 @@ class rdiffPage:
 
    ########## SESSION INFORMATION #############
    def checkAuthentication(self, username, password):
-      if self.userDB.areUserCredentialsValid(username, password):
+      if self.getUserDB().areUserCredentialsValid(username, password):
          cherrypy.session['username'] = username
          return None
       return "Invalid username or password."

@@ -30,16 +30,16 @@ class rdiffPreferencesPage(page_main.rdiffPage):
    index.exposed = True
    
    def _changePassword(self, currentPassword, newPassword, confirmPassword):
-      if not self.userDB.modificationsSupported():
+      if not self.getUserDB().modificationsSupported():
          return self._getPrefsPage(errorMessage="Password changing is not supported with the active user database.")
       
-      if not self.userDB.areUserCredentialsValid(self.getUsername(), currentPassword):
+      if not self.getUserDB().areUserCredentialsValid(self.getUsername(), currentPassword):
          return self._getPrefsPage(errorMessage="The 'Current Password' is invalid.")
       
       if newPassword != confirmPassword:
          return self._getPrefsPage(errorMessage="The passwords do not match.")
 
-      self.userDB.setUserPassword(self.getUsername(), newPassword)      
+      self.getUserDB().setUserPassword(self.getUsername(), newPassword)      
       return self._getPrefsPage(statusMessage="Password updated successfully.")
    
    def _updateRepos(self):
@@ -47,16 +47,16 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       return self._getPrefsPage(statusMessage="Successfully updated backup locations.")
 
    def _setNotifications(self, parms):
-      if not self.userDB.modificationsSupported():
+      if not self.getUserDB().modificationsSupported():
          return self._getPrefsPage(errorMessage="Email notification is not supported with the active user database.")
       
-      repos = self.userDB.getUserRepoPaths(self.getUsername())
+      repos = self.getUserDB().getUserRepoPaths(self.getUsername())
       
       for parmName in parms.keys():
          if parmName == "userEmail":
             if parms[parmName] == self.sampleEmail:
                parms[parmName] = ''
-            self.userDB.setUserEmail(self.getUsername(), parms[parmName])
+            self.getUserDB().setUserEmail(self.getUsername(), parms[parmName])
          if parmName.endswith("numDays"):
             backupName = parmName[:-7]
             if backupName in repos:
@@ -64,23 +64,23 @@ class rdiffPreferencesPage(page_main.rdiffPage):
                   maxDays = 0
                else:
                   maxDays = int(parms[parmName][0])
-               self.userDB.setRepoMaxAge(self.getUsername(), backupName, maxDays)
+               self.getUserDB().setRepoMaxAge(self.getUsername(), backupName, maxDays)
                
       return self._getPrefsPage(statusMessage="Successfully changed notification settings.")
    
    def _setRestoreType(self, restoreType):
-      if not self.userDB.modificationsSupported():
+      if not self.getUserDB().modificationsSupported():
          return self.getPrefsPage(errorMessage="Setting the restore format is not supported with the active user database.")
       
       if restoreType == 'zip' or restoreType == 'tgz':
-         self.userDB.setUseZipFormat(self.getUsername(), restoreType == 'zip')
+         self.getUserDB().setUseZipFormat(self.getUsername(), restoreType == 'zip')
       else:
          return self._getPrefsPage(errorMessage='Invalid restore format.')
       return self._getPrefsPage(statusMessage="Successfully set restore format.")
    
    def _getPrefsPage(self, errorMessage="", statusMessage=""):
       title = "User Preferences"
-      email = self.userDB.getUserEmail(self.getUsername());
+      email = self.getUserDB().getUserEmail(self.getUsername());
       parms = {
          "title" : title,
          "error" : errorMessage,
@@ -88,14 +88,14 @@ class rdiffPreferencesPage(page_main.rdiffPage):
          "userEmail" : email,
          "notificationsEnabled" : False,
          "backups" : [],
-         "useZipFormat": self.userDB.useZipFormat(self.getUsername()),
+         "useZipFormat": self.getUserDB().useZipFormat(self.getUsername()),
          "sampleEmail": self.sampleEmail
       }
       if email_notification.emailNotifier().notificationsEnabled():
-         repos = self.userDB.getUserRepoPaths(self.getUsername())
+         repos = self.getUserDB().getUserRepoPaths(self.getUsername())
          backups = []
          for repo in repos:
-            maxAge = self.userDB.getRepoMaxAge(self.getUsername(), repo)
+            maxAge = self.getUserDB().getRepoMaxAge(self.getUsername(), repo)
             notifyOptions = []
             for i in range(0, 8):
                notifyStr = "Don't notify"

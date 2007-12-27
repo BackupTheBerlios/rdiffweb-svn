@@ -13,12 +13,12 @@ class rdiffHistoryPage(page_main.rdiffPage):
          return self.writeErrorPage(str(error))
 
       if not repo: return self.writeErrorPage("Backup location not specified.")
-      if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
+      if not repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
          return self.writeErrorPage("Access is denied.")
 
       parms = {}
       try:
-         parms = self.getParmsForPage(joinPaths(self.userDB.getUserRoot(self.getUsername()), repo), repo)
+         parms = self.getParmsForPage(joinPaths(self.getUserDB().getUserRoot(self.getUsername()), repo), repo)
       except librdiff.FileError, error:
          return self.writeErrorPage(error.getErrorString())
       

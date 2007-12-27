@@ -19,10 +19,10 @@ class rdiffRestorePage(page_main.rdiffPage):
       except rdw_helpers.accessDeniedError, error:
          return self.writeErrorPage(str(error))
       if not repo: return self.writeErrorPage("Backup location not specified.")
-      if not repo in self.userDB.getUserRepoPaths(self.getUsername()):
+      if not repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
          return self.writeErrorPage("Access is denied.")
 
-      if librdiff.backupIsInProgressForRepo(rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)):
+      if librdiff.backupIsInProgressForRepo(rdw_helpers.joinPaths(self.getUserDB().getUserRoot(self.getUsername()), repo)):
          return self.writeErrorPage("A backup is currently in progress to this location.  Restores are disabled until this backup is complete.")
 
       try:
@@ -32,8 +32,8 @@ class rdiffRestorePage(page_main.rdiffPage):
          if not file:
             file = path
             path = "/"
-         fullPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(self.getUsername()), repo)
-         useZipFormat = self.userDB.useZipFormat(self.getUsername())
+         fullPath = rdw_helpers.joinPaths(self.getUserDB().getUserRoot(self.getUsername()), repo)
+         useZipFormat = self.getUserDB().useZipFormat(self.getUsername())
          filePath = librdiff.restoreFileOrDir(fullPath, path, file, restoreTime, useZipFormat)
       except librdiff.FileError, error:
          return self.writeErrorPage(error.getErrorString())
