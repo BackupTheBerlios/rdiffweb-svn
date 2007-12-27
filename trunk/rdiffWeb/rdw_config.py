@@ -9,6 +9,12 @@ def getConfigFile():
       if os.access(settingsFile, os.F_OK):
          return settingsFile
    return ""
+   
+def getDatabasePath():
+   if os.access("/etc/rdiffweb/rdw.conf", os.F_OK):
+      return "/etc/rdiffweb/rdw.db"
+   return "rdw.db"
+   
 
 import os, re
 def getConfigSetting(settingName, settingsFile = None):
