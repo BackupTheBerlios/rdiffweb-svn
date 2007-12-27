@@ -8,7 +8,7 @@ class rdiffLocationsPage(page_main.rdiffPage):
    backup directories. This is the root (/) page '''
    def index(self):
       page = self.startPage("Backup Locations")
-      page = page + self.compileTemplate("repo_listing.html", **self.getParmsForPage(self.userDB.getUserRoot(self.getUsername()), self.userDB.getUserRepoPaths(self.getUsername())))
+      page = page + self.compileTemplate("repo_listing.html", **self.getParmsForPage(self.getUserDB().getUserRoot(self.getUsername()), self.getUserDB().getUserRepoPaths(self.getUsername())))
       page = page + self.endPage()
       return page
    index.exposed = True
