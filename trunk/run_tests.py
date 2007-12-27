@@ -12,5 +12,6 @@ from rdiffWeb.rdw_templating import templateParsingTest
 from rdiffWeb.filter_authentication import rdwAuthenticationFilterTest
 from rdiffWeb.db_file import fileUserDataTest
 from rdiffWeb.rdw_config import configFileTest
+from rdiffWeb.db_sqlite import sqliteUserDBTest
 
 unittest.main()
