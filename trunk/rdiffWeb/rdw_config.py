@@ -1,7 +1,12 @@
 #!/usr/bin/python
 
-SettingsError = "Invalid configuration file syntax"
-ParameterError = "Invalid parameters"
+class SettingsError:
+   def __str__(self):
+      return "Invalid configuration file syntax"
+   
+class ParameterError:
+   def __str__(self):
+      return "Invalid parameters"
 
 def getConfigFile():
    settingsFiles = ["rdw.conf", "/etc/rdiffweb/rdw.conf" ] # TODO: there *has* to be a better way to get the /etc config file path...
