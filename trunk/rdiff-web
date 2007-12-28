@@ -130,6 +130,6 @@ if __name__ == "__main__":
    
       rdiffWeb.rdw_spider_repos.startRepoSpiderThread(killEvent)
       rdiffWeb.email_notification.startEmailNotificationThread(killEvent)
-      cherrypy.server.on_stop_server_list.append(lambda: killEvent.set())
+      cherrypy.engine.on_stop_engine_list.append(lambda: killEvent.set())
 
    cherrypy.quickstart(root, config=page_settings)
