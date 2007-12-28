@@ -6,9 +6,10 @@ import db_sql
 """We do no length validation for incoming parameters, since truncated values will
 at worst lead to slightly confusing results, but no security risks"""
 class sqliteUserDB():
-   def __init__(self, databaseFilePath):
+   def __init__(self, databaseFilePath, autoConvertDatabase=True):
       import sqlite3
       self._databaseFilePath = databaseFilePath
+      self._autoConvertDatabase = autoConvertDatabase
       self.userRootCache = {}
       self._connect()
       self._migrateExistingData()
@@ -196,26 +197,27 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
       for statement in self._getCreateStatements():
          cursor.execute(statement)
 
-      prevDBType = rdw_config.getConfigSetting("UserDB")
-      if prevDBType.lower() == "mysql":
-         print 'Converting database from mysql...'
-         import db_mysql
-         prevDB = db_mysql.mysqlUserDB()
-         users = prevDB._executeQuery("SELECT UserID, Username, Password, UserRoot, IsAdmin, UserEmail, RestoreFormat FROM users")
-         cursor.executemany("INSERT INTO users (UserID, Username, Password, UserRoot, IsAdmin, UserEmail, RestoreFormat) values (?, ?, ?, ?, ?, ?, ?)", users)
-         
-         repos = prevDB._executeQuery("SELECT RepoID, UserID, RepoPath, MaxAge FROM repos")
-         cursor.executemany("INSERT INTO repos (RepoID, UserID, RepoPath, MaxAge) values (?, ?, ?, ?)", repos)
-      elif prevDBType.lower() == "file":
-         print 'Converting database from file...'
-         import db_file
-         prevDB = db_file.fileUserDB()
-         username = rdw_config.getConfigSetting("username")
-         password = rdw_config.getConfigSetting("password")
-         self.addUser(username)
-         self.setUserPassword(username, password)
-         self.setUserInfo(username, prevDB.getUserRoot(username), True)
-         self.setUserRepos(username, prevDB.getUserRepoPaths(username))
+      if self._autoConvertDatabase:
+         prevDBType = rdw_config.getConfigSetting("UserDB")
+         if prevDBType.lower() == "mysql":
+            print 'Converting database from mysql...'
+            import db_mysql
+            prevDB = db_mysql.mysqlUserDB()
+            users = prevDB._executeQuery("SELECT UserID, Username, Password, UserRoot, IsAdmin, UserEmail, RestoreFormat FROM users")
+            cursor.executemany("INSERT INTO users (UserID, Username, Password, UserRoot, IsAdmin, UserEmail, RestoreFormat) values (?, ?, ?, ?, ?, ?, ?)", users)
+            
+            repos = prevDB._executeQuery("SELECT RepoID, UserID, RepoPath, MaxAge FROM repos")
+            cursor.executemany("INSERT INTO repos (RepoID, UserID, RepoPath, MaxAge) values (?, ?, ?, ?)", repos)
+         elif prevDBType.lower() == "file":
+            print 'Converting database from file...'
+            import db_file
+            prevDB = db_file.fileUserDB()
+            username = rdw_config.getConfigSetting("username")
+            password = rdw_config.getConfigSetting("password")
+            self.addUser(username)
+            self.setUserPassword(username, password)
+            self.setUserInfo(username, prevDB.getUserRoot(username), True)
+            self.setUserRepos(username, prevDB.getUserRepoPaths(username))
          
       self.sqlConnection.execute("COMMIT TRANSACTION")
 
@@ -224,7 +226,7 @@ class sqliteUserDBTest(db_sql.sqlUserDBTest):
    """Unit tests for the sqliteUserDBTeste class"""
    
    def _getUserDBObject(self):
-      return sqliteUserDB(":memory:")
+      return sqliteUserDB(":memory:", autoConvertDatabase=False)
    
    def setUp(self):
       super(sqliteUserDBTest, self).setUp()

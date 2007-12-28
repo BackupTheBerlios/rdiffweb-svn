@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
+import db_sql
 import rdw_config
+import warnings
 
 """We do no length validation for incoming parameters, since truncated values will
 at worst lead to slightly confusing results, but no security risks"""
@@ -211,18 +213,24 @@ primary key (RepoID))"""
       columnNames = [column[0].lower() for column in self._executeQuery("describe users")]
       if not "restoreformat" in columnNames:
          self._executeQuery('alter table users add column RestoreFormat tinyint NOT NULL DEFAULT TRUE')
+         
+   def _getTables(self):
+      return [table[0].lower() for table in self._executeQuery("show tables")]
 
 
 ##################### Unit Tests #########################
 
 import unittest, os
-class mysqlUserDBTest(unittest.TestCase):
+class mysqlUserDBTest(db_sql.sqlUserDBTest):
    """Unit tests for the mysqlUserDBTest class"""
    configFileData = """sqlHost=localhost
                        sqlUsername=
                        sqlPassword=
                        sqlDatabase=test"""
    configFilePath = "/tmp/rdw_config.conf"
+   
+   def _getUserDBObject(self):
+      return mysqlUserDB(self.configFilePath)
 
    def setUp(self):
       file = open(self.configFilePath, "w")
@@ -232,14 +240,6 @@ class mysqlUserDBTest(unittest.TestCase):
       file = open(self.configFilePath, "w")
       file.write(self.configFileData)
       file.close()
-      userData = mysqlUserDB(self.configFilePath)
-      for statement in userData._getCreateStatements():
-         userData._executeQuery(statement)
-
-      userData.addUser("test")
-      userData.setUserInfo("test", "/data", False)
-      userData.setUserPassword("test", "user")
-      userData.setUserRepos("test", ["/data/bill", "/data/frank"])
 
    def tearDown(self):
       userData = mysqlUserDB(self.configFilePath)
@@ -251,14 +251,10 @@ class mysqlUserDBTest(unittest.TestCase):
       if (os.access(self.configFilePath, os.F_OK)):
          os.remove(self.configFilePath)
 
-   def testValidUser(self):
-      authModule = mysqlUserDB(self.configFilePath)
-      assert(authModule.userExists("test"))
-      assert(authModule.areUserCredentialsValid("test", "user"))
-
    def testUserTruncation(self):
+      warnings.filterwarnings('ignore', message='Data truncated')
       import MySQLdb
-      authModule = mysqlUserDB(self.configFilePath)
+      authModule = self._getUserDB()
       authModule.addUser("bill" * 1000)
       try:
          authModule.addUser("bill" * 1000 + "test")
@@ -266,55 +262,5 @@ class mysqlUserDBTest(unittest.TestCase):
          pass
       else:
          assert(false)
-
-   def testUserList(self):
-      authModule = mysqlUserDB(self.configFilePath)
-      assert(authModule.getUserList() == ["test"])
-
-   def testUserInfo(self):
-      authModule = mysqlUserDB(self.configFilePath)
-      assert(authModule.getUserRoot("test") == "/data")
-      assert(authModule.userIsAdmin("test") == False)
-
-   def testBadPassword(self):
-      authModule = mysqlUserDB(self.configFilePath)
-      assert(not authModule.areUserCredentialsValid("test", "user2")) # Basic test
-      assert(not authModule.areUserCredentialsValid("test", "User")) # password is case sensitive
-      assert(not authModule.areUserCredentialsValid("test", "use")) # Match entire password
-      assert(not authModule.areUserCredentialsValid("test", "")) # Match entire password
-
-   def testBadUser(self):
-      authModule = mysqlUserDB(self.configFilePath)
-      assert(not authModule.userExists("Test")) # username is case sensitive
-      assert(not authModule.userExists("tes")) # Match entire username
-
-   def testGoodUserDir(self):
-      userDataModule = mysqlUserDB(self.configFilePath)
-      assert(userDataModule.getUserRepoPaths("test") == ["/data/bill", "/data/frank"])
-      assert(userDataModule.getUserRoot("test") == "/data")
-
-   def testBadUserReturn(self):
-      userDataModule = mysqlUserDB(self.configFilePath)
-      assert(not userDataModule.getUserRepoPaths("test2")) # should return None if user doesn't exist
-      assert(not userDataModule.getUserRoot("")) # should return None if user doesn't exist
-      
-   def testUserRepos(self):
-      userDataModule = mysqlUserDB(self.configFilePath)
-      userDataModule.setUserRepos("test", [])
-      userDataModule.setUserRepos("test", ["a", "b", "c"])
-      self.assertEquals(userDataModule.getUserRepoPaths("test"), ["a", "b", "c"])
-      # Make sure that repo max ages are initialized to 0
-      maxAges = [ userDataModule.getRepoMaxAge("test", x) for x in userDataModule.getUserRepoPaths("test") ]
-      self.assertEquals(maxAges, [0, 0, 0])
-      userDataModule.setRepoMaxAge("test", "b", 1)
-      self.assertEquals(userDataModule.getRepoMaxAge("test", "b"), 1)
-      userDataModule.setUserRepos("test", ["b", "c", "d"])
-      self.assertEquals(userDataModule.getRepoMaxAge("test", "b"), 1)
-      self.assertEquals(userDataModule.getUserRepoPaths("test"), ["b", "c", "d"])
-      
-   def testRestoreFormat(self):
-      userDataModule = mysqlUserDB(self.configFilePath)
-      assert(userDataModule.useZipFormat('test')) # Should default to using zip format
-      userDataModule.setUseZipFormat('test', False)
-      assert(not userDataModule.useZipFormat('test'))
+      warnings.resetwarnings()
       
