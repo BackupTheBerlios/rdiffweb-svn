@@ -26,7 +26,7 @@ def getConfigSetting(settingName, settingsFile = None):
    if ('=' in settingName): raise ParameterError
    if settingsFile == None:
       settingsFile = getConfigFile()
-   if (not os.access(settingsFile, os.F_OK)): raise ParameterError
+   if (not os.access(settingsFile, os.F_OK)): return ""
    settingsStrings = open(settingsFile, "r").readlines()
    for setting in settingsStrings:
       setting = re.compile("(.*)#.*").sub(r'\1', setting)
