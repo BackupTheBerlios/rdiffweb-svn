@@ -59,7 +59,7 @@ class sqliteUserDB():
       if not self.userExists(username): raise ValueError
       self._deleteUserRepos(username)
       query = "DELETE FROM users WHERE Username = ?"
-      self._executeQuery(query, (username))
+      self._executeQuery(query, (username,))
 
    def setUserInfo(self, username, userRoot, isAdmin):
       if not self.userExists(username): raise ValueError

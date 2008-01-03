@@ -40,6 +40,12 @@ class sqlUserDBTest(unittest.TestCase):
       authModule = self._getUserDB()
       assert(authModule.getUserList() == ["test"])
 
+   def testDeleteUser(self):
+      authModule = self._getUserDB()
+      assert(authModule.getUserList() == ["test"])
+      authModule.deleteUser("test")
+      assert(authModule.getUserList() == [])
+
    def testUserInfo(self):
       authModule = self._getUserDB()
       assert(authModule.getUserRoot("test") == "/data")
