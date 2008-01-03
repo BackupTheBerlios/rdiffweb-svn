@@ -43,7 +43,7 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       return self._getPrefsPage(statusMessage="Password updated successfully.")
    
    def _updateRepos(self):
-      rdw_spider_repos.findReposForUser(self.getUsername(), self.userDB)
+      rdw_spider_repos.findReposForUser(self.getUsername(), self.getUserDB())
       return self._getPrefsPage(statusMessage="Successfully updated backup locations.")
 
    def _setNotifications(self, parms):
