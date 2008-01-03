@@ -18,6 +18,7 @@ class rdiffAdminPage(page_main.rdiffPage):
       # We need to change values. Change them, then give back that main page again, with a message
       action = cherrypy.request.params["action"]
       username = cherrypy.request.params["username"]
+      password = cherrypy.request.params["password"]
       userRoot = cherrypy.request.params["userRoot"]
       userIsAdmin = cherrypy.request.params.get("isAdmin", False) != False
       
@@ -33,6 +34,7 @@ class rdiffAdminPage(page_main.rdiffPage):
          if username == "":
             return self._generatePageHtml("", "The username is invalid.", username, userRoot, userIsAdmin)
          self.getUserDB().addUser(username)
+         self.getUserDB().setUserPassword(username, password)
          self.getUserDB().setUserInfo(username, userRoot, userIsAdmin)
          return self._generatePageHtml("User added successfully.", "")
       
