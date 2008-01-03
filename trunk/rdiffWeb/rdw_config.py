@@ -76,10 +76,8 @@ class configFileTest(unittest.TestCase):
          os.remove(self.configFilePath)
 
    def testBadParms(self):
-      try:
-         getConfigSetting("setting", "/tmp/rdw_bogus.conf")
-      except ParameterError: pass
-      else: assert(False)
+      value = getConfigSetting("setting", "/tmp/rdw_bogus.conf")
+      assert(value == "")
       self.writeGoodFile()
       try:
          getConfigSetting("setting=", "/tmp/rdw_config.conf")
