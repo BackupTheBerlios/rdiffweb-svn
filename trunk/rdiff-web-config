@@ -107,6 +107,7 @@ def createNeededFolders():
    configDir = "/etc/rdiffweb"
    if not os.path.exists(configDir):
       os.mkdir("/etc/rdiffweb", stat.S_IRWXU)
+   os.chmod("/etc/rdiffweb", stat.S_IRWXU)
    # If the configuration path exists, make sure that we can look inside
    files = os.listdir(configDir)
    
@@ -120,8 +121,8 @@ if __name__ == "__main__":
    # Validate this before the user has spent a lot of time entering data.
    try:
       createNeededFolders()
-   except OSError, error:
-      if error.errno != 13: # Only catch "permission denied" errors
+   except (IOError, OSError), error:
+      if error.errno != 13 and error.errno != 1: # Only catch "permission denied" errors
          raise
       print "Error: this script must be run with root privileges."
       sys.exit(2)
