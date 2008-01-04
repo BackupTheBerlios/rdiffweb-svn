@@ -20,8 +20,7 @@ if [ -f /etc/init.d/functions ]; then
 fi
 
 # This script won't be able to run without root privileges.
-USERNAME=`id -un`
-if [ "$USERNAME" != "root" ]; then
+if [ `id -u` -ne 0 ]; then
    echo "Error: this script must be run as root."
    exit 1
 fi
