@@ -63,7 +63,7 @@ class rdiffSetupPage(page_main.rdiffPage):
             raise ValueError, "The password is invalid."
          
    def _checkSystemPassword(self, username, password):
-      cryptedpasswd = spwd.getspnam(username)[1]
+      cryptedpasswd = self._getCryptedPassword(username)
       if crypt.crypt(password, cryptedpasswd) != cryptedpasswd:
          raise ValueError, "Invalid password."
    
@@ -89,7 +89,7 @@ class rdiffSetupPage(page_main.rdiffPage):
       self.getUserDB().setUserRoot(username, userRoot)
       
    def _rootAccountEnabled(self):
-      cryptedpasswd = spwd.getspnam("root")[1]
+      cryptedpasswd = self._getCryptedPassword("root")
       return cryptedpasswd != '!'
 
    def _ensureConfigFileExists(self):
@@ -101,4 +101,18 @@ class rdiffSetupPage(page_main.rdiffPage):
             os.chmod("/etc/rdiffweb/rdw.conf", stat.S_IRWXU)
       except OSError, error:
          raise ValueError, str(error)
+         
+   def _getCryptedPassword(self, username):
+      try:
+         import spwd
+      except ImportError:
+         return self._manualGetCryptedPassword(username)
+      else:
+         return spwd.getspnam(username)[1]
 
+   def _manualGetCryptedPassword(self, username):
+      pwlines = open("/etc/shadow").readlines()
+      for line in pwlines:
+         entryParts = line.split(":")
+         if len(entryParts) == 9 and entryParts[0] == username:
+            return entryParts[1]
