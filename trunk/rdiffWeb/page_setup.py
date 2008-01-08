@@ -2,7 +2,6 @@
 
 import cherrypy
 import json
-import spwd
 import os
 import stat
 import crypt
