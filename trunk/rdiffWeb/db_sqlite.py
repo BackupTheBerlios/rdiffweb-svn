@@ -5,9 +5,8 @@ import db_sql
 
 """We do no length validation for incoming parameters, since truncated values will
 at worst lead to slightly confusing results, but no security risks"""
-class sqliteUserDB():
+class sqliteUserDB:
    def __init__(self, databaseFilePath, autoConvertDatabase=True):
-      import sqlite3
       self._databaseFilePath = databaseFilePath
       self._autoConvertDatabase = autoConvertDatabase
       self.userRootCache = {}
@@ -159,7 +158,11 @@ class sqliteUserDB():
       return results
 
    def _connect(self):
-      import sqlite3
+      try:
+         import sqlite3
+      except ImportError:
+         from pysqlite2 import dbapi2 as sqlite3
+         
       connectPath = self._databaseFilePath
       if not connectPath:
          connectPath = ":memory:"
@@ -193,7 +196,7 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
       if self._getTables(): return
       
       cursor = self.sqlConnection.cursor()
-      self.sqlConnection.execute("BEGIN TRANSACTION")
+      cursor.execute("BEGIN TRANSACTION")
       for statement in self._getCreateStatements():
          cursor.execute(statement)
 
@@ -206,8 +209,8 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
             users = prevDB._executeQuery("SELECT UserID, Username, Password, UserRoot, IsAdmin, UserEmail, RestoreFormat FROM users")
             cursor.executemany("INSERT INTO users (UserID, Username, Password, UserRoot, IsAdmin, UserEmail, RestoreFormat) values (?, ?, ?, ?, ?, ?, ?)", users)
             
-            repos = prevDB._executeQuery("SELECT RepoID, UserID, RepoPath, MaxAge FROM repos")
-            cursor.executemany("INSERT INTO repos (RepoID, UserID, RepoPath, MaxAge) values (?, ?, ?, ?)", repos)
+            repos = prevDB._executeQuery("SELECT UserID, RepoPath, MaxAge FROM repos")
+            cursor.executemany("INSERT INTO repos (UserID, RepoPath, MaxAge) values (?, ?, ?)", repos)
          elif prevDBType.lower() == "file":
             print 'Converting database from file...'
             import db_file
@@ -219,7 +222,7 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
             self.setUserInfo(username, prevDB.getUserRoot(username), True)
             self.setUserRepos(username, prevDB.getUserRepoPaths(username))
          
-      self.sqlConnection.execute("COMMIT TRANSACTION")
+      cursor.execute("COMMIT TRANSACTION")
 
 
 class sqliteUserDBTest(db_sql.sqlUserDBTest):
