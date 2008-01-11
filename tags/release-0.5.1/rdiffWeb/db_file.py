@@ -31,6 +31,9 @@ class fileUserDB(db.userDB):
    def userIsAdmin(self, username):
       return False
 
+   def useZipFormat(self, username):
+      return False
+
 
 ##################### Unit Tests #########################
 
