@@ -1,0 +1,7 @@
+include COPYING rdiff-web rdiff-web-config rdw.conf.sample init/rdiff-web
+include rdiffWeb/templates/*.html
+include rdiffWeb/static/*.png 
+include rdiffWeb/static/*.css 
+include rdiffWeb/static/*.js
+include rdiffWeb/static/images/*
+include rdiffWeb/*.py

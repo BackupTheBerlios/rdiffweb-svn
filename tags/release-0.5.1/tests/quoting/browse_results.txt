@@ -1,0 +1,6 @@
+Title:Browse repo
+Path: / Backup Locations / repo
+Viewing
+
+Name	Size	Revision	Number_Previous_Revisions	Exists?
+CapCaseDir	 	2007-10-07 15:55:50	0	True
