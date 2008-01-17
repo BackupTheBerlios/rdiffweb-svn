@@ -18,9 +18,9 @@ class emailNotifyThread(threading.Thread):
    def __init__(self, killEvent):
       self.killEvent = killEvent
       threading.Thread.__init__(self)
-      self.notifier = emailNotifier()
       
    def run(self):
+      self.notifier = emailNotifier()
       if not self.notifier.notificationsEnabled():
          return;
       emailTimeStr = rdw_config.getConfigSetting("emailNotificationTime")
