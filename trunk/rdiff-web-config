@@ -47,9 +47,9 @@ def sqlSetup():
       import sqlite3
    except ImportError:
       from pysqlite2 import dbapi2 as sqlite3
-   	except ImportError:
-	      print "Unable to load the python bindings for sqlite (sometimes packaged as python-sqlite).  Please install this module and try again."
-	      sys.exit(2)
+   except ImportError:
+      print "Unable to load the python bindings for sqlite (sometimes packaged as python-sqlite).  Please install this module and try again."
+      sys.exit(2)
 
    userDB = rdiffWeb.db_sqlite.sqliteUserDB(rdiffWeb.rdw_config.getDatabasePath())
 
