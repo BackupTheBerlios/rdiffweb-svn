@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from cherrypy.lib.static import serve_file
+from cherrypy.lib.static import serve_file, serve_download
 import rdw_helpers, page_main, librdiff
 import os
 
@@ -13,6 +13,8 @@ class autoDeleteDir:
       rdw_helpers.removeDir(self.dirPath)
 
 class rdiffRestorePage(page_main.rdiffPage):
+   _cp_config = {"response.stream": True, "response.timeout": 3000 }
+   
    def index(self, repo, path, date):
       try:
          self.validateUserPath(rdw_helpers.joinPaths(repo, path))
@@ -41,8 +43,7 @@ class rdiffRestorePage(page_main.rdiffPage):
          return self.writeErrorPage("Invalid date parameter.")
 
       (directory, filename) = os.path.split(filePath)
-      file = autoDeleteDir(directory)
-      filename = "\""+filename.replace("\"", "\\\"")+"\"" # quote file to handle files with spaces, while escaping quotes in filename
+      filename = filename.replace("\"", "\\\"") # Escape quotes in filename
       return serve_file(filePath, None, disposition="attachment", name=filename)
    index.exposed = True
 
