@@ -31,7 +31,7 @@ class rdiffPage:
          
    def validateUserPath(self, path):
       '''Takes a path relative to the user's root dir and validates that it is valid and within the user's root'''
-      path = rdw_helpers.joinPaths(self.getUserDB().getUserRoot(self.getUsername()), path)
+      path = rdw_helpers.joinPaths(self.getUserDB().getUserRoot(self.getUsername()), rdw_helpers.encodePath(path))
       path = path.rstrip("/")
       realPath = os.path.realpath(path)
       if realPath != path:
@@ -39,8 +39,7 @@ class rdiffPage:
       
       # Make sure that the path starts with the user root
       # This check should be accomplished by ensurePathValid, but adding for a sanity check
-      realDestPath = os.path.realpath(path)
-      if realDestPath.find(self.getUserDB().getUserRoot(self.getUsername())) != 0:      
+      if realPath.find(rdw_helpers.encodePath(self.getUserDB().getUserRoot(self.getUsername()))) != 0:
          raise rdw_helpers.accessDeniedError
       
       

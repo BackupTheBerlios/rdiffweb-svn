@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from rdw_helpers import joinPaths
+from rdw_helpers import joinPaths, encodePath
 import rdw_helpers, page_main, librdiff
 import os
 import urllib
@@ -32,6 +32,8 @@ class rdiffBrowsePage(page_main.rdiffPage):
    
    
    def getParmsForPage(self, userRoot, repo="", path="", restore=""):
+      repo = encodePath(repo)
+      path = encodePath(path)
       # Build "parent directories" links
       parentDirs = [{ "parentPath" : self.buildLocationsUrl(), "parentDir" : "Backup Locations" }]
       parentDirs.append({ "parentPath" : self.buildBrowseUrl(repo, "/", False), "parentDir" : repo.lstrip("/") })

@@ -4,10 +4,7 @@ import rdw_helpers
 import re
 
 class templateError:
-   def __init__(self, errorString):
-      self.errorString = errorString
-   def __repr__(self):
-      return self.errorString
+   pass
 class templateDataError(templateError):
    pass
 class templateDefinitionError(templateError):
@@ -81,7 +78,7 @@ class templateParser:
          matchText = matchText[len(multilineKeyword):]
       if not matchText in replacements.keys():
          raise templateDataError(matchText)
-      replacementText = rdw_helpers.encodeText(str(replacements[matchText]))
+      replacementText = self._getReplacementText(replacements[matchText])
       if isMultiline:
          replacementText = replacementText.replace("\n", "\n<br/>")
       return replacementText
@@ -102,6 +99,11 @@ class templateParser:
             return self.parseSingleTemplate(textToInclude)
          return textToInclude
       return ""
+   
+   def _getReplacementText(self, replacement):
+      if isinstance(replacement, unicode):
+         replacement = replacement.encode('utf-8')
+      return rdw_helpers.encodeText(replacement)
 
 import unittest
 class templateParsingTest(unittest.TestCase):

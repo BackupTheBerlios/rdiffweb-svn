@@ -12,7 +12,13 @@ import subprocess
 
 import rdw_templating
 
+def encodePath(path):
+   if isinstance(path, unicode):
+      return path.encode('utf-8')
+   return path
+
 def joinPaths(parentPath, *args):
+   parentPath = encodePath(parentPath)
    args = [x.lstrip("/") for x in args]
    return os.path.join(parentPath, *args)
 
@@ -25,6 +31,7 @@ class accessDeniedError:
 
 def encodeUrl(url, safeChars=""):
    if not url: return url
+   url = encodePath(url)
    return urllib.quote_plus(url, safeChars)
 
 def decodeUrl(encodedUrl):
