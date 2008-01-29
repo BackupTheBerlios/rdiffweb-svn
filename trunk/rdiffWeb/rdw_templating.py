@@ -3,7 +3,7 @@
 import rdw_helpers
 import re
 
-class templateError:
+class templateError(BaseException):
    pass
 class templateDataError(templateError):
    pass
@@ -28,7 +28,7 @@ class templateParser:
       regEx = re.compile(r"<!--StartRepeat:(.*?)-->(.*?)<!--EndRepeat:\1-->", re.S)
       workingText = regEx.sub(self._handleListMatch, templateString)
       if "<!--StartRepeat" in workingText or "<!--EndRepeat" in workingText:
-         raise templateDefinitionError(workingText)
+         raise templateDefinitionError, workingText
 
       # handle all other single replacements
       workingText = self.parseSingleTemplate(workingText)
@@ -60,7 +60,7 @@ class templateParser:
       listName = match.group(1)
       textToReplace = match.group(2).rstrip("\n")
       if not replacements.get(listName) and replacements.get(listName) != []: # allow empty dictionaries
-         raise templateDataError(listName)
+         raise templateDataError, listName
       entireResult = ""
       listToReplaceWith = replacements[listName]
       for listInList in listToReplaceWith[:-1]:
@@ -77,7 +77,7 @@ class templateParser:
       if isMultiline:
          matchText = matchText[len(multilineKeyword):]
       if not matchText in replacements.keys():
-         raise templateDataError(matchText)
+         raise templateDataError, matchText
       replacementText = self._getReplacementText(replacements[matchText])
       if isMultiline:
          replacementText = replacementText.replace("\n", "\n<br/>")
@@ -103,7 +103,7 @@ class templateParser:
    def _getReplacementText(self, replacement):
       if isinstance(replacement, unicode):
          replacement = replacement.encode('utf-8')
-      return rdw_helpers.encodeText(replacement)
+      return rdw_helpers.encodeText(str(replacement))
 
 import unittest
 class templateParsingTest(unittest.TestCase):
