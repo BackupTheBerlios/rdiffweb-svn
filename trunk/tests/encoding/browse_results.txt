@@ -1,0 +1,7 @@
+Title:Browse repo
+Path: / Backup Locations / repo
+Viewing
+
+Name	Size	Revision	Number_Previous_Revisions	Exists?
+Büro	 	2008-01-28 18:00:09	0	True
+Büro.txt	0 bytes	2008-01-28 18:00:09	0	True
