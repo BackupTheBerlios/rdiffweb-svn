@@ -26,13 +26,13 @@ class sqliteUserDB:
 
    def getUserRoot(self, username):
       if not username in self.userRootCache:
-         self.userRootCache[username] = self._getUserField(username, "UserRoot")
+         self.userRootCache[username] = self._encodePath(self._getUserField(username, "UserRoot"))
       return self.userRootCache[username]
 
    def getUserRepoPaths(self, username):
       if not self.userExists(username): return None
       query = "SELECT RepoPath FROM repos WHERE UserID = %d" % self._getUserID(username)
-      repos = [ row[0] for row in self._executeQuery(query)]
+      repos = [ self._encodePath(row[0]) for row in self._executeQuery(query)]
       repos.sort(lambda x, y: cmp(x.upper(), y.upper()))
       return repos
       
@@ -118,6 +118,10 @@ class sqliteUserDB:
       return bool(self._getUserField(username, "IsAdmin"))
 
    ########## Helper functions ###########   
+   def _encodePath(self, path):
+      if isinstance(path, unicode):
+         return path.encode('utf-8')
+      return path
    def _deleteUserRepos(self, username):
       if not self.userExists(username): raise ValueError
       self._executeQuery("DELETE FROM repos WHERE UserID=%d" % self._getUserID(username))
