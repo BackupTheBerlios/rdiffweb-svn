@@ -58,6 +58,8 @@ if __name__ == "__main__":
    if not debug:
       environment = "production"
    global_settings = {
+      'tools.encode.on': True,
+      'tools.encode.encoding': 'utf-8',
       'tools.gzip.on': True,
       'tools.sessions.on' : True,
       'tools.authenticate.on' : True,
