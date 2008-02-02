@@ -1,0 +1,14 @@
+rdiff-web (0.6.2-1) unstable; urgency=low
+
+  * New upstream testing release.
+  * Switched from python-cherrypy to python-cherrypy3.
+  * Switched from python-mysqldb to python-pysqlite2.
+
+ -- Matthew Rosewarne <mrosewarne@inoutbox.com>  Fri, 18 Jan 2008 01:43:30 -0500
+
+rdiff-web (0.5.1-1) stable; urgency=low
+
+  * Initial release.
+
+ -- Matthew Rosewarne <mrosewarne@inoutbox.com>  Thu, 17 Jan 2008 21:01:05 -0500
+
