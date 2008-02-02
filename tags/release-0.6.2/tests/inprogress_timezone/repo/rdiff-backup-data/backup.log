@@ -1,0 +1,30 @@
+Exception 'Truncated header string (problem probably originated remotely)' raised of class '<class 'rdiff_backup.connection.ConnectionReadError'>':
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/robust.py", line 32, in check_common_error
+    try: return function(*args)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/rpath.py", line 96, in copy
+    if rpin.isreg(): copy_reg_file(rpin, rpout, compress)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/rpath.py", line 118, in copy_reg_file
+    rpout.write_from_fileobj(rpin.open("rb"), compress = compress)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/rpath.py", line 978, in write_from_fileobj
+    copyfileobj(fp, outfp)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/rpath.py", line 58, in copyfileobj
+    inbuf = inputfp.read(blocksize)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/rpath.py", line 1201, in read
+    def read(self, length = -1): return self.file.read(length)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/iterfile.py", line 117, in read
+    if not self.addtobuffer(): break
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/iterfile.py", line 132, in addtobuffer
+    type, data = self.iwf._get()
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/iterfile.py", line 401, in _get
+    if not self.buf: self.buf += self.file.read()
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/connection.py", line 513, in read
+    return self.connection.VirtualFile.readfromid(self.id, length)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/connection.py", line 445, in __call__
+    return apply(self.connection.reval, (self.name,) + args)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/connection.py", line 365, in reval
+    result = self.get_response(req_num)
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/connection.py", line 314, in get_response
+    try: req_num, object = self._get()
+  File "/usr/lib/python2.5/site-packages/rdiff_backup/connection.py", line 230, in _get
+    raise ConnectionReadError("Truncated header string (problem "
+
