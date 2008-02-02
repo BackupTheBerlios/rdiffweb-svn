@@ -7,7 +7,7 @@
 # Required-Stop: $network
 # Default-Start: 2 3 5
 # Default-Stop: 0 6
-# Description: Manages the rdiff-backup daemon
+# Description: Manages the rdiffWeb daemon
 ### END INIT INFO
 
 PIDFILE="/var/run/rdiff-web"
