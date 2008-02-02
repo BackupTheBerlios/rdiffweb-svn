@@ -10,7 +10,7 @@ if pythonVersion < 2.4:
    sys.exit(1)
    
 setup(name='rdiffWeb',
-   version='0.6.1',
+   version='0.6.2',
    description='A web interface to rdiff-backup repositories',
    author='Josh Nisly',
    author_email='rdiffweb@joshnisly.com',
