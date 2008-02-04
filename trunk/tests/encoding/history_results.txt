@@ -1,4 +1,0 @@
-Title: Backup history for repo
-
-Date	Size	Errors	In Progress?	Cumulative Size
-2008-01-28 18:00:09	0 bytes		False	0 bytes
