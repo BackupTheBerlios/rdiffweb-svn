@@ -3,7 +3,7 @@
 import rdw_helpers
 import re
 
-class templateError(BaseException):
+class templateError(Exception):
    pass
 class templateDataError(templateError):
    pass
