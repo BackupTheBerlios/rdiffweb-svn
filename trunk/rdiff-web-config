@@ -100,7 +100,10 @@ def doAddUser():
       sys.exit(2)
 
    addUser(sys.argv[2], sys.argv[3], sys.argv[4], False)
-   
+
+def doSpiderRepos():
+   rdiffWeb.rdw_spider_repos.findReposForAllUsers()  
+
 def createNeededFolders():
    # We can't just check for root privileges, since cygwin doesn't support the "root" user.
    # So we poke around at folders/files, to make sure that we have the required permissions.
@@ -132,5 +135,10 @@ if __name__ == "__main__":
    if len(sys.argv) > 1:
       if sys.argv[1] == "adduser":
          doAddUser()
+      elif sys.argv[1] == "spiderrepos":
+         doSpiderRepos()
+      else:
+         print "Error: unrecognized command."
+         sys.exit(2)
    else:
       doMainSetup()
