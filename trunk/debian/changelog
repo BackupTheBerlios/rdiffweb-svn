@@ -1,6 +1,14 @@
 rdiff-web (0.6.2-1) unstable; urgency=low
 
   * New upstream testing release.
+  * Changed init script handling.
+  * Fixed python-pysqlite2 dependency.
+
+ -- Matthew Rosewarne <mrosewarne@inoutbox.com>  Sat, 09 Feb 2008 15:09:52 -0500
+
+rdiff-web (0.6.1-1) unstable; urgency=low
+
+  * New upstream testing release.
   * Switched from python-cherrypy to python-cherrypy3.
   * Switched from python-mysqldb to python-pysqlite2.
 
