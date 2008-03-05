@@ -1,0 +1,27 @@
+Source: rdiff-web
+Section: www
+Priority: extra
+Maintainer: Matthew Rosewarne <mrosewarne@inoutbox.com>
+Build-Depends: cdbs, debhelper (>= 5), python-all-dev, python-central
+Standards-Version: 3.7.3
+Homepage: http://www.rdiffweb.org/
+XS-Python-Version: all
+
+Package: python-rdiff-web
+Architecture: all
+XB-Python-Version: ${python:Versions}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
+ python-cherrypy3, python-pysqlite2, rdiff-backup
+Provides: ${python:Provides}
+Description: Python module for rdiffWeb
+ This package contains Python modules used by rdiffWeb.
+ .
+ rdiffWeb is a web interface for browsing and restoring from rdiff-backup
+ repositories.
+
+Package: rdiff-web
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-rdiff-web (= ${source:Version})
+Description: Web interface to rdiff-backup repositories
+ rdiffWeb is a web interface for browsing and restoring from rdiff-backup
+ repositories.

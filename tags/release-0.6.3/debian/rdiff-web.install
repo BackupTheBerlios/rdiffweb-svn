@@ -1,0 +1,3 @@
+etc/init.d/rdiff-web
+usr/bin/rdiff-web
+usr/bin/rdiff-web-config

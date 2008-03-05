@@ -1,0 +1,8 @@
+Title:Browse repo
+Path: / Backup Locations / repo
+Viewing
+
+Name	Size	Revision	Number_Previous_Revisions	Exists?
+testdir.data	 	2007-10-19 18:13:10	0	True
+testfile.data	13 bytes	2007-10-19 18:13:10	1	True
+PrevRevision	2007-10-19 18:12:44
