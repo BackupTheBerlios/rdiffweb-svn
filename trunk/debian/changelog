@@ -1,3 +1,9 @@
+rdiff-web (0.6.3-1) unstable; urgency=low
+
+  * New upstream testing release.
+
+ -- Matthew Rosewarne <mrosewarne@inoutbox.com>  Thu, 06 Mar 2008 19:42:18 -0500
+
 rdiff-web (0.6.2-1) unstable; urgency=low
 
   * New upstream testing release.
