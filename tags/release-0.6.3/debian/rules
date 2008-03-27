@@ -8,6 +8,10 @@ include /usr/share/cdbs/1/class/python-distutils.mk
 
 DEB_DH_INSTALL_SOURCEDIR = debian/tmp
 
-DEB_DH_INSTALLINIT_ARGS = --onlyscripts
-
 DEB_INSTALL_DOCS_ALL = 
+
+cleanbuilddir/rdiff-web::
+	rm -f $(CURDIR)/debian/rdiff-web.init
+
+install/rdiff-web::
+	cp -a $(CURDIR)/init/rdiff-web $(CURDIR)/debian/rdiff-web.init

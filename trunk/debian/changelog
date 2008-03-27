@@ -1,8 +1,9 @@
 rdiff-web (0.6.3-1) unstable; urgency=low
 
   * New upstream testing release.
+  * Changed init script handling again.
 
- -- Matthew Rosewarne <mrosewarne@inoutbox.com>  Thu, 06 Mar 2008 19:42:18 -0500
+ -- Matthew Rosewarne <mrosewarne@inoutbox.com>  Thu, 27 Mar 2008 18:57:03 -0400
 
 rdiff-web (0.6.2-1) unstable; urgency=low
 
