@@ -23,7 +23,7 @@ class spiderReposThread(threading.Thread):
       if spiderInterval:
          spiderInterval = int(spiderInterval)         
          while True:
-            findReposForAllUsers()
+            findReposForAllUsers(False)
             self.killEvent.wait(60*spiderInterval)
             if self.killEvent.isSet():
                return
@@ -54,11 +54,13 @@ def findReposForUser(user, userDBModule):
    userDBModule.setUserRepos(user, repoPaths)
 
 
-def findReposForAllUsers():
+def findReposForAllUsers(verbose):
    userDBModule = db.userDB().getUserDBModule()
    if not userDBModule.modificationsSupported(): return
    
    users = userDBModule.getUserList()
    for user in users:
+      if verbose:
+         print 'Finding repositories for %s...' % user
       findReposForUser(user, userDBModule)
 
