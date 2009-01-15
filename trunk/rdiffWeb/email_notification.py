@@ -68,7 +68,8 @@ class emailNotifier:
                   
          if oldRepos:
             userEmailAddress = self.userDB.getUserEmail(user)
-            emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos, sender=self._getEmailSender(), user=user)
+            emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos,
+                                                    sender=self._getEmailSender(), user=user, to=userEmailAddress)
    
             session = smtplib.SMTP(self._getEmailHost())
             session.login(self._getEmailUsername(), self._getEmailPassword())
