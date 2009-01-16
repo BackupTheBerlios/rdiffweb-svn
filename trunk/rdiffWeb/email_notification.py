@@ -29,7 +29,7 @@ class emailNotifyThread(threading.Thread):
          now = datetime.datetime.now()
          nextEmailTime = now.replace(hour=emailTime.tm_hour, minute=emailTime.tm_min, second=0, microsecond=0)
          if nextEmailTime < now:
-            nextEmailTime = nextEmailTime.replace(day=nextEmailTime.day+1)
+            nextEmailTime = nextEmailTime + datetime.timedelta(days=1)
          delta = (nextEmailTime - now).seconds
          self.killEvent.wait(delta)
          if self.killEvent.isSet():
@@ -72,7 +72,8 @@ class emailNotifier:
                                                     sender=self._getEmailSender(), user=user, to=userEmailAddress)
    
             session = smtplib.SMTP(self._getEmailHost())
-            session.login(self._getEmailUsername(), self._getEmailPassword())
+            if self._getEmailUsername():
+               session.login(self._getEmailUsername(), self._getEmailPassword())
             smtpresult = session.sendmail(self._getEmailSender(), userEmailAddress.split(";"), emailText)
             session.quit()
              

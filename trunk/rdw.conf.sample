@@ -1,9 +1,13 @@
 
 # This is the name of the host that the server should bind to.
-# ServerName=localhost
+# ServerHost=localhost
 
 # This is the port that the server should listen on
 # ServerPort=8080
+
+# rdiffWeb can log to both an access and error file.
+# accessLogFile = /var/log/rdiff-web-access.log
+# errorLogFile = /var/log/rdiff-web-error.log
 
 # The server can be configured to email user when their repositories have not
 # been backed up for a user-specified period of time. To enable this feature,
