@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
-import rdw_helpers
-import page_main
-import rdw_templating
 import cherrypy
+
+import email_notification
+import page_main
+import rdw_helpers
+import rdw_templating
 import rdw_spider_repos
 
 
@@ -51,6 +53,17 @@ class rdiffAdminPage(page_main.rdiffPage):
       self.getUserDB().deleteUser(user)
       return self._generatePageHtml("User account removed.", "")
    deleteUser.exposed = True
+
+   @cherrypy.expose
+   def sendEmails(self):
+      if not self._userIsAdmin(): return self.writeErrorPage("Access denied.")
+
+      emailNotifier = email_notification.emailNotifier()
+      if emailNotifier.notificationsEnabled():
+         emailNotifier.sendEmails()
+         return self._generatePageHtml("Email notifications sent.", "")
+      else:
+         return self._generatePageHtml("", "Email notifications are disabled.")
 
    ############### HELPER FUNCTIONS #####################
    def _userIsAdmin(self):
