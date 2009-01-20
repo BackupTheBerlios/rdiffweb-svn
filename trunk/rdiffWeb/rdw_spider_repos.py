@@ -5,6 +5,7 @@ import db
 import rdw_helpers
 import librdiff
 import rdw_config
+import rdw_logging
 import time
 import threading
 
@@ -42,16 +43,19 @@ def _findRdiffRepos(dirToSearch, outRepoPaths):
 
 
 def findReposForUser(user, userDBModule):
-   userRoot = userDBModule.getUserRoot(user)
-   repoPaths = []
-   _findRdiffRepos(userRoot, repoPaths)
+   try:
+      userRoot = userDBModule.getUserRoot(user)
+      repoPaths = []
+      _findRdiffRepos(userRoot, repoPaths)
 
-   def stripRoot(path):
-      if not path[len(userRoot):]:
-         return "/"
-      return path[len(userRoot):]
-   repoPaths = map(stripRoot, repoPaths)
-   userDBModule.setUserRepos(user, repoPaths)
+      def stripRoot(path):
+         if not path[len(userRoot):]:
+            return "/"
+         return path[len(userRoot):]
+      repoPaths = map(stripRoot, repoPaths)
+      userDBModule.setUserRepos(user, repoPaths)
+   except Exception:
+      rdw_logging.log_exception()
 
 
 def findReposForAllUsers(verbose):
