@@ -71,12 +71,16 @@ if __name__ == "__main__":
    if rdiffWeb.rdw_config.getConfigSetting("ServerPort") != "":
       serverPort = int(rdiffWeb.rdw_config.getConfigSetting("ServerPort"))
 
+   sslCert = rdiffWeb.rdw_config.getConfigSetting("SslCertificate")
+   redirectSetting = rdiffWeb.rdw_config.getConfigSetting("redirectToHttps")
+   shouldRedirectToHttps = sslCert != "" and redirectSetting.lower() == "true"
+   
    environment = "development"
    if not debug:
       environment = "production"
    global_settings = {
       'tools.encode.on': True,
-      'tools.redirect.on': True,
+      'tools.redirect.on': shouldRedirectToHttps,
       'tools.encode.encoding': 'utf-8',
       'tools.gzip.on': True,
       'tools.sessions.on' : True,
@@ -92,10 +96,6 @@ if __name__ == "__main__":
       'server.environment': environment,
    }
 
-   sslCert = rdiffWeb.rdw_config.getConfigSetting("SslCertificate")
-   redirectSetting = rdiffWeb.rdw_config.getConfigSetting("redirectToHttps")
-   shouldRedirectToHttps = sslCert != "" and redirectSetting.lower() == "true"
-   
    page_settings = {
       '/': {
          'tools.authenticate.checkAuth' : rdiffWeb.page_locations.rdiffLocationsPage().checkAuthentication,
