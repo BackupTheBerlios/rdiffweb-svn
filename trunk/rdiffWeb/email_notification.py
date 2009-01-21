@@ -41,17 +41,19 @@ class emailNotifyThread(threading.Thread):
          except Exception:
             rdw_logging.log_exception()
 
+def notificationsEnabled(userDB):
+   notifier = emailNotifier()
+   return notifier.getEmailHost() != "" and\
+          notifier.getEmailSender() != "" and\
+          notifier.getNotificationTimeStr() != "" and\
+          userDB.modificationsSupported()
+
 class emailNotifier:
    def __init__(self):
       self.userDB = db.userDB().getUserDBModule()
       
-   def notificationsEnabled(self):
-      return self._getEmailHost() != "" and\
-             self._getEmailSender() != "" and\
-             self._getNotificationTimeStr() != "" and\
-             self.userDB.modificationsSupported()
-
    def sendEmails(self):
+      # Send emails to each user, if requested
       for user in self.userDB.getUserList():
          try:
             userRepos = self.userDB.getUserRepoPaths(user)
@@ -61,45 +63,140 @@ class emailNotifier:
                if maxDaysOld != 0:
                   # get the last backup date
                   repoPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(user), repo)
-                  try:
-                     lastBackup = librdiff.getLastBackupHistoryEntry(repo_path, False)
-                  except librdiff.FileError:
-                     pass # Skip repos that have never been successfully backed up
-                  except Exception:
-                     rdw_logging.log_exception()
-                     rdw_logging.log('(Previous exception occurred for repo %s.)' % repoPath)
-                  else:
-                     if lastBackup:
-                        oldestGoodBackupTime = rdw_helpers.rdwTime()
-                        oldestGoodBackupTime.initFromMidnightUTC(-maxDaysOld)
-                        if lastBackup.date < oldestGoodBackupTime:
-                           oldRepos.append({"repo" : repo, "lastBackupDate" : lastBackup.date.getDisplayString(), "maxAge" : maxDaysOld })
+                  oldRepoInfo = self._getOldRepoInfo(repo, repoPath, maxDaysOld)
+                  if not oldRepoInfo is None:
+                     oldRepos.append(oldRepoInfo)
                         
             if oldRepos:
                userEmailAddress = self.userDB.getUserEmail(user)
                emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos,
-                                                       sender=self._getEmailSender(), user=user, to=userEmailAddress)
+                                                       sender=self.getEmailSender(), user=user, to=userEmailAddress)
       
-               session = smtplib.SMTP(self._getEmailHost())
+               session = smtplib.SMTP(self.getEmailHost())
                if self._getEmailUsername():
                   session.login(self._getEmailUsername(), self._getEmailPassword())
-               smtpresult = session.sendmail(self._getEmailSender(), userEmailAddress.split(";"), emailText)
+               smtpresult = session.sendmail(self.getEmailSender(), userEmailAddress.split(";"), emailText)
                session.quit()
          except Exception:
             rdw_logging.log_exception()
-             
-   def _getEmailHost(self):
+
+      # Send admin-level emails, if requested
+      adminEmails = []
+      for user in self.userDB.getUserList():
+         if self.userDB.userIsAdmin(user):
+            userEmail = self.userDB.getUserEmail(user)
+            if userEmail:
+               adminEmails.append(userEmail)
+
+      if adminEmails:
+         oldUserRepos = []
+
+         for user in self.userDB.getUserList():
+            userRepos = self.userDB.getUserRepoPaths(user)
+            maxAge = self.userDB.getAdminMonitoredRepoMaxAge(user)
+            oldRepos = []
+            for repo in userRepos:
+               repoPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(user), repo)
+               oldRepoInfo = self._getOldRepoInfo(repo, repoPath, maxAge)
+               if not oldRepoInfo is None:
+                  oldRepos.append(oldRepoInfo)
+
+            if oldRepos:
+               oldUserRepos.append({
+                  'user': user,
+                  'maxAge': maxAge,
+                  'repos': oldRepos
+               })
+
+         session = smtplib.SMTP(self.getEmailHost())
+         if self._getEmailUsername():
+            session.login(self._getEmailUsername(), self._getEmailPassword())
+         for email in adminEmails:
+            emailText = rdw_helpers.compileTemplate("admin_email_notification.txt",
+                                                    users=oldUserRepos,
+                                                    sender=self.getEmailSender(),
+                                                    date=datetime.date.today().strftime('%m/%d/%Y'),
+                                                    to=email)
+            smtpresult = session.sendmail(self.getEmailSender(), email.split(";"), emailText)
+         session.quit()
+
+   def notificationsEnabled(self):
+      return notificationsEnabled(self.userDB)
+ 
+   def getEmailHost(self):
       return rdw_config.getConfigSetting("emailHost")
 
-   def _getEmailSender(self):
+   def getEmailSender(self):
       return rdw_config.getConfigSetting("emailSender")
    
+   def getNotificationTimeStr(self):
+      return rdw_config.getConfigSetting("emailNotificationTime")
+   
+   def _getOldRepoInfo(self, repoName, repoPath, maxDaysOld):
+      try:
+         lastBackup = librdiff.getLastBackupHistoryEntry(repoPath, False)
+      except librdiff.FileError:
+         return {
+            "repo" : repoName,
+            "lastBackupDate" : "never",
+            "maxAge" : maxDaysOld
+         }
+      except Exception:
+         rdw_logging.log_exception()
+         rdw_logging.log('(Previous exception occurred for repo %s.)' % repoPath)
+      else:
+         if lastBackup:
+            oldestGoodBackupTime = rdw_helpers.rdwTime()
+            oldestGoodBackupTime.initFromMidnightUTC(-maxDaysOld)
+            if lastBackup.date < oldestGoodBackupTime:
+               return {
+                  "repo" : repoName,
+                  "lastBackupDate" : lastBackup.date.getDisplayString(),
+                  "maxAge" : maxDaysOld
+               }
+      return None
+
    def _getEmailUsername(self):
       return rdw_config.getConfigSetting("emailUsername")
    
    def _getEmailPassword(self):
       return rdw_config.getConfigSetting("emailPassword")
+
+def buildNotificationsTable(notify_options):
+   """ options should be a dictionary of optionName to selectedOptionNum """
    
-   def _getNotificationTimeStr(self):
-      return rdw_config.getConfigSetting("emailNotificationTime")
+   options = []
+   keys = notify_options.keys()
+   keys.sort()
+   for key in keys:
+      notifyOptions = []
+      for i in range(0, 8):
+         notifyStr = "Don't notify"
+         if i == 1:
+            notifyStr = "1 day"
+         elif i > 1:
+            notifyStr = str(i) + " days"
+            
+         selectedStr = ""
+         if i == notify_options[key]:
+            selectedStr = "selected"
+         
+         notifyOptions.append({ "optionStr": notifyStr, "selectedStr": selectedStr })
+      options.append({ "key" : key, "notifyOptions" : notifyOptions })
+
+   return rdw_helpers.compileTemplate("notifications_table.html", options=options)
+
+def loadNotificationsTableResults(post_parms):
+   """ Returns a dictionary like is taken above, loaded from postdata. """
+
+   options = {}
+   for parmName in post_parms.keys():
+      if parmName.endswith("numDays"):
+         backupName = parmName[:-7]
+         if post_parms[parmName] == "Don't notify":
+            maxDays = 0
+         else:
+            maxDays = int(post_parms[parmName][0])
+         options[backupName] = maxDays
+   return options
 

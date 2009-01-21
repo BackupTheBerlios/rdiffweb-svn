@@ -19,9 +19,10 @@ class rdiffAdminPage(page_main.rdiffPage):
       
       # We need to change values. Change them, then give back that main page again, with a message
       action = cherrypy.request.params["action"]
-      username = cherrypy.request.params["username"]
-      userRoot = cherrypy.request.params["userRoot"]
-      userIsAdmin = cherrypy.request.params.get("isAdmin", False) != False
+      if action == "edit" or action == "add":
+         username = cherrypy.request.params["username"]
+         userRoot = cherrypy.request.params["userRoot"]
+         userIsAdmin = cherrypy.request.params.get("isAdmin", False) != False
       
       if action == "edit":
          if not self.getUserDB().userExists(username):
@@ -38,6 +39,10 @@ class rdiffAdminPage(page_main.rdiffPage):
          self.getUserDB().setUserPassword(username, cherrypy.request.params["password"])
          self.getUserDB().setUserInfo(username, userRoot, userIsAdmin)
          return self._generatePageHtml("User added successfully.", "")
+      elif action == "sendEmails":
+         return self._sendEmails()
+      elif action == "changeNotifications":
+         return self._changeNotifications(kwargs)
       
    index.exposed = True
 
@@ -54,8 +59,7 @@ class rdiffAdminPage(page_main.rdiffPage):
       return self._generatePageHtml("User account removed.", "")
    deleteUser.exposed = True
 
-   @cherrypy.expose
-   def sendEmails(self):
+   def _sendEmails(self):
       if not self._userIsAdmin(): return self.writeErrorPage("Access denied.")
 
       emailNotifier = email_notification.emailNotifier()
@@ -64,6 +68,19 @@ class rdiffAdminPage(page_main.rdiffPage):
          return self._generatePageHtml("Email notifications sent.", "")
       else:
          return self._generatePageHtml("", "Email notifications are disabled.")
+
+   def _changeNotifications(self, parms):
+      if not self.getUserDB().modificationsSupported():
+         return self._getPrefsPage(errorMessage="Email notification is not supported with the active user database.")
+
+      users = self.getUserDB().getUserList()
+      notify_options = email_notification.loadNotificationsTableResults(parms)
+      for option in notify_options:
+         if option in users:
+            self.getUserDB().setAdminMonitoredRepoMaxAge(option, notify_options[option])
+
+      return self._generatePageHtml("Successfully changed notifications.", "")
+      
 
    ############### HELPER FUNCTIONS #####################
    def _userIsAdmin(self):
@@ -74,12 +91,28 @@ class rdiffAdminPage(page_main.rdiffPage):
 
    def _generatePageHtml(self, message, error, username="", userRoot="", isAdmin=False):
       userNames = self.getUserDB().getUserList()
-      users = [ { "username" : user, "isAdmin" : self.getUserDB().userIsAdmin(user), "userRoot" : self.getUserDB().getUserRoot(user) } for user in userNames ]
+      users = [{
+         "username" : user,
+         "isAdmin" : self.getUserDB().userIsAdmin(user),
+         "userRoot" : self.getUserDB().getUserRoot(user)
+      } for user in userNames]
+
+      notificationsEnabled = email_notification.notificationsEnabled(self.getUserDB())
+      notificationsTable = ''
+      if notificationsEnabled:
+         options = {}
+         for user in userNames:
+            options[user] = self.getUserDB().getAdminMonitoredRepoMaxAge(user)
+         notificationsTable = email_notification.buildNotificationsTable(options)
+
       parms = { "users" : users, 
                 "username" : username, 
                 "userRoot" : userRoot, 
                 "isAdmin" : isAdmin,
                 "message" : message,
+                "notificationsEnabled" : notificationsEnabled,
+                "notificationsTable" : notificationsTable,
+                "userEmail" : self.getUserDB().getUserEmail(user),
                 "error" : error }
       return self.startPage("Administration") + self.compileTemplate("admin_main.html", **parms) + self.endPage()
 

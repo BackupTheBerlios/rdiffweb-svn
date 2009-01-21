@@ -1,0 +1,13 @@
+From: ^sender$
+To: ^to$
+Subject: Backup Failures for ^date$
+
+The following users have repositories which have not been backed up recently:
+
+<!--StartRepeat:users-->
+^user$ (backup locations older than ^maxAge$ days):
+   Backup Location	Last Backup Date
+<!--StartRepeat:repos-->
+   ^repo$	^lastBackupDate$
+<!--EndRepeat:repos-->
+<!--EndRepeat:users-->

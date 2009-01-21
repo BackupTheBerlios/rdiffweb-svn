@@ -12,6 +12,43 @@
 <h2>Admin Panel</h2>
 <!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
 <!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
+
+<!-- Add User portion -->
+<form action="/admin/" method="post">
+<div class="groupboxDiv">
+<div class="roundedBorderContents">
+<input style="display:none" name="action" value="add" />
+<h3>Add User</h3>
+<table>
+   <tr>
+      <td>Username:</td>
+      <td><input name="username" value="^username$" /></td>
+   </tr>
+   <tr>
+      <td>Password:</td>
+      <td><input name="password"></td>
+   </tr>
+   <tr>
+      <td>User Root Directory:</td>
+      <td><input name="userRoot" value="^userRoot$" /></td>
+   </tr>
+   <tr>
+      <td>
+         <!--StartIncludeIf:isAdmin--><input checked type="checkbox" name="isAdmin" /><!--EndIncludeIf:isAdmin-->
+         <!--StartDeleteIf:isAdmin--><input type="checkbox" name="isAdmin" /><!--EndDeleteIf:isAdmin-->
+         User is admin?
+      </td>
+   </tr>
+</table>
+<br>
+<input type="submit" value="Add User" />
+</div>
+</div>
+</form>
+
+<!-- Manage User portion -->
+<div class="groupboxDiv">
+<div class="roundedBorderContents">
 <h3>Manage Users</h3>
 <table class="usersTable">
 <!--StartRepeat:users-->
@@ -40,41 +77,34 @@
    </tr>
 <!--EndRepeat:users-->
 </table>
+</div>
+</div>
+<br/>
 
-<br>
-<form action="/admin/" method="post">
-<input style="display:none" name="action" value="add" />
-<h3>Add User</h3>
-<table>
-   <tr>
-      <td>Username:</td>
-      <td><input name="username" value="^username$" /></td>
-   </tr>
-   <tr>
-      <td>Password:</td>
-      <td><input name="password"></td>
-   </tr>
-   <tr>
-      <td>User Root Directory:</td>
-      <td><input name="userRoot" value="^userRoot$" /></td>
-   </tr>
-   <tr>
-      <td>
-         <!--StartIncludeIf:isAdmin--><input checked type="checkbox" name="isAdmin" /><!--EndIncludeIf:isAdmin-->
-         <!--StartDeleteIf:isAdmin--><input type="checkbox" name="isAdmin" /><!--EndDeleteIf:isAdmin-->
-         User is admin?
-      </td>
-   </tr>
-</table>
-<br>
-<input type="submit" value="Add User" />
+<!-- Email Notifications portion -->
+<!--StartIncludeIf:notificationsEnabled-->
+<form action="" method="post">
+<input type="hidden" name="action" value="changeNotifications"/>
+<div class="groupboxDiv">
+<div class="roundedBorderContents">
+   <h3 class="groupboxHeader">Site-wide Backup Notifications</h3>
+   <p style="margin-bottom: 0.25em">Notify me at ^userEmail$ when the following users' backups do not get backed up for:</p>
+   ^raw:notificationsTable$
+   <div><input type="submit" class="groupboxButton" value="Change Notifications" /></div>
+</div>
+</div>
 </form>
 
-<br>
-<form action="/admin/sendEmails/" method="post">
+<!-- Send Emails portion -->
+<form action="" method="post">
+<div class="groupboxDiv">
+<div class="roundedBorderContents">
+<input type="hidden" name="action" value="sendEmails"/>
 <h3>Send Email Notifications</h3>
 <p>Note that this will not affect the normally scheduled email notifications.</p>
 <input type="submit" value="Send Emails" />
+</div>
+</div>
 </form>
 
 

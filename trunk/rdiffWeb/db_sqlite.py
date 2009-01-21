@@ -12,6 +12,7 @@ class sqliteUserDB:
       self.userRootCache = {}
       self._connect()
       self._migrateExistingData()
+      self._handleFormatChanges()
 
    def modificationsSupported(self):
       return True
@@ -43,6 +44,10 @@ class sqliteUserDB:
    def useZipFormat(self, username):
       if not self.userExists(username): return False
       return bool(self._getUserField(username, "restoreFormat"))
+
+   def getAdminMonitoredRepoMaxAge(self, username):
+      if not self.userExists(username): return 0
+      return self._getUserField(username, "AdminMonitoredMaxAge")
 
    def getUserList(self):
       query = "SELECT UserName FROM users"
@@ -103,6 +108,10 @@ class sqliteUserDB:
       if not self.userExists(username): raise ValueError
       self._setUserField(username, 'RestoreFormat', bool(useZip))
       
+   def setAdminMonitoredRepoMaxAge(self, username, maxAge):
+      if not self.userExists(username): raise ValueError
+      self._setUserField(username, 'AdminMonitoredMaxAge', maxAge)
+
    def setRepoMaxAge(self, username, repoPath, maxAge):
       if not repoPath in self.getUserRepoPaths(username): raise ValueError
       query = "UPDATE repos SET MaxAge=? WHERE RepoPath=? AND UserID = " + str(self._getUserID(username))
@@ -176,6 +185,9 @@ class sqliteUserDB:
    def _getTables(self):
       return [column[0] for column in self._executeQuery('select name from sqlite_master where type="table"')]
 
+   def _getFieldNames(self, table):
+      return [field[1] for field in self._executeQuery('pragma table_info ( users )')]
+
    def _getCreateStatements(self):
       return [
 """create table users (
@@ -185,7 +197,8 @@ Password varchar (40) NOT NULL DEFAULT "",
 UserRoot varchar (255) NOT NULL DEFAULT "",
 IsAdmin tinyint NOT NULL DEFAULT FALSE,
 UserEmail varchar (255) NOT NULL DEFAULT "",
-RestoreFormat tinyint NOT NULL DEFAULT TRUE)""",
+RestoreFormat tinyint NOT NULL DEFAULT TRUE),
+AdminMonitoredMaxAge tinyint NOT NULL DEFAULT FALSE)""",
 """create table repos (
 RepoID integer primary key autoincrement,
 UserID int(11) NOT NULL, 
@@ -228,9 +241,15 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
          
       cursor.execute("COMMIT TRANSACTION")
 
+   def _handleFormatChanges(self):
+      # Handle the addition of adminMonitoredMaxAge
+      if not u'AdminMonitoredMaxAge' in self._getFieldNames('users'):
+         print 'Adding AdminMonitoredMaxAge column to users table...'
+         self._executeQuery('ALTER TABLE users ADD COLUMN AdminMonitoredMaxAge tinyint NOT NULL DEFAULT FALSE')
+
 
 class sqliteUserDBTest(db_sql.sqlUserDBTest):
-   """Unit tests for the sqliteUserDBTeste class"""
+   """Unit tests for the sqliteUserDB class"""
    
    def _getUserDBObject(self):
       return sqliteUserDB(":memory:", autoConvertDatabase=False)

@@ -92,7 +92,9 @@ class rdiffPage:
    def getUsername(self):
       username = cherrypy.session['username']
       return username
-   
+
+
+
 
 import unittest, shutil, tempfile, os.path
 class pageTest(unittest.TestCase):

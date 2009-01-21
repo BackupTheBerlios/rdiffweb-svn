@@ -76,9 +76,13 @@ class templateParser:
       isMultiline = matchText.startswith(multilineKeyword)
       if isMultiline:
          matchText = matchText[len(multilineKeyword):]
+      rawKeyword = "raw:"
+      isRaw = matchText.startswith(rawKeyword)
+      if isRaw:
+         matchText = matchText[len(rawKeyword):]
       if not matchText in replacements.keys():
          raise templateDataError, matchText
-      replacementText = self._getReplacementText(replacements[matchText])
+      replacementText = self._getReplacementText(replacements[matchText], isRaw)
       if isMultiline:
          replacementText = replacementText.replace("\n", "\n<br/>")
       return replacementText
@@ -100,10 +104,13 @@ class templateParser:
          return textToInclude
       return ""
    
-   def _getReplacementText(self, replacement):
+   def _getReplacementText(self, replacement, isRaw):
       if isinstance(replacement, unicode):
          replacement = replacement.encode('utf-8')
-      return rdw_helpers.encodeText(str(replacement))
+      if isRaw:
+         return replacement
+      else:
+         return rdw_helpers.encodeText(str(replacement))
 
 import unittest
 class templateParsingTest(unittest.TestCase):

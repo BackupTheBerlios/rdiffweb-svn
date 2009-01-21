@@ -80,24 +80,8 @@
          </td>
       </tr>
    </table>
-   <table class="notificationsTable">
-      <tr></tr>
-      <!--StartRepeat:backups-->
-      <tr class="notificationsRow">
-         <td>^backupName$ : </td>
-         <td>
-            <select name="^backupName$numDays" id="^backupName$Select">
-               <!--StartRepeat:notifyOptions-->
-               <option ^selectedStr$>^optionStr$</option>
-               <!--EndRepeat:notifyOptions-->
-            </select>
-         </td>
-      </tr>
-      <!--EndRepeat:backups-->
-      <tr style="height: 2em">
-         <td><input type="submit" class="groupboxButton" value="Change Notifications" /></td>
-      </tr>
-   </table>
+   ^raw:notificationsTable$
+   <div><input type="submit" class="groupboxButton" value="Change Notifications" /></div>
 </div>
 </div>
 </form>
