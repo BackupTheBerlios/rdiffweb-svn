@@ -91,29 +91,15 @@ class rdiffPreferencesPage(page_main.rdiffPage):
          "useZipFormat": self.getUserDB().useZipFormat(self.getUsername()),
          "sampleEmail": self.sampleEmail
       }
+
       if email_notification.emailNotifier().notificationsEnabled():
-         repos = self.getUserDB().getUserRepoPaths(self.getUsername())
-         backups = []
-         for repo in repos:
-            maxAge = self.getUserDB().getRepoMaxAge(self.getUsername(), repo)
-            notifyOptions = []
-            for i in range(0, 8):
-               notifyStr = "Don't notify"
-               if i == 1:
-                  notifyStr = "1 day"
-               elif i > 1:
-                  notifyStr = str(i) + " days"
-                  
-               selectedStr = ""
-               if i == maxAge:
-                  selectedStr = "selected"
-               
-               notifyOptions.append({ "optionStr": notifyStr, "selectedStr": selectedStr })
-               
-            backups.append({ "backupName" : repo, "notifyOptions" : notifyOptions })
-         
-         parms.update({ "notificationsEnabled" : True, "backups" : backups })
-         
+         options = {}
+         for repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
+            options[repo] = self.getUserDB().getRepoMaxAge(self.getUsername(), repo)
+         notificationsTable = email_notification.buildNotificationsTable(options)
+
+         parms.update({ "notificationsEnabled" : True, "notificationsTable" : notificationsTable })
+
       return self.startPage(title) + self.compileTemplate("user_prefs.html", **parms) + self.endPage()
       
 

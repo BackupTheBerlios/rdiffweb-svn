@@ -60,12 +60,11 @@ class emailNotifier:
             oldRepos = []
             for repo in userRepos:
                maxDaysOld = self.userDB.getRepoMaxAge(user, repo)
-               if maxDaysOld != 0:
-                  # get the last backup date
-                  repoPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(user), repo)
-                  oldRepoInfo = self._getOldRepoInfo(repo, repoPath, maxDaysOld)
-                  if not oldRepoInfo is None:
-                     oldRepos.append(oldRepoInfo)
+               # get the last backup date
+               repoPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(user), repo)
+               oldRepoInfo = self._getOldRepoInfo(repo, repoPath, maxDaysOld)
+               if not oldRepoInfo is None:
+                  oldRepos.append(oldRepoInfo)
                         
             if oldRepos:
                userEmailAddress = self.userDB.getUserEmail(user)
@@ -133,6 +132,9 @@ class emailNotifier:
       return rdw_config.getConfigSetting("emailNotificationTime")
    
    def _getOldRepoInfo(self, repoName, repoPath, maxDaysOld):
+      if maxDaysOld == 0:
+         return None
+
       try:
          lastBackup = librdiff.getLastBackupHistoryEntry(repoPath, False)
       except librdiff.FileError:
