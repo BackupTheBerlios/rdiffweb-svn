@@ -197,8 +197,8 @@ Password varchar (40) NOT NULL DEFAULT "",
 UserRoot varchar (255) NOT NULL DEFAULT "",
 IsAdmin tinyint NOT NULL DEFAULT FALSE,
 UserEmail varchar (255) NOT NULL DEFAULT "",
-RestoreFormat tinyint NOT NULL DEFAULT TRUE),
-AdminMonitoredMaxAge tinyint NOT NULL DEFAULT FALSE)""",
+RestoreFormat tinyint NOT NULL DEFAULT TRUE,
+AdminMonitoredMaxAge tinyint NOT NULL DEFAULT 0)""",
 """create table repos (
 RepoID integer primary key autoincrement,
 UserID int(11) NOT NULL, 
@@ -245,7 +245,7 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
       # Handle the addition of adminMonitoredMaxAge
       if not u'AdminMonitoredMaxAge' in self._getFieldNames('users'):
          print 'Adding AdminMonitoredMaxAge column to users table...'
-         self._executeQuery('ALTER TABLE users ADD COLUMN AdminMonitoredMaxAge tinyint NOT NULL DEFAULT FALSE')
+         self._executeQuery('ALTER TABLE users ADD COLUMN AdminMonitoredMaxAge tinyint NOT NULL DEFAULT 0')
 
 
 class sqliteUserDBTest(db_sql.sqlUserDBTest):
