@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
-import rdw_helpers, page_main, librdiff
+import subprocess
+
+import rdw_config
+import rdw_helpers
+import page_main
+import librdiff
 
 
 class rdiffLocationsPage(page_main.rdiffPage):
@@ -43,7 +48,19 @@ class rdiffLocationsPage(page_main.rdiffPage):
       # Make second pass through list, setting the 'altRow' attribute
       for i in range(0, len(repoList)):
          repoList[i]['altRow'] = (i % 2 == 0)
-      return { "title" : "browse", "repos" : repoList }
+      # Calculate disk usage
+      diskUsage = ''
+      diskUsageCommand = rdw_config.getConfigSetting('diskUsageCommand')
+      if diskUsageCommand:
+         diskUsage = subprocess.Popen([diskUsageCommand, self.getUsername(), self.getUserDB().getUserRoot(self.getUsername())],
+                                    stdout=subprocess.PIPE).communicate()[0]
+         try:
+            diskUsageNum = int(diskUsage)
+         except:
+            pass
+         else:
+            diskUsage = rdw_helpers.formatFileSizeStr(diskUsageNum)
+      return { "title" : "browse", "repos" : repoList, "diskUsage": diskUsage }
             
             
    def _sortLocations(self, locations):

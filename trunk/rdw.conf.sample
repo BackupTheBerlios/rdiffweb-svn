@@ -30,4 +30,21 @@
 
 # rdiffWeb can automatically update all user repositories. Automatic updates can be be
 # enabled by setting the interval in minutes between updates.
+#
 # autoUpdateRepos=15 # Update user repositories every 15 minutes
+
+# rdiffWeb can optionally display total raw disk usage for a user. The
+# setting below specifies what command rdiffWeb should run to calculate disk
+# usage. The command will be passed the rdiffWeb username and user root dir.
+#
+# diskUsageCommand=/usr/bin/calc_usage.sh
+#
+# Sample scripts:
+# Simple script:
+# du -s $2 # Probably too slow
+#
+# Faster, but requires quotas:
+# USER=$1
+# USAGE=`repquota /chroot | grep "^$USER " | awk -F "--" '{print $2}' | awk '{print $1}'`
+# let "USAGE *= 1024"
+# echo $USAGE
