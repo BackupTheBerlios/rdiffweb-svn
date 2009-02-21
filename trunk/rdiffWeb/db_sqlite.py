@@ -47,7 +47,7 @@ class sqliteUserDB:
 
    def getAdminMonitoredRepoMaxAge(self, username):
       if not self.userExists(username): return 0
-      return self._getUserField(username, "AdminMonitoredMaxAge")
+      return int(self._getUserField(username, "AdminMonitoredMaxAge"))
 
    def getUserList(self):
       query = "SELECT UserName FROM users"
