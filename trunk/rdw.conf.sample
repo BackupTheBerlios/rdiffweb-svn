@@ -6,7 +6,7 @@
 # ServerPort=8080
 
 # SSL setup:
-# If these settings are specified, the server will server HTTPS.
+# If these settings are specified, the server will serve HTTPS.
 # sslCertificate = /var/certs/rdiffweb.crt
 # sslPublicKey = /var/certs/rdiffweb.key
 #
