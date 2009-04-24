@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import cherrypy
+import os
 import subprocess
 
 import rdw_config
@@ -11,14 +13,16 @@ import librdiff
 class rdiffLocationsPage(page_main.rdiffPage):
    ''' Shows the locations page. Will show all available destination
    backup directories. This is the root (/) page '''
-   def index(self):
-      page = self.startPage("Backup Locations")
-      page = page + self.compileTemplate("repo_listing.html", **self.getParmsForPage(self.getUserDB().getUserRoot(self.getUsername()), self.getUserDB().getUserRepoPaths(self.getUsername())))
-      page = page + self.endPage()
-      return page
+   def index(self, **kwargs):
+      # Handle repository deletion
+      if cherrypy.request.method == "POST" and 'repo' in cherrypy.request.params:
+         # Delete the repository
+         return self._handle_deletion(cherrypy.request.params['repo'])
+
+      return self._generate_page()
    index.exposed = True
-   
-   def getParmsForPage(self, root, repos):
+
+   def getParmsForPage(self, root, repos, message='', error=''):
       repoList = []
       for userRepo in repos:
          try:
@@ -60,9 +64,40 @@ class rdiffLocationsPage(page_main.rdiffPage):
             pass
          else:
             diskUsage = rdw_helpers.formatFileSizeStr(diskUsageNum)
-      return { "title" : "browse", "repos" : repoList, "diskUsage": diskUsage }
-            
-            
+      # Allow repository deletion?
+      allowRepoDeletion = self.getUserDB().allowRepoDeletion(self.getUsername())
+      return {
+         "title": "browse",
+         "repos": repoList,
+         "diskUsage": diskUsage,
+         "allowRepoDeletion": allowRepoDeletion,
+         "message": message,
+         "error": error
+      }
+
+   def _handle_deletion(self, repo):
+      try:
+         self.validateUserPath(repo)
+      except rdw_helpers.accessDeniedError, error:
+         return self._generate_page(error=str(error))
+      if not repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
+         return self._generate_page(error="Access is denied.")
+      if not self.getUserDB().allowRepoDeletion(self.getUsername()):
+         return self._generate_page(error="Deleting backups is not allowed.")
+         
+      fullPath = rdw_helpers.joinPaths(self.getUserDB().getUserRoot(self.getUsername()), repo)
+      rdw_helpers.removeDir(fullPath)
+      repos = self.getUserDB().getUserRepoPaths(self.getUsername())
+      repos.remove(repo)
+      self.getUserDB().setUserRepos(self.getUsername(), repos)
+      return self._generate_page(message="The repo \"%s\" was successfully deleted." % repo)
+ 
+   def _generate_page(self, message='', error=''):
+      page = self.startPage("Backup Locations")
+      page = page + self.compileTemplate("repo_listing.html", **self.getParmsForPage(self.getUserDB().getUserRoot(self.getUsername()), self.getUserDB().getUserRepoPaths(self.getUsername()), message=message, error=error))
+      page = page + self.endPage()
+      return page
+   
    def _sortLocations(self, locations):
       def compare(left, right):
          if left['failed'] != right['failed']:

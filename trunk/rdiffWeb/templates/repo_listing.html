@@ -1,5 +1,10 @@
 <h2>Backup Locations</h2>
 
+<script type="text/javascript" src="../static/locations.js"></script>
+
+<!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
+<!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
+<form action="." method="POST">
 <table id="PopupTable">
    <thead>
       <tr>
@@ -8,6 +13,7 @@
          <td>Last Backup</td>
          <td>Last Backup Size</td>
          <td>History</td>
+         <!--StartIncludeIf:allowRepoDeletion--><td></td><!--EndIncludeIf:allowRepoDeletion-->
       </tr>
    </thead>
    <tbody>
@@ -17,10 +23,12 @@
          <td><!--StartDeleteIf:failed--><a href="^repoBrowseUrl$"><!--EndDeleteIf:failed-->^repoName$<!--StartDeleteIf:failed--></a><!--EndDeleteIf:failed--></td>
          <td>^repoDate$</td><td>^repoSize$</td>
          <td><a href="^repoHistoryUrl$">(more)</a></td>
+         <!--StartIncludeIf:allowRepoDeletion--><td><button type="submit" name="repo" value="^repoName$">Delete this backup</button></td><!--EndIncludeIf:allowRepoDeletion-->
       </tr>
       <!--EndRepeat:repos-->
    </tbody>
 </table>
+</form>
 
 <!--StartIncludeIf:diskUsage-->
 <p>Total disk usage: ^diskUsage$</p>

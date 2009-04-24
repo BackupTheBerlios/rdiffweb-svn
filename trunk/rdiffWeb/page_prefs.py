@@ -23,6 +23,8 @@ class rdiffPreferencesPage(page_main.rdiffPage):
             return self._setNotifications(parms)
          elif action == 'setRestoreType':
             return self._setRestoreType(parms['restoreType'])
+         elif action == 'setAllowRepoDeletion':
+            return self._setAllowRepoDeletion('allowDeletion' in parms)
          else:
             return self._getPrefsPage(errorMessage='Invalid setting.')
          
@@ -78,6 +80,11 @@ class rdiffPreferencesPage(page_main.rdiffPage):
          return self._getPrefsPage(errorMessage='Invalid restore format.')
       return self._getPrefsPage(statusMessage="Successfully set restore format.")
    
+   def _setAllowRepoDeletion(self, allowDeletion):
+      self.getUserDB().setAllowRepoDeletion(self.getUsername(), allowDeletion)
+      verb = 'allowed' if allowDeletion else 'disallowed'
+      return self._getPrefsPage(statusMessage="Successfully %s backup deletion and modification." % verb)
+   
    def _getPrefsPage(self, errorMessage="", statusMessage=""):
       title = "User Preferences"
       email = self.getUserDB().getUserEmail(self.getUsername());
@@ -89,7 +96,8 @@ class rdiffPreferencesPage(page_main.rdiffPage):
          "notificationsEnabled" : False,
          "backups" : [],
          "useZipFormat": self.getUserDB().useZipFormat(self.getUsername()),
-         "sampleEmail": self.sampleEmail
+         "sampleEmail": self.sampleEmail,
+         "allowRepoDeletion": self.getUserDB().allowRepoDeletion(self.getUsername())
       }
 
       if email_notification.emailNotifier().notificationsEnabled():

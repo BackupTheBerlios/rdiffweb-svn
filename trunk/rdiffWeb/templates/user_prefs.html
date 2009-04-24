@@ -108,3 +108,17 @@
    fnOnBlur();
 </script>
 <!--EndIncludeIf:notificationsEnabled-->
+
+<form action="" method="post">
+<input style="display:none" name="form" value="setAllowRepoDeletion"/>
+<div class="groupboxDiv">
+   <div class="roundedBorderContents">
+      <h3 class="groupboxHeader">Backup Modification</h3>
+         <label><input type="checkbox" name="allowDeletion"
+		StartIncludeIf:allowRepoDeletion- checked='checked' EndIncludeIf:allowRepoDeletion->
+                </input>Allow me to modify/delete my backups.</label>
+      <br/>
+      <input type="submit" class="groupboxButton" value="Update" />
+   </div>
+</div>
+</form>

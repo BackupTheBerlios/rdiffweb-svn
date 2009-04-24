@@ -49,6 +49,10 @@ class sqliteUserDB:
       if not self.userExists(username): return 0
       return int(self._getUserField(username, "AdminMonitoredMaxAge"))
 
+   def allowRepoDeletion(self, username):
+      if not self.userExists(username): return False
+      return bool(self._getUserField(username, "AllowRepoDeletion"))
+
    def getUserList(self):
       query = "SELECT UserName FROM users"
       users = [x[0] for x in self._executeQuery(query)]
@@ -107,11 +111,15 @@ class sqliteUserDB:
    def setUseZipFormat(self, username, useZip):
       if not self.userExists(username): raise ValueError
       self._setUserField(username, 'RestoreFormat', bool(useZip))
-      
+ 
    def setAdminMonitoredRepoMaxAge(self, username, maxAge):
       if not self.userExists(username): raise ValueError
       self._setUserField(username, 'AdminMonitoredMaxAge', maxAge)
 
+   def setAllowRepoDeletion(self, username, allowDeletion):
+      if not self.userExists(username): raise ValueError
+      self._setUserField(username, 'AllowRepoDeletion', bool(allowDeletion))
+ 
    def setRepoMaxAge(self, username, repoPath, maxAge):
       if not repoPath in self.getUserRepoPaths(username): raise ValueError
       query = "UPDATE repos SET MaxAge=? WHERE RepoPath=? AND UserID = " + str(self._getUserID(username))
@@ -186,7 +194,7 @@ class sqliteUserDB:
       return [column[0] for column in self._executeQuery('select name from sqlite_master where type="table"')]
 
    def _getFieldNames(self, table):
-      return [field[1] for field in self._executeQuery('pragma table_info ( users )')]
+      return [field[1].lower() for field in self._executeQuery('pragma table_info ('+table+')')]
 
    def _getCreateStatements(self):
       return [
@@ -198,7 +206,8 @@ UserRoot varchar (255) NOT NULL DEFAULT "",
 IsAdmin tinyint NOT NULL DEFAULT FALSE,
 UserEmail varchar (255) NOT NULL DEFAULT "",
 RestoreFormat tinyint NOT NULL DEFAULT TRUE,
-AdminMonitoredMaxAge tinyint NOT NULL DEFAULT 0)""",
+AdminMonitoredMaxAge tinyint NOT NULL DEFAULT 0,
+AllowRepoDeletion tinyint NOT NULL DEFAULT FALSE)""",
 """create table repos (
 RepoID integer primary key autoincrement,
 UserID int(11) NOT NULL, 
@@ -242,11 +251,15 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
       cursor.execute("COMMIT TRANSACTION")
 
    def _handleFormatChanges(self):
-      # Handle the addition of adminMonitoredMaxAge
-      if not u'AdminMonitoredMaxAge' in self._getFieldNames('users'):
+      # Handle the addition of AdminMonitoredMaxAge
+      if not u'AdminMonitoredMaxAge'.lower() in self._getFieldNames('users'):
          print 'Adding AdminMonitoredMaxAge column to users table...'
          self._executeQuery('ALTER TABLE users ADD COLUMN AdminMonitoredMaxAge tinyint NOT NULL DEFAULT 0')
 
+      # Handle the addition of AllowRepoDeletion
+      if not u'AllowRepoDeletion'.lower() in self._getFieldNames('users'):
+         print 'Adding AllowRepoDeletion column to users table...'
+         self._executeQuery('ALTER TABLE users ADD COLUMN AllowRepoDeletion tinyint NOT NULL DEFAULT FALSE')
 
 class sqliteUserDBTest(db_sql.sqlUserDBTest):
    """Unit tests for the sqliteUserDB class"""

@@ -13,3 +13,26 @@ function addOnLoadEvent(func)
       }
    }
 }
+
+window.Lightbox = {
+   init: function()
+   {
+      makeDivRounded(document.getElementById('LightboxContents'));
+   },
+
+   show: function()
+   {
+      $('#LightboxBackground').show();
+      $('#LightboxForeground').show();
+   },
+
+   hide: function()
+   {
+      $('#LightboxBackground').hide();
+      $('#LightboxForeground').hide();
+   }
+};
+new function()
+{
+   $(Lightbox.init);
+};

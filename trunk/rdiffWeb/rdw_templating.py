@@ -80,9 +80,8 @@ class templateParser:
       isRaw = matchText.startswith(rawKeyword)
       if isRaw:
          matchText = matchText[len(rawKeyword):]
-      if not matchText in replacements.keys():
-         raise templateDataError, matchText
-      replacementText = self._getReplacementText(replacements[matchText], isRaw)
+      raw_value = self._lookupReplacement(matchText)
+      replacementText = self._getReplacementText(raw_value, isRaw)
       if isMultiline:
          replacementText = replacementText.replace("\n", "\n<br/>")
       return replacementText
@@ -94,10 +93,10 @@ class templateParser:
       return self._handleConditionalInclude(match, True)
 
    def _handleConditionalInclude(self, match, includeIfTrue):
-      replacements = self.replacements[-1]
       conditional = match.group(1)
       textToInclude = match.group(2).rstrip("\n")
-      if (replacements[conditional] and includeIfTrue) or (not replacements[conditional] and not includeIfTrue):
+      conditionalIsTrue = self._lookupReplacement(conditional)
+      if (conditionalIsTrue and includeIfTrue) or (not conditionalIsTrue and not includeIfTrue):
          # The included text may contain additional include/delete statements. Check for those, and if they exist, recurse.
          if self.hasConditionalDirectives(textToInclude):
             return self.parseSingleTemplate(textToInclude)
@@ -111,6 +110,12 @@ class templateParser:
          return replacement
       else:
          return rdw_helpers.encodeText(str(replacement))
+
+   def _lookupReplacement(self, keyword):
+      for replacements in reversed(self.replacements):
+         if keyword in replacements:
+            return replacements[keyword]
+      raise templateDataError, repr(self.replacements)+'\n'+repr(keyword)
 
 import unittest
 class templateParsingTest(unittest.TestCase):
@@ -186,6 +191,23 @@ class templateParsingTest(unittest.TestCase):
       expectedResult = """<td>>char1<>char2<</td>"""
       assert(parseResult == expectedResult)
 
+   def testNonListKeywordInList(self):
+      template = """<!--StartRepeat:links--><td><!--StartRepeat:chars-->>^outerElem$<<!--EndRepeat:chars--></td><!--EndRepeat:links-->"""
+      innerData = { "chars" : [{"char":"char"}]}
+      linksArray = [ innerData ]
+      parser = templateParser()
+      parseResult = parser.parseTemplate(template, links=linksArray, outerElem="test")
+      expectedResult = """<td>>test<</td>"""
+      assert(parseResult == expectedResult)
+
+   def testNonListConditionInList(self):
+      template = """<!--StartRepeat:links--><td><!--StartIncludeIf:outerElem-->>^chars$<<!--EndIncludeIf:outerElem--></td><!--EndRepeat:links-->"""
+      linksArray = [{"chars": "chars"}]
+      parser = templateParser()
+      parseResult = parser.parseTemplate(template, links=linksArray, outerElem=True)
+      expectedResult = """<td>>chars<</td>"""
+      assert(parseResult == expectedResult)
+
    def testNonGreedyReplace(self):
       template = """<!--StartDeleteIf:linkUrl-->foo<!--EndDeleteIf:linkUrl-->should see me<!--StartDeleteIf:linkUrl-->bar<!--EndDeleteIf:linkUrl-->"""
       parmsDict = {"linkUrl":"http://www.google.com", "linkText":"Google"}
@@ -215,4 +237,5 @@ class templateParsingTest(unittest.TestCase):
       except templateError: pass
       else: assert(False)
 
-
+if __name__ == '__main__':
+   unittest.main()
