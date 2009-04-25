@@ -51,7 +51,10 @@ class sqliteUserDB:
 
    def allowRepoDeletion(self, username):
       if not self.userExists(username): return False
-      return bool(self._getUserField(username, "AllowRepoDeletion"))
+      field = self._getUserField(username, "AllowRepoDeletion")
+      if type(field) == str or type(field) == unicode:
+         return field and str(field).lower() == 'true'
+      return bool(field)
 
    def getUserList(self):
       query = "SELECT UserName FROM users"

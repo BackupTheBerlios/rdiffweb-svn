@@ -67,7 +67,7 @@ table td
 /* Lightboxes */
 #LightboxBackground
 {
-   position: absolute;
+   position: fixed;
    width: 100%;
    height: 100%;
    background-color: #000;
@@ -80,7 +80,7 @@ table td
 #LightboxForeground
 {
    text-align: center;
-   position: absolute;
+   position: fixed;
    top: 0;
    right: 0;
    width: 100%;

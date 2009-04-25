@@ -90,7 +90,7 @@ class rdiffLocationsPage(page_main.rdiffPage):
       repos = self.getUserDB().getUserRepoPaths(self.getUsername())
       repos.remove(repo)
       self.getUserDB().setUserRepos(self.getUsername(), repos)
-      return self._generate_page(message="The repo \"%s\" was successfully deleted." % repo)
+      return self._generate_page(message="The backup location \"%s\" was successfully deleted." % repo)
  
    def _generate_page(self, message='', error=''):
       page = self.startPage("Backup Locations")
