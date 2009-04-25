@@ -14,6 +14,24 @@ function addOnLoadEvent(func)
    }
 }
 
+function appendText(elem, text, bold)
+{
+   if (bold)
+      elem = elem.appendChild(document.createElement('B'));
+   elem.appendChild(document.createTextNode(text));
+}
+
+function showWarning(warningElem, continueBtnText, onContinue)
+{
+   $('#LightboxContents').empty();
+   $('#LightboxContents').append(warningElem);
+   $('#LightboxContents').append('<div id="LightboxButtonsContainer"><button type="button" id="ContinueBtn">'+continueBtnText+
+                                 '</button>' + '<button type="button" id="CancelBtn">Cancel</button></div>');
+   $('#ContinueBtn').click(onContinue);
+   $('#CancelBtn').click(Lightbox.hide);
+   Lightbox.show();
+}
+
 window.Lightbox = {
    init: function()
    {
@@ -32,6 +50,7 @@ window.Lightbox = {
       $('#LightboxForeground').hide();
    }
 };
+
 new function()
 {
    $(Lightbox.init);

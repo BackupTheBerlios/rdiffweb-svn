@@ -304,6 +304,17 @@ def restoreFileOrDir(repoRoot, dirPath, filename, restoreDate, useZip):
          rdiffOutputFile = rdiffOutputFile+".tar.gz"
    return rdiffOutputFile
 
+def removeRepoHistory(repo, afterDate):
+   """ Removes all history for repo after afterDate using --remove-older-than. """
+   dateString = str(afterDate.getSeconds())
+   if backupIsInProgressForRepo(repo):
+      raise UnknownError('A backup is currently in progress to this location. '+
+                         'Please allow this backup to complete before removing history.')
+   results = rdw_helpers.execute('rdiff-backup', '--force', '--remove-older-than', dateString, repo)
+   if results['exitCode'] != 0:
+      error = results['stderr']
+      raise UnknownError('Unable to delete history! rdiff-backup output:\n'+error)
+
 def backupIsInProgressForRepo(repo):
    rdiffDir = joinPaths(repo, rdiffDataDirName)
    mirrorMarkers = os.listdir(rdiffDir)

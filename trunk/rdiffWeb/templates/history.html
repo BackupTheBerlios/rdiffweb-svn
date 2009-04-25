@@ -9,8 +9,10 @@
 <script type="text/javascript" language="javascript" src="../static/borders.js"></script>
 <!--EndDelete-->
 <script type="text/javascript" language="javascript" src="../static/popups.js"></script>
+<script type="text/javascript" language="javascript" src="../static/history.js"></script>
 
 <h2>^title$</h2>
+<form method="POST">
 <table id="PopupTable">
 <thead>
    <tr>
@@ -24,6 +26,7 @@
          </div>
       </td>
       <td>Result</td>
+      <!--StartIncludeIf:allowHistoryDeletion--><td></td><!--EndIncludeIf:allowHistoryDeletion-->
    </tr>
 </thead>
 <tbody>
@@ -57,9 +60,13 @@
       </td>
       <!--EndDeleteIf:errors-->
 
+      <!--StartIncludeIf:allowHistoryDeletion-->
+         <td><button type="submit" date="^date$" value="^rawDate$" size="^priorIncrementsSize$">Delete Prior History</button></td>
+      <!--EndIncludeIf:allowHistoryDeletion-->
       </tr>
    <!--EndRepeat:history-->
 </tbody>
 </table>
-
+<input type="hidden" name="date" id="DeleteDate"></input>
+</form>
 
