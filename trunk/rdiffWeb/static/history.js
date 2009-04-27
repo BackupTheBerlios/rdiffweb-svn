@@ -3,13 +3,11 @@ new function()
    $(document).click(function(event) {
       if (event.target.tagName != 'BUTTON' || event.target.type != 'submit')
          return;
-      console.log('onclick');
 
       event.preventDefault();
       function submit()
       {
          $('#DeleteDate').val(event.target.value);
-         console.log('submit');
          $(event.target).click();
       }
       var warningElem = document.createDocumentFragment();
