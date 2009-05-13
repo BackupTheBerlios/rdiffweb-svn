@@ -22,7 +22,7 @@ class rdiffLocationsPage(page_main.rdiffPage):
       return self._generate_page()
    index.exposed = True
 
-   def getParmsForPage(self, root, repos, message='', error=''):
+   def getParmsForPage(self, root, repos, allowRepoDeletion=False, message='', error=''):
       repoList = []
       for userRepo in repos:
          try:
@@ -65,7 +65,6 @@ class rdiffLocationsPage(page_main.rdiffPage):
          else:
             diskUsage = rdw_helpers.formatFileSizeStr(diskUsageNum)
       # Allow repository deletion?
-      allowRepoDeletion = self.getUserDB().allowRepoDeletion(self.getUsername())
       return {
          "title": "browse",
          "repos": repoList,
@@ -94,7 +93,11 @@ class rdiffLocationsPage(page_main.rdiffPage):
  
    def _generate_page(self, message='', error=''):
       page = self.startPage("Backup Locations")
-      page = page + self.compileTemplate("repo_listing.html", **self.getParmsForPage(self.getUserDB().getUserRoot(self.getUsername()), self.getUserDB().getUserRepoPaths(self.getUsername()), message=message, error=error))
+      parms = self.getParmsForPage(self.getUserDB().getUserRoot(self.getUsername()),
+                                   self.getUserDB().getUserRepoPaths(self.getUsername()),
+                                   self.getUserDB().allowRepoDeletion(self.getUsername()),
+                                   message=message, error=error)
+      page = page + self.compileTemplate("repo_listing.html", **parms)
       page = page + self.endPage()
       return page
    

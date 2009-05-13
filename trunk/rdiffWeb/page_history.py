@@ -32,14 +32,16 @@ class rdiffHistoryPage(page_main.rdiffPage):
 
       parms = {}
       try:
-         parms = self.getParmsForPage(joinPaths(self.getUserDB().getUserRoot(self.getUsername()), repo), repo)
+         full_path = joinPaths(self.getUserDB().getUserRoot(self.getUsername()), repo)
+         allowHistoryDeletion = self.getUserDB().allowRepoDeletion(self.getUsername())
+         parms = self.getParmsForPage(full_path, repo, allowHistoryDeletion)
       except librdiff.FileError, error:
          return self.writeErrorPage(error.getErrorString())
       
       return self.startPage("Backup History") + self.compileTemplate("history.html", **parms) + self.endPage()
    index.exposed = True
    
-   def getParmsForPage(self, repoPath, repoName, message='', error=''):
+   def getParmsForPage(self, repoPath, repoName, allowHistoryDeletion=False, message='', error=''):
       rdiffHistory = librdiff.getBackupHistory(repoPath)
       rdiffHistory.reverse()
       entries = []
@@ -75,7 +77,7 @@ class rdiffHistoryPage(page_main.rdiffPage):
          "title": "Backup history for "+repoName,
          "history": entries,
          "totalBackups": len(rdiffHistory),
-         "allowHistoryDeletion": self.getUserDB().allowRepoDeletion(self.getUsername()),
+         "allowHistoryDeletion": allowHistoryDeletion,
          "message": message,
          "error": error
       }

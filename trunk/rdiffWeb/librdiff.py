@@ -212,9 +212,15 @@ class rdiffDirEntries:
 
    def _getFirstBackupAfterDate(self, date):
       """ Iterates the mirror_metadata files in the rdiff data dir """
+      if not self.backupTimes:
+         return rdw_helpers.rdwTime()
       if not date:
          return self.backupTimes[0]
-      return self.backupTimes[bisect.bisect_right(self.backupTimes, date)]
+
+      index = bisect.bisect_right(self.backupTimes, date)
+      if index >= len(self.backupTimes):
+         return self.backupTimes[-1]
+      return self.backupTimes[index]
 
    def _getLastChangedBackupTime(self, filename):
       files = self.groupedIncrementEntries.get(filename, [])
