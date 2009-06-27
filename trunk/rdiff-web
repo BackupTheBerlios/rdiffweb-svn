@@ -70,6 +70,9 @@ if __name__ == "__main__":
    serverPort = 8080
    if rdiffWeb.rdw_config.getConfigSetting("ServerPort") != "":
       serverPort = int(rdiffWeb.rdw_config.getConfigSetting("ServerPort"))
+   serverHost = '0.0.0.0'
+   if rdiffWeb.rdw_config.getConfigSetting("ServerHost") != "":
+      serverPort = int(rdiffWeb.rdw_config.getConfigSetting("ServerHost"))
 
    sslCert = rdiffWeb.rdw_config.getConfigSetting("SslCertificate")
    redirectSetting = rdiffWeb.rdw_config.getConfigSetting("redirectToHttps")
@@ -86,7 +89,7 @@ if __name__ == "__main__":
       'tools.sessions.on' : True,
       'tools.authenticate.on' : True,
       'autoreload.on' : autoReload,
-      'server.socket_host' : rdiffWeb.rdw_config.getConfigSetting("ServerHost"),
+      'server.socket_host' : serverHost,
       'server.socket_port' : serverPort,
       'server.ssl_certificate': rdiffWeb.rdw_config.getConfigSetting("SslCertificate"),
       'server.ssl_private_key': rdiffWeb.rdw_config.getConfigSetting("SslPrivateKey"),
@@ -145,7 +148,10 @@ if __name__ == "__main__":
    
       rdiffWeb.rdw_spider_repos.startRepoSpiderThread(killEvent)
       rdiffWeb.email_notification.startEmailNotificationThread(killEvent)
-      cherrypy.engine.on_stop_engine_list.append(lambda: killEvent.set())
+      try:
+         cherrypy.engine.on_stop_engine_list.append(lambda: killEvent.set())
+      except AttributeError:
+         cherrypy.engine.subscribe('stop', lambda: killEvent.set())
 
 
    # Start the HTTP servers. If serving SSL, optionally also start 
