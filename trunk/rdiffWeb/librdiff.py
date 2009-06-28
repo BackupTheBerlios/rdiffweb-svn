@@ -202,7 +202,13 @@ class rdiffDirEntries:
                   entryDate = entry.getDate()
             if not entryName in entriesDict.keys():
                entryPath = joinPaths(self.repo, rdiffIncrementsDirName, self.dirPath, entryName)
-               newEntry = dirEntry(entryName, self.pathQuoter, os.path.isdir(entryPath), 0, False, [entryDate])
+               rawEntryPath = joinPaths(self.repo, rdiffIncrementsDirName, self.dirPath, entry.entryName)
+               if not entry.isCompressed():
+                  size = os.lstat(rawEntryPath)[6]
+               else:
+                  size = self._getUnzippedFileSize(rawEntryPath)
+               newEntry = dirEntry(entryName, self.pathQuoter, os.path.isdir(entryPath),
+                                   size, False, [entryDate])
                entriesDict[entryName] = newEntry
             else:
                if not entryDate in entriesDict[entryName].changeDates:
@@ -231,6 +237,10 @@ class rdiffDirEntries:
          return self._getFirstBackupAfterDate(None)
       return self._getFirstBackupAfterDate(incrementEntry(self.pathQuoter, files[-1]).getDate())
 
+   def _getUnzippedFileSize(self, gzippedFile):
+      file = open(gzippedFile, 'r')
+      file.seek(-4, os.SEEK_END)
+      return gzip.read32(file)
 
 def checkRepoPath(repoRoot, filePath):
    # Make sure repoRoot is a valid rdiff-backup repository
