@@ -44,6 +44,6 @@ class rdiffRestorePage(page_main.rdiffPage):
 
       (directory, filename) = os.path.split(filePath)
       filename = filename.replace("\"", "\\\"") # Escape quotes in filename
-      return serve_file(filePath, None, disposition="attachment", name=filename)
+      return serve_download(filePath, name=filename)
    index.exposed = True
 
