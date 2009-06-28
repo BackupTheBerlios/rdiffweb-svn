@@ -7,10 +7,9 @@ import urllib
 import rdw_spider_repos
 import email_notification
 
+#TODO: remove all the modificationsSupported calls
 
 class rdiffPreferencesPage(page_main.rdiffPage):
-   
-   sampleEmail = 'joe@example.com'
    
    def index(self, **parms):
       if parms:
@@ -49,25 +48,23 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       return self._getPrefsPage(statusMessage="Successfully updated backup locations.")
 
    def _setNotifications(self, parms):
-      if not self.getUserDB().modificationsSupported():
-         return self._getPrefsPage(errorMessage="Email notification is not supported with the active user database.")
-      
       repos = self.getUserDB().getUserRepoPaths(self.getUsername())
       
       for parmName in parms.keys():
          if parmName == "userEmail":
-            if parms[parmName] == self.sampleEmail:
-               parms[parmName] = ''
             self.getUserDB().setUserEmail(self.getUsername(), parms[parmName])
-         if parmName.endswith("numDays"):
-            backupName = parmName[:-7]
-            if backupName in repos:
-               if parms[parmName] == "Don't notify":
-                  maxDays = 0
-               else:
-                  maxDays = int(parms[parmName][0])
-               self.getUserDB().setRepoMaxAge(self.getUsername(), backupName, maxDays)
-               
+         else:
+            try:
+               repoID = int(parmName)
+            except ValueError:
+               pass
+            else:
+               repoName = self.getUserDB().getRepoName(self.getUsername(),
+                                                      int(parmName))
+               if not repoName is None:
+                  self.getUserDB().setRepoMaxAge(self.getUsername(), repoName,
+                                                 int(parms[parmName]))
+
       return self._getPrefsPage(statusMessage="Successfully changed notification settings.")
    
    def _setRestoreType(self, restoreType):
@@ -86,6 +83,22 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       return self._getPrefsPage(statusMessage="Successfully %s backup deletion and modification." % verb)
    
    def _getPrefsPage(self, errorMessage="", statusMessage=""):
+      # Email notification options
+      repos = []
+      for repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
+         maxAge = self.getUserDB().getRepoMaxAge(self.getUsername(), repo)
+         options = [{
+            'optionValue': num,
+            'optionDesc': str(num) + ' days' if num else 'Don\'t notify',
+            'optionSelected': num == maxAge
+         } for num in range(0, 8)]
+
+         repos.append({
+            'repoName': repo,
+            'repoID': self.getUserDB().getRepoID(self.getUsername(), repo),
+            'notifyOptions': options
+         })
+
       title = "User Preferences"
       email = self.getUserDB().getUserEmail(self.getUsername());
       parms = {
@@ -93,21 +106,12 @@ class rdiffPreferencesPage(page_main.rdiffPage):
          "error" : errorMessage,
          "message" : statusMessage,
          "userEmail" : email,
-         "notificationsEnabled" : False,
+         "notificationsEnabled" : email_notification.emailNotifier().notificationsEnabled(),
+         "repos": repos,
          "backups" : [],
          "useZipFormat": self.getUserDB().useZipFormat(self.getUsername()),
-         "sampleEmail": self.sampleEmail,
          "allowRepoDeletion": self.getUserDB().allowRepoDeletion(self.getUsername())
       }
 
-      if email_notification.emailNotifier().notificationsEnabled():
-         options = {}
-         for repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
-            options[repo] = self.getUserDB().getRepoMaxAge(self.getUsername(), repo)
-         notificationsTable = email_notification.buildNotificationsTable(options)
-
-         parms.update({ "notificationsEnabled" : True, "notificationsTable" : notificationsTable })
-
       return self.startPage(title) + self.compileTemplate("user_prefs.html", **parms) + self.endPage()
-      
 

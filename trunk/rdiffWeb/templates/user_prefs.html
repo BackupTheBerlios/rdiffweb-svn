@@ -73,40 +73,32 @@
    <h3 class="groupboxHeader">Backup Notifications</h3>
    <table class="emailTable">
       <tr>
-         <td>Notify me at</td>
+         <td>Send an email to</td>
          <td><input id="userEmail" class="textInput" name="userEmail" value="^userEmail$"></td>
          <td align="left">
-            when my backups do not get backed up for:
+            when my backups do not complete for:
          </td>
       </tr>
    </table>
-   ^raw:notificationsTable$
+   <table class="notificationsTable">
+      <tr></tr>
+      <!--StartRepeat:repos-->
+      <tr class="notificationsRow">
+         <td>^repoName$ : </td>
+         <td>
+            <select name="^repoID$">
+               <!--StartRepeat:notifyOptions-->
+               <option <!--StartIncludeIf:optionSelected-->selected<!--EndIncludeIf:optionSelected--> value="^optionValue$">^optionDesc$</option>
+               <!--EndRepeat:notifyOptions-->
+            </select>
+         </td>
+      </tr>
+      <!--EndRepeat:repos-->
+   </table>
    <div><input type="submit" class="groupboxButton" value="Change Notifications" /></div>
 </div>
 </div>
 </form>
-<script type="text/javascript">
-   var sExampleEmail = '^sampleEmail$';
-   var oUserEmailElem = document.getElementById('userEmail');
-   fnOnBlur = function()
-   {
-      if (oUserEmailElem.value === '')
-      {
-         oUserEmailElem.style.color = '#AAA';
-         oUserEmailElem.value = sExampleEmail;
-      }
-   }
-   oUserEmailElem.onfocus = function()
-   {
-      if (oUserEmailElem.value === sExampleEmail)
-      {
-         oUserEmailElem.value = '';
-         oUserEmailElem.style.color = '#000';
-      }
-   }
-   oUserEmailElem.onblur = fnOnBlur;
-   fnOnBlur();
-</script>
 <!--EndIncludeIf:notificationsEnabled-->
 
 <form action="" method="post">

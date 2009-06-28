@@ -133,6 +133,18 @@ class sqliteUserDB:
       results = self._executeQuery(query, (repoPath,))
       assert len(results) == 1
       return int(results[0][0])
+
+   def getRepoID(self, username, repoPath):
+      query = "SELECT RepoID FROM repos WHERE RepoPath=? AND UserID = " + str(self._getUserID(username))
+      results = self._executeQuery(query, (repoPath,))
+      assert len(results) == 1
+      return int(results[0][0])
+      
+   def getRepoName(self, username, repoID):
+      query = "SELECT RepoPath FROM repos WHERE RepoID=? AND UserID = " + str(self._getUserID(username))
+      results = self._executeQuery(query, (repoID,))
+      assert len(results) == 1
+      return results[0][0]
       
    def userIsAdmin(self, username):
       return bool(self._getUserField(username, "IsAdmin"))
