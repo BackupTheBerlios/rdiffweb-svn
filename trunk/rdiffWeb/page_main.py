@@ -71,7 +71,7 @@ class rdiffPage:
 
    def writeErrorPage(self, error):
       page = self.startPage("Error")
-      page = page + error
+      page = page + self.compileTemplate("error.html", error=error)
       page = page + self.endPage()
       return page
 
