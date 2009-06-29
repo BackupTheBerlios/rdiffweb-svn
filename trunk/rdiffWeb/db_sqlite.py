@@ -14,9 +14,6 @@ class sqliteUserDB:
       self._migrateExistingData()
       self._handleFormatChanges()
 
-   def modificationsSupported(self):
-      return True
-
    def userExists(self, username):
       results = self._executeQuery("SELECT Username FROM users WHERE Username = ?", (username,))
       return len(results) == 1

@@ -60,7 +60,6 @@ def findReposForUser(user, userDBModule):
 
 def findReposForAllUsers(verbose):
    userDBModule = db.userDB().getUserDBModule()
-   if not userDBModule.modificationsSupported(): return
    
    users = userDBModule.getUserList()
    for user in users:

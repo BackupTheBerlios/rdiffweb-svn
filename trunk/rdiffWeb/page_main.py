@@ -58,8 +58,7 @@ class rdiffPage:
 
    def writeTopLinks(self):
       pages = [("/status/", "Backup Status")]
-      if self.getUserDB().modificationsSupported():
-         pages.append(("/prefs", "Preferences"))
+      pages.append(("/prefs", "Preferences"))
       if self.getUserDB().userIsAdmin(self.getUsername()):
          pages.append(("/admin", "Admin"))
       pages.append(("/logout", "Log Out"))

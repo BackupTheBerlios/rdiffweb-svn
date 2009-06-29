@@ -7,8 +7,6 @@ import urllib
 import rdw_spider_repos
 import email_notification
 
-#TODO: remove all the modificationsSupported calls
-
 class rdiffPreferencesPage(page_main.rdiffPage):
    
    def index(self, **parms):
@@ -31,9 +29,6 @@ class rdiffPreferencesPage(page_main.rdiffPage):
    index.exposed = True
    
    def _changePassword(self, currentPassword, newPassword, confirmPassword):
-      if not self.getUserDB().modificationsSupported():
-         return self._getPrefsPage(errorMessage="Password changing is not supported with the active user database.")
-      
       if not self.getUserDB().areUserCredentialsValid(self.getUsername(), currentPassword):
          return self._getPrefsPage(errorMessage="The 'Current Password' is invalid.")
       
@@ -68,9 +63,6 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       return self._getPrefsPage(statusMessage="Successfully changed notification settings.")
    
    def _setRestoreType(self, restoreType):
-      if not self.getUserDB().modificationsSupported():
-         return self.getPrefsPage(errorMessage="Setting the restore format is not supported with the active user database.")
-      
       if restoreType == 'zip' or restoreType == 'tgz':
          self.getUserDB().setUseZipFormat(self.getUsername(), restoreType == 'zip')
       else:

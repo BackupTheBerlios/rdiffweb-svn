@@ -15,9 +15,6 @@ class mysqlUserDB:
       self._connect()
       self._updateToLatestFormat()
 
-   def modificationsSupported(self):
-      return True
-
    def userExists(self, username):
       results = self._executeQuery("SELECT Username FROM users WHERE Username = %(user)s", user=username)
       return len(results) == 1

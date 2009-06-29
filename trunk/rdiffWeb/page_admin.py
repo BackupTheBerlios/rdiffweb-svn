@@ -70,9 +70,6 @@ class rdiffAdminPage(page_main.rdiffPage):
          return self._generatePageHtml("", "Email notifications are disabled.")
 
    def _changeNotifications(self, parms):
-      if not self.getUserDB().modificationsSupported():
-         return self._getPrefsPage(errorMessage="Email notification is not supported with the active user database.")
-
       users = self.getUserDB().getUserList()
       notify_options = email_notification.loadNotificationsTableResults(parms)
       for option in notify_options:

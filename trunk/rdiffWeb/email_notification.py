@@ -45,8 +45,7 @@ def notificationsEnabled(userDB):
    notifier = emailNotifier()
    return notifier.getEmailHost() != "" and\
           notifier.getEmailSender() != "" and\
-          notifier.getNotificationTimeStr() != "" and\
-          userDB.modificationsSupported()
+          notifier.getNotificationTimeStr()
 
 class emailNotifier:
    def __init__(self):
