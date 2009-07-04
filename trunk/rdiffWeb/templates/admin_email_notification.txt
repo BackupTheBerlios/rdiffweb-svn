@@ -1,7 +1,3 @@
-From: ^sender$
-To: ^to$
-Subject: Backup Failures for ^date$
-
 The following users have repositories which have not been backed up recently:
 
 <!--StartRepeat:users-->

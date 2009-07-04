@@ -1,7 +1,3 @@
-From: ^sender$
-To: ^to$
-Subject: Backup Failures for ^user$
-
 The following backup locations have not been backed up recently:
 
 Backup Location         Last Backup Date     Max Days Between Backups

@@ -1,19 +1,27 @@
 #!/usr/bin/python
 
+import datetime
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
 import smtplib
+import threading
+import time
 
 import rdw_config
 import db
 import librdiff
 import rdw_helpers
 import rdw_logging
-import datetime
-import threading
-import time
 
 def startEmailNotificationThread(killEvent):
    newThread = emailNotifyThread(killEvent)
    newThread.start()
+
+def notificationsEnabled(userDB):
+   notifier = emailNotifier()
+   return notifier.getEmailHost() != "" and\
+          notifier.getEmailSender() != "" and\
+          notifier.getNotificationTimeStr()
 
 class emailNotifyThread(threading.Thread):
    def __init__(self, killEvent):
@@ -41,12 +49,6 @@ class emailNotifyThread(threading.Thread):
          except Exception:
             rdw_logging.log_exception()
 
-def notificationsEnabled(userDB):
-   notifier = emailNotifier()
-   return notifier.getEmailHost() != "" and\
-          notifier.getEmailSender() != "" and\
-          notifier.getNotificationTimeStr()
-
 class emailNotifier:
    def __init__(self):
       self.userDB = db.userDB().getUserDBModule()
@@ -68,14 +70,15 @@ class emailNotifier:
                         
             if oldRepos:
                userEmailAddress = notifySettings['email']
-               emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos,
-                                                       sender=self.getEmailSender(), user=user, to=userEmailAddress)
-      
-               session = smtplib.SMTP(self.getEmailHost())
-               if self._getEmailUsername():
-                  session.login(self._getEmailUsername(), self._getEmailPassword())
-               smtpresult = session.sendmail(self.getEmailSender(), userEmailAddress.split(","), emailText)
-               session.quit()
+               parms = {
+                  'repos': oldRepos,
+                  'sender': self.getEmailSender(),
+                  'user': user,
+                  'to': userEmailAddress
+               }
+               self._sendNotifyEmail('email_notification', parms,
+                                    userEmailAddress, self.getEmailSender(),
+                                    'Recent backup failures')
          except Exception:
             rdw_logging.log_exception()
 
@@ -104,21 +107,20 @@ class emailNotifier:
             if oldRepos:
                oldUserRepos.append({
                   'user': user,
-                  'maxAge': maxAge,
+                  'maxAge': notifySettings['adminMaxAge'],
                   'repos': oldRepos
                })
 
-         session = smtplib.SMTP(self.getEmailHost())
-         if self._getEmailUsername():
-            session.login(self._getEmailUsername(), self._getEmailPassword())
-         for email in adminEmails:
-            emailText = rdw_helpers.compileTemplate("admin_email_notification.txt",
-                                                    users=oldUserRepos,
-                                                    sender=self.getEmailSender(),
-                                                    date=datetime.date.today().strftime('%m/%d/%Y'),
-                                                    to=email)
-            smtpresult = session.sendmail(self.getEmailSender(), email.split(","), emailText)
-         session.quit()
+         email = ', '.join(adminEmails)
+         parms = {
+            'users': oldUserRepos,
+            'sender': self.getEmailSender(),
+            'date': datetime.date.today().strftime('%m/%d/%Y'),
+            'to': email
+         }
+         self._sendNotifyEmail('admin_email_notification', parms, email,
+                               self.getEmailSender(),
+                               'Backup Failures for ' + parms['date'])
 
    def notificationsEnabled(self):
       return notificationsEnabled(self.userDB)
@@ -172,6 +174,34 @@ class emailNotifier:
    
    def _getEmailPassword(self):
       return rdw_config.getConfigSetting("emailPassword")
+
+   def _sendNotifyEmail(self, templateTitle, templateParms, to, from_, subject):
+      emailText = rdw_helpers.compileTemplate(templateTitle+'.txt',
+                                             **templateParms)
+      emailHtml = rdw_helpers.compileTemplate(templateTitle+'.html',
+                                             **templateParms)
+
+      msgRoot = MIMEMultipart('related')
+      msgRoot['Subject'] = subject
+      msgRoot['From'] = from_
+      msgRoot['To'] = to
+
+      # Attach HTML version
+      msgAlternative = MIMEMultipart('alternative')
+      msgRoot.attach(msgAlternative)
+      msgAlternative.attach(MIMEText(emailHtml, 'html'))
+
+      # Attach plaintext version
+      msgAlternative = MIMEMultipart('alternative')
+      msgRoot.attach(msgAlternative)
+      msgAlternative.attach(MIMEText(emailText))
+
+      # Send email
+      session = smtplib.SMTP(self.getEmailHost())
+      if self._getEmailUsername():
+         session.login(self._getEmailUsername(), self._getEmailPassword())
+      smtpresult = session.sendmail(from_, to.split(","), msgRoot.as_string())
+      session.quit()
 
 def buildNotificationsTable(notify_options):
    """ options should be a dictionary of optionName to selectedOptionNum """

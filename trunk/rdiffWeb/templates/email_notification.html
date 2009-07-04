@@ -1,0 +1,53 @@
+<html>
+<head>
+   <style>
+   body
+   {
+      font-family: sans-serif;
+   }
+   h1,
+   h2,
+   h3,
+   table thead
+   {
+      color: #3162a6;
+   }
+   table
+   {
+      border-collapse: collapse;
+   }
+   table thead
+   {
+      text-align: left;
+      font-size: 14pt;
+      font-weight: bold;
+      background-color: #DCE4F9;
+      border-bottom: 2px solid #F5F5F5;
+   }
+
+   table td
+   {
+      padding: 0.25em 2em 0.25em 0.15em;
+      vertical-align: bottom;
+      font-size: 12pt;
+   }
+   </style>
+</head>
+<body>
+   <h2>Recent backup failures</h2>
+   <p>Dear ^user$,<br/>
+      <br/>
+      One or more of your backups haven't completed recently:</p>
+   <table>
+      <thead>
+         <td>Backup</td>
+         <td>Last backup</td>
+      </thead>
+      <!--StartRepeat:repos-->
+      <tr>
+         <td>^repo$</td>
+         <td>^lastBackupDate$</td>
+      </tr>
+      <!--EndRepeat:repos-->
+   </table>
+</body>
