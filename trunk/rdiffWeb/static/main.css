@@ -206,6 +206,7 @@ div#incrementSizePopup
 /* Login page */
 table.Login td
 {
+   padding: 0;
    padding-right: .5em;
 }
 
