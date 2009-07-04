@@ -1,0 +1,41 @@
+p.warning,
+p.error
+{
+   color: red
+}
+
+p.message
+{
+   color: green
+}
+
+.notificationsTable
+{
+   margin-left: 1.5em;
+}
+.NotifyGrouping
+{
+   margin: 0.3em;
+}
+.NotifyGrouping.Disabled td
+{
+   color: #CCC;
+}
+
+tr.notificationsRow td
+{
+   border-top:1px solid #ccc;
+   padding-bottom: 5px;
+   padding-top: 5px;
+   padding-right: 1em;
+}
+
+.groupboxDiv
+{
+   display: table-cell;
+}
+.groupboxDiv .roundedBorderBackground
+{
+   background-color: #FFF;
+}
+

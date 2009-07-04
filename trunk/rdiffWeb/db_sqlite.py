@@ -34,10 +34,6 @@ class sqliteUserDB:
       repos.sort(lambda x, y: cmp(x.upper(), y.upper()))
       return repos
       
-   def getUserEmail(self, username):
-      if not self.userExists(username): return None
-      return self._getUserField(username, "userEmail")
-   
    def useZipFormat(self, username):
       if not self.userExists(username): return False
       return bool(self._getUserField(username, "restoreFormat"))
@@ -52,6 +48,30 @@ class sqliteUserDB:
       if type(field) == str or type(field) == unicode:
          return field and str(field).lower() == 'true'
       return bool(field)
+
+   def getNotificationSettings(self, username):
+      repos = {}
+      for repo in self.getUserRepoPaths(username):
+         repos[repo] = int(self._getRepoField(repo, username, 'MaxAge'))
+      return {
+         'email': self._getUserField(username, "userEmail"),
+         'adminMaxAge': int(self._getUserField(username,
+                                               'AdminMonitoredMaxAge')),
+         'anyRepoMaxAge': int(self._getUserField(username, 'AnyRepoMaxAge')),
+         'repos': repos
+      }
+      
+   def getRepoID(self, username, repoPath):
+      return self._getRepoField(repoPath, username, 'RepoID')
+      
+   def getRepoName(self, username, repoID):
+      query = "SELECT RepoPath FROM repos WHERE RepoID=? AND UserID = " + str(self._getUserID(username))
+      results = self._executeQuery(query, (repoID,))
+      assert len(results) == 1
+      return results[0][0]
+      
+   def userIsAdmin(self, username):
+      return bool(self._getUserField(username, "IsAdmin"))
 
    def getUserList(self):
       query = "SELECT UserName FROM users"
@@ -79,10 +99,6 @@ class sqliteUserDB:
       self._executeQuery(query, (userRoot, username))
       self.userRootCache[username] = userRoot # update cache
 
-   def setUserEmail(self, username, userEmail):
-      if not self.userExists(username): raise ValueError
-      self._setUserField(username, 'UserEmail', userEmail)
-      
    def setUserRepos(self, username, repoPaths):
       if not self.userExists(username): raise ValueError
       userID = self._getUserID(username)
@@ -112,45 +128,26 @@ class sqliteUserDB:
       if not self.userExists(username): raise ValueError
       self._setUserField(username, 'RestoreFormat', bool(useZip))
  
-   def setAdminMonitoredRepoMaxAge(self, username, maxAge):
-      if not self.userExists(username): raise ValueError
-      self._setUserField(username, 'AdminMonitoredMaxAge', maxAge)
-
    def setAllowRepoDeletion(self, username, allowDeletion):
       if not self.userExists(username): raise ValueError
       self._setUserField(username, 'AllowRepoDeletion', bool(allowDeletion))
  
-   def setRepoMaxAge(self, username, repoPath, maxAge):
-      if not repoPath in self.getUserRepoPaths(username): raise ValueError
-      query = "UPDATE repos SET MaxAge=? WHERE RepoPath=? AND UserID = " + str(self._getUserID(username))
-      self._executeQuery(query, (maxAge, repoPath))
-      
-   def getRepoMaxAge(self, username, repoPath):
-      query = "SELECT MaxAge FROM repos WHERE RepoPath=? AND UserID = " + str(self._getUserID(username))
-      results = self._executeQuery(query, (repoPath,))
-      assert len(results) == 1
-      return int(results[0][0])
-
-   def getRepoID(self, username, repoPath):
-      query = "SELECT RepoID FROM repos WHERE RepoPath=? AND UserID = " + str(self._getUserID(username))
-      results = self._executeQuery(query, (repoPath,))
-      assert len(results) == 1
-      return int(results[0][0])
-      
-   def getRepoName(self, username, repoID):
-      query = "SELECT RepoPath FROM repos WHERE RepoID=? AND UserID = " + str(self._getUserID(username))
-      results = self._executeQuery(query, (repoID,))
-      assert len(results) == 1
-      return results[0][0]
-      
-   def userIsAdmin(self, username):
-      return bool(self._getUserField(username, "IsAdmin"))
-
+   def setNotificationSettings(self, username, settings):
+      self._setUserField(username, 'UserEmail', settings['email'])
+      self._setUserField(username, 'AdminMonitoredMaxAge',
+                         settings['adminMaxAge'])
+      self._setUserField(username, 'AnyRepoMaxAge', settings['anyRepoMaxAge'])
+      for repo in settings['repos']:
+         if repo in self.getUserRepoPaths(username):
+            self._setRepoField(repo, username, 'MaxAge',
+                               settings['repos'][repo])
+ 
    ########## Helper functions ###########   
    def _encodePath(self, path):
       if isinstance(path, unicode):
          return path.encode('utf-8')
       return path
+
    def _deleteUserRepos(self, username):
       if not self.userExists(username): raise ValueError
       self._executeQuery("DELETE FROM repos WHERE UserID=%d" % self._getUserID(username))
@@ -163,6 +160,13 @@ class sqliteUserDB:
       if not self.userExists(username): return None
       query = "SELECT "+fieldName+" FROM users WHERE Username = ?"
       results = self._executeQuery(query, (username,))
+      assert len(results) == 1
+      return results[0][0]
+
+   def _getRepoField(self, repo, username, field):
+      query = 'SELECT '+field+' FROM repos WHERE RepoPath=? AND UserID = ' +\
+               str(self._getUserID(username))
+      results = self._executeQuery(query, (repo,))
       assert len(results) == 1
       return results[0][0]
       
@@ -178,6 +182,12 @@ class sqliteUserDB:
       query = 'UPDATE users SET '+fieldName+'=? WHERE Username=?'
       self._executeQuery(query, (valueStr, username))
 
+   def _setRepoField(self, repo, username, field, value):
+      if not repo in self.getUserRepoPaths(username): raise ValueError
+      query = "UPDATE repos SET "+field+"=? WHERE RepoPath=? AND UserID = " +\
+               str(self._getUserID(username))
+      self._executeQuery(query, (value, repo))
+      
    def _hashPassword(self, password):
       import sha
       hasher = sha.new()
@@ -219,7 +229,8 @@ IsAdmin tinyint NOT NULL DEFAULT FALSE,
 UserEmail varchar (255) NOT NULL DEFAULT "",
 RestoreFormat tinyint NOT NULL DEFAULT TRUE,
 AdminMonitoredMaxAge tinyint NOT NULL DEFAULT 0,
-AllowRepoDeletion tinyint NOT NULL DEFAULT FALSE)""",
+AllowRepoDeletion tinyint NOT NULL DEFAULT FALSE,
+AnyRepoMaxAge tinyint NOT NULL DEFAULT 0)""",
 """create table repos (
 RepoID integer primary key autoincrement,
 UserID int(11) NOT NULL, 
@@ -272,6 +283,11 @@ MaxAge tinyint NOT NULL DEFAULT 0)"""
       if not u'AllowRepoDeletion'.lower() in self._getFieldNames('users'):
          print 'Adding AllowRepoDeletion column to users table...'
          self._executeQuery('ALTER TABLE users ADD COLUMN AllowRepoDeletion tinyint NOT NULL DEFAULT FALSE')
+
+      # Handle the addition of AnyRepoMaxAge
+      if not u'AnyRepoMaxAge'.lower() in self._getFieldNames('users'):
+         print 'Adding AnyRepoMaxAge column to users table...'
+         self._executeQuery('ALTER TABLE users ADD COLUMN AnyRepoMaxAge tinyint NOT NULL DEFAULT 0')
 
 class sqliteUserDBTest(db_sql.sqlUserDBTest):
    """Unit tests for the sqliteUserDB class"""

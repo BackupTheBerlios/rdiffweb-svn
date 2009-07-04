@@ -44,21 +44,31 @@ class rdiffPreferencesPage(page_main.rdiffPage):
 
    def _setNotifications(self, parms):
       repos = self.getUserDB().getUserRepoPaths(self.getUsername())
-      
-      for parmName in parms.keys():
-         if parmName == "userEmail":
-            self.getUserDB().setUserEmail(self.getUsername(), parms[parmName])
+
+      notifySettings = self.getUserDB().getNotificationSettings(self.getUsername())
+
+      notifyForAnyRepo = parms['NotifyType'] == 'any'
+      if not notifyForAnyRepo:
+         notifySettings['anyRepoMaxAge'] = 0
+
+      for key in parms.keys():
+         if key == "userEmail":
+            notifySettings['email'] = parms[key]
+         elif key == 'AllReposInterval':
+            if notifyForAnyRepo:
+               notifySettings['anyRepoMaxAge'] = int(parms[key])
          else:
-            try:
-               repoID = int(parmName)
-            except ValueError:
-               pass
-            else:
-               repoName = self.getUserDB().getRepoName(self.getUsername(),
-                                                      int(parmName))
-               if not repoName is None:
-                  self.getUserDB().setRepoMaxAge(self.getUsername(), repoName,
-                                                 int(parms[parmName]))
+            if not notifyForAnyRepo:
+               try:
+                  repoID = int(key)
+               except ValueError:
+                  pass
+               else:
+                  repoName = self.getUserDB().getRepoName(self.getUsername(),
+                                                         int(key))
+                  if not repoName is None:
+                     notifySettings['repos'][repoName] = int(parms[key])
+      self.getUserDB().setNotificationSettings(self.getUsername(), notifySettings)
 
       return self._getPrefsPage(statusMessage="Successfully changed notification settings.")
    
@@ -75,31 +85,46 @@ class rdiffPreferencesPage(page_main.rdiffPage):
       return self._getPrefsPage(statusMessage="Successfully %s backup deletion and modification." % verb)
    
    def _getPrefsPage(self, errorMessage="", statusMessage=""):
+      def getNotifyIntervals(selectedOption, includeNone):
+         def getDesc(num):
+            if num == 0:
+               return 'Ignore'
+            elif num == 1:
+               return '1 day'
+            else:
+               return str(num) + ' days'
+
+         start = 0
+         if not includeNone:
+            start = 1
+         return [{
+            'optionValue': num,
+            'optionDesc': getDesc(num),
+            'optionSelected': num == selectedOption
+         } for num in range(start, 8)]
+
       # Email notification options
+      notifySettings = self.getUserDB().getNotificationSettings(self.getUsername())
       repos = []
       for repo in self.getUserDB().getUserRepoPaths(self.getUsername()):
-         maxAge = self.getUserDB().getRepoMaxAge(self.getUsername(), repo)
-         options = [{
-            'optionValue': num,
-            'optionDesc': str(num) + ' days' if num else 'Don\'t notify',
-            'optionSelected': num == maxAge
-         } for num in range(0, 8)]
-
          repos.append({
             'repoName': repo,
             'repoID': self.getUserDB().getRepoID(self.getUsername(), repo),
-            'notifyOptions': options
+            'notifyOptions': getNotifyIntervals(notifySettings['repos'][repo],
+                                                True)
          })
 
       title = "User Preferences"
-      email = self.getUserDB().getUserEmail(self.getUsername());
       parms = {
          "title" : title,
          "error" : errorMessage,
          "message" : statusMessage,
-         "userEmail" : email,
+         "userEmail" : notifySettings['email'],
          "notificationsEnabled" : email_notification.emailNotifier().notificationsEnabled(),
-         "repos": repos,
+         "notifyForAny": notifySettings['anyRepoMaxAge'] != 0,
+         "notifyOptions": getNotifyIntervals(notifySettings['anyRepoMaxAge'],
+                                             False),
+         "notifyRepos": repos,
          "backups" : [],
          "useZipFormat": self.getUserDB().useZipFormat(self.getUsername()),
          "allowRepoDeletion": self.getUserDB().allowRepoDeletion(self.getUsername())

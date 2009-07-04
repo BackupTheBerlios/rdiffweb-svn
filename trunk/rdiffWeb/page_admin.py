@@ -109,7 +109,7 @@ class rdiffAdminPage(page_main.rdiffPage):
                 "message" : message,
                 "notificationsEnabled" : notificationsEnabled,
                 "notificationsTable" : notificationsTable,
-                "userEmail" : self.getUserDB().getUserEmail(user),
+                "userEmail" : self.getUserDB().getNotificationSettings(user)['email'],
                 "error" : error }
       return self.startPage("Administration") + self.compileTemplate("admin_main.html", **parms) + self.endPage()
 

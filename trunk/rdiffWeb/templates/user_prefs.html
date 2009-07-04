@@ -5,31 +5,34 @@
 </head>
 <body>
 <!--EndDelete-->
+<link rel="stylesheet" href="../static/prefs.css" type="text/css" />
+<script type="text/javascript" src="../static/prefs.js"></script>
 
 <h2>User Preferences</h2>
 <p>
 <!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
 <!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
 <form action="" method="post">
-<input style="display:none" name="form" value="setPassword"/>
 <div class="groupboxDiv">
 <div class="roundedBorderContents">
 <h3 class="groupboxHeader">Change Password</h3>
 <table>
 <tr>
    <td>Current Password:</td>
-   <td><input class="textInput" type="password" name="current"/></td>
+   <td><input type="password" name="current"/></td>
 </tr>
 <tr>
    <td>New Password:</td>
-   <td><input class="textInput" type="password" name="new"/></td>
+   <td><input type="password" name="new"/></td>
 </tr>
 <tr>
    <td>Confirm New Password:</td>
-   <td><input class="textInput" type="password" name="confirm"/></td>
+   <td><input type="password" name="confirm"/></td>
 </tr>
 <tr>
-   <td style="height: 2em"> <input class="groupboxButton" type="submit" value="Change Password" /></td>
+   <td style="height: 2em">
+      <button type="submit" name="form" value="setPassword">Change Password</button>
+   </td>
 </tr>
 </table>
 </div>
@@ -38,17 +41,15 @@
 
 
 <form action="" method="post">
-<input style="display:none" name="form" value="updateRepos"/>
 <div class="groupboxDiv">
 <div class="roundedBorderContents">
 <h3 class="groupboxHeader">Update Backup Locations</h3>
-<input type="submit" class="groupboxButton" value="Find and Update Backup Locations" />
+<button type="submit" name="form" value="updateRepos">Find and Update Backup Locations</button>
 </div>
 </div>
 </form>
 
 <form action="" method="post">
-<input style="display:none" name="form" value="setRestoreType"/>
 <div class="groupboxDiv">
    <div class="roundedBorderContents">
       <h3 class="groupboxHeader">Directory Restore Format</h3>
@@ -60,49 +61,52 @@
       <br/><br/>
          (If unsure, select the .zip format.)
       <br/>
-      <input type="submit" class="groupboxButton" value="Update Restore Preferences" />
+      <button type="submit" name="form" value="setRestoreType">Update Restore Preferences</button>
    </div>
 </div>
 </form>
 
 <!--StartIncludeIf:notificationsEnabled-->
 <form action="" method="post">
-<input style="display:none" name="form" value="setNotifications"/>
 <div class="groupboxDiv">
 <div class="roundedBorderContents">
    <h3 class="groupboxHeader">Backup Notifications</h3>
-   <table class="emailTable">
-      <tr>
-         <td>Send an email to</td>
-         <td><input id="userEmail" class="textInput" name="userEmail" value="^userEmail$"></td>
-         <td align="left">
-            when my backups do not complete for:
-         </td>
-      </tr>
-   </table>
-   <table class="notificationsTable">
-      <tr></tr>
-      <!--StartRepeat:repos-->
-      <tr class="notificationsRow">
-         <td>^repoName$ : </td>
-         <td>
-            <select name="^repoID$">
-               <!--StartRepeat:notifyOptions-->
-               <option <!--StartIncludeIf:optionSelected-->selected<!--EndIncludeIf:optionSelected--> value="^optionValue$">^optionDesc$</option>
-               <!--EndRepeat:notifyOptions-->
-            </select>
-         </td>
-      </tr>
-      <!--EndRepeat:repos-->
-   </table>
-   <div><input type="submit" class="groupboxButton" value="Change Notifications" /></div>
+   <div>Send an email to <input id="userEmail" type="text" name="userEmail" value="^userEmail$"> when:</div>
+   <div class="NotifyGrouping">
+      <label><input StartIncludeIf:notifyForAny- checked="on" EndIncludeIf:notifyForAny-
+                  type="radio" name="NotifyType" value="any"/> any backup does not complete for</label>
+      <select name="AllReposInterval">
+         <!--StartRepeat:notifyOptions-->
+         <option StartIncludeIf:optionSelected- selected EndIncludeIf:optionSelected- value="^optionValue$">^optionDesc$</option>
+         <!--EndRepeat:notifyOptions-->
+      </select>
+   </div>
+   <div class="NotifyGrouping">
+      <label><input StartDeleteIf:notifyForAny- checked="on" EndDeleteIf:notifyForAny-
+                  type="radio" name="NotifyType" value="specific"/> the following backups do not complete for:</label>
+      <table class="notificationsTable">
+         <!--StartRepeat:notifyRepos-->
+         <tr class="notificationsRow">
+            <td>^repoName$ : </td>
+            <td>
+               <select name="^repoID$">
+                  <!--StartRepeat:notifyOptions-->
+                  <option StartIncludeIf:optionSelected- selected EndIncludeIf:optionSelected- value="^optionValue$">^optionDesc$</option>
+                  <!--EndRepeat:notifyOptions-->
+               </select>
+            </td>
+         </tr>
+         <!--EndRepeat:notifyRepos-->
+      </table>
+   </div>
+      <button type="submit" name="form" value="setNotifications">Change Notifications</button>
+   </div>
 </div>
 </div>
 </form>
 <!--EndIncludeIf:notificationsEnabled-->
 
 <form action="" method="post">
-<input style="display:none" name="form" value="setAllowRepoDeletion"/>
 <div class="groupboxDiv">
    <div class="roundedBorderContents">
       <h3 class="groupboxHeader">Backup Modification</h3>
@@ -110,7 +114,7 @@
 		StartIncludeIf:allowRepoDeletion- checked='checked' EndIncludeIf:allowRepoDeletion->
                 </input>Allow me to modify/delete my backups.</label>
       <br/>
-      <input type="submit" class="groupboxButton" value="Update" />
+      <button type="submit" name="form" value="setAllowRepoDeletion">Update</button>
    </div>
 </div>
 </form>

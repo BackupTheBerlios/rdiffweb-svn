@@ -13,6 +13,15 @@ a:hover
    text-decoration: underline;
 }
 
+input[type=text],
+input[type=password]
+{
+   font-size: 100%;
+   border: 2px solid #CCC;
+   width: 17em;
+   margin: 0.25em 0 0 0.25em;
+}
+
 #NavBar .roundedBorderBackground,
 #NavBar .roundedBorderContents
 {
@@ -240,53 +249,12 @@ table.Login td
    color: black;
 }
 
-/* Prefs page */
-p.warning,
-p.error
-{
-   color: red
-}
-
-p.message
-{
-   color: green
-}
-
-table.emailTable td
-{
-   vertical-align: top;
-   padding-right: 0.5em;
-   text-align: right;
-}
-
-tr.notificationsRow td
-{
-   border-top:1px solid #ccc;
-   padding-bottom: 5px;
-   padding-top: 5px;
-   padding-right: 1em;
-}
-
-.groupboxDiv
-{
-   display: table-cell;
-}
-.groupboxDiv .roundedBorderBackground
-{
-   background-color: #FFF;
-}
-
 h1,
 h2,
 h3,
 table thead
 {
    color: #3162a6;
-}
-
-input.textInput
-{
-   width: 17em;
 }
 
 .groupboxHeader

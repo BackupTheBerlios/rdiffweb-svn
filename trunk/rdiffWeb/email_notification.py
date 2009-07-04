@@ -55,18 +55,19 @@ class emailNotifier:
       # Send emails to each user, if requested
       for user in self.userDB.getUserList():
          try:
+            notifySettings = self.userDB.getNotificationSettings(user)
             userRepos = self.userDB.getUserRepoPaths(user)
             oldRepos = []
             for repo in userRepos:
-               maxDaysOld = self.userDB.getRepoMaxAge(user, repo)
                # get the last backup date
                repoPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(user), repo)
-               oldRepoInfo = self._getOldRepoInfo(repo, repoPath, maxDaysOld)
+               oldRepoInfo = self._getOldRepoInfo(repo, repoPath,
+                                                  notifySettings, False)
                if not oldRepoInfo is None:
                   oldRepos.append(oldRepoInfo)
                         
             if oldRepos:
-               userEmailAddress = self.userDB.getUserEmail(user)
+               userEmailAddress = notifySettings['email']
                emailText = rdw_helpers.compileTemplate("email_notification.txt", repos=oldRepos,
                                                        sender=self.getEmailSender(), user=user, to=userEmailAddress)
       
@@ -82,7 +83,7 @@ class emailNotifier:
       adminEmails = []
       for user in self.userDB.getUserList():
          if self.userDB.userIsAdmin(user):
-            userEmail = self.userDB.getUserEmail(user)
+            userEmail = self.userDB.getNotificationSettings(user)['email']
             if userEmail:
                adminEmails.append(userEmail)
 
@@ -90,12 +91,13 @@ class emailNotifier:
          oldUserRepos = []
 
          for user in self.userDB.getUserList():
+            notifySettings = self.userDB.getNotificationSettings(user)
             userRepos = self.userDB.getUserRepoPaths(user)
-            maxAge = self.userDB.getAdminMonitoredRepoMaxAge(user)
             oldRepos = []
             for repo in userRepos:
                repoPath = rdw_helpers.joinPaths(self.userDB.getUserRoot(user), repo)
-               oldRepoInfo = self._getOldRepoInfo(repo, repoPath, maxAge)
+               oldRepoInfo = self._getOldRepoInfo(repo, repoPath,
+                                                  notifySettings, True)
                if not oldRepoInfo is None:
                   oldRepos.append(oldRepoInfo)
 
@@ -130,8 +132,16 @@ class emailNotifier:
    def getNotificationTimeStr(self):
       return rdw_config.getConfigSetting("emailNotificationTime")
    
-   def _getOldRepoInfo(self, repoName, repoPath, maxDaysOld):
-      if maxDaysOld == 0:
+   def _getOldRepoInfo(self, repoName, repoPath,
+                     notifySettings, isAdminMonitoring):
+      if isAdminMonitoring:
+         maxAge = notifySettings['adminMaxAge']
+      else:
+         maxAge = notifySettings['anyRepoMaxAge']
+         if not maxAge:
+            maxAge = notifySettings['repos'][repo]
+
+      if maxAge == 0:
          return None
 
       try:
@@ -140,7 +150,7 @@ class emailNotifier:
          return {
             "repo" : repoName,
             "lastBackupDate" : "never",
-            "maxAge" : maxDaysOld
+            "maxAge" : maxAge
          }
       except Exception:
          rdw_logging.log_exception()
@@ -148,12 +158,12 @@ class emailNotifier:
       else:
          if lastBackup:
             oldestGoodBackupTime = rdw_helpers.rdwTime()
-            oldestGoodBackupTime.initFromMidnightUTC(-maxDaysOld)
+            oldestGoodBackupTime.initFromMidnightUTC(-maxAge)
             if lastBackup.date < oldestGoodBackupTime:
                return {
                   "repo" : repoName,
                   "lastBackupDate" : lastBackup.date.getDisplayString(),
-                  "maxAge" : maxDaysOld
+                  "maxAge" : maxAge
                }
       return None
 
