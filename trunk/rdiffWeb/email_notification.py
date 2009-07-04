@@ -23,7 +23,7 @@ class emailNotifyThread(threading.Thread):
    def run(self):
       self.notifier = emailNotifier()
       if not self.notifier.notificationsEnabled():
-         return;
+         return
       emailTimeStr = rdw_config.getConfigSetting("emailNotificationTime")
       while True:
          try:
@@ -74,7 +74,7 @@ class emailNotifier:
                session = smtplib.SMTP(self.getEmailHost())
                if self._getEmailUsername():
                   session.login(self._getEmailUsername(), self._getEmailPassword())
-               smtpresult = session.sendmail(self.getEmailSender(), userEmailAddress.split(";"), emailText)
+               smtpresult = session.sendmail(self.getEmailSender(), userEmailAddress.split(","), emailText)
                session.quit()
          except Exception:
             rdw_logging.log_exception()
@@ -117,7 +117,7 @@ class emailNotifier:
                                                     sender=self.getEmailSender(),
                                                     date=datetime.date.today().strftime('%m/%d/%Y'),
                                                     to=email)
-            smtpresult = session.sendmail(self.getEmailSender(), email.split(";"), emailText)
+            smtpresult = session.sendmail(self.getEmailSender(), email.split(","), emailText)
          session.quit()
 
    def notificationsEnabled(self):
