@@ -72,7 +72,7 @@ if __name__ == "__main__":
       serverPort = int(rdiffWeb.rdw_config.getConfigSetting("ServerPort"))
    serverHost = '0.0.0.0'
    if rdiffWeb.rdw_config.getConfigSetting("ServerHost") != "":
-      serverPort = rdiffWeb.rdw_config.getConfigSetting("ServerHost")
+      serverHost = rdiffWeb.rdw_config.getConfigSetting("ServerHost")
 
    sslCert = rdiffWeb.rdw_config.getConfigSetting("SslCertificate")
    redirectSetting = rdiffWeb.rdw_config.getConfigSetting("redirectToHttps")
