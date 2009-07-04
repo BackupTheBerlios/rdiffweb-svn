@@ -59,53 +59,6 @@ class mysqlUserDB:
       query = "DELETE FROM users WHERE Username = %(user)s"
       self._executeQuery(query, user=username)
 
-   def setUserInfo(self, username, userRoot, isAdmin):
-      if not self.userExists(username): raise ValueError
-      if isAdmin:
-         adminInt = 1
-      else:
-         adminInt = 0
-      query = "UPDATE users SET UserRoot=%(userRoot)s, IsAdmin="+str(adminInt)+" WHERE Username = %(user)s"
-      self._executeQuery(query, userRoot=userRoot, user=username)
-      self.userRootCache[username] = userRoot # update cache
-
-   def setUserEmail(self, username, userEmail):
-      if not self.userExists(username): raise ValueError
-      self._setUserField(username, 'UserEmail', userEmail)
-      
-   def setUserRepos(self, username, repoPaths):
-      if not self.userExists(username): raise ValueError
-      userID = self._getUserID(username)
-      
-      # We don't want to just delete and recreate the repos, since that
-      # would lose notification information.      
-      existingRepos = self.getUserRepoPaths(username)      
-      reposToDelete = filter(lambda x: not x in repoPaths, existingRepos)
-      reposToAdd = filter(lambda x: not x in existingRepos, repoPaths)
-      
-      # delete any obsolete repos
-      for repo in reposToDelete:
-         query = "DELETE FROM repos WHERE UserID=%(userID)s AND RepoPath= BINARY %(repo)s"
-         self._executeQuery(query, repo=repo, userID=str(userID))
-      
-      # add in new repos
-      query = "INSERT INTO repos (UserID, RepoPath) values (%s, %s)"
-      repoPaths = [ (str(userID), repo) for repo in reposToAdd ]
-      cursor = self.sqlConnection.cursor()
-      cursor.executemany(query, repoPaths)
-
-   def setUserPassword(self, username, password):
-      if not self.userExists(username): raise ValueError
-      self._setUserField(username, 'Password', self._hashPassword(password))
-   
-   def setUseZipFormat(self, username, useZip):
-      if not self.userExists(username): raise ValueError
-      self._setUserField(username, 'RestoreFormat', bool(useZip))
-      
-   def setRepoMaxAge(self, username, repoPath, maxAge):
-      if not repoPath in self.getUserRepoPaths(username): raise ValueError
-      query = "UPDATE repos SET MaxAge=%(maxAge)s WHERE RepoPath = BINARY %(repoPath)s AND UserID = " + str(self._getUserID(username))
-      self._executeQuery(query, maxAge=maxAge, repoPath=repoPath)
       
    def getRepoMaxAge(self, username, repoPath):
       query = "SELECT MaxAge FROM repos WHERE RepoPath = BINARY %(repoPath)s AND UserID = " + str(self._getUserID(username))
@@ -132,18 +85,6 @@ class mysqlUserDB:
       assert len(results) == 1
       return results[0][0]
       
-   def _setUserField(self, username, fieldName, value):
-      if not self.userExists(username): raise ValueError
-      if isinstance(value, bool):
-         if value:
-            valueStr = '1'
-         else:
-            valueStr = '0'
-      else:
-         valueStr = str(value)
-      query = 'UPDATE users SET '+fieldName+'=%(value)s WHERE Username=%(user)s'
-      self._executeQuery(query, value=valueStr, user=username)
-
    def _internalExecuteQuery(self, query, **kwargs):
       cursor = self.sqlConnection.cursor()
       cursor.execute(query, kwargs)
