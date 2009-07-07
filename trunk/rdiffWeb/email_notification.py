@@ -141,7 +141,7 @@ class emailNotifier:
       else:
          maxAge = notifySettings['anyRepoMaxAge']
          if not maxAge:
-            maxAge = notifySettings['repos'][repoPath]
+            maxAge = notifySettings['repos'][repoName]
 
       if maxAge == 0:
          return None
