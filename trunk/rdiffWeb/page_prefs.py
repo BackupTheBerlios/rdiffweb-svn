@@ -12,15 +12,15 @@ class rdiffPreferencesPage(page_main.rdiffPage):
    def index(self, **parms):
       if parms:
          action = parms['form']
-         if action == 'setPassword':
+         if action == 'setPassword' or action == 'Change Password':
             return self._changePassword(parms['current'], parms['new'], parms['confirm'])
-         elif action == 'updateRepos':
+         elif action == 'updateRepos' or action == 'Find and Update Backup Locations':
             return self._updateRepos()
-         elif action == 'setNotifications':
+         elif action == 'setNotifications' or action == 'Change Notifications':
             return self._setNotifications(parms)
-         elif action == 'setRestoreType':
+         elif action == 'setRestoreType' or action == 'Update Restore Preferences':
             return self._setRestoreType(parms['restoreType'])
-         elif action == 'setAllowRepoDeletion':
+         elif action == 'setAllowRepoDeletion' or action == 'Update':
             return self._setAllowRepoDeletion('allowDeletion' in parms)
          else:
             return self._getPrefsPage(errorMessage='Invalid setting.')
