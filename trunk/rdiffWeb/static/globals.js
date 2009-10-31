@@ -51,7 +51,4 @@ window.Lightbox = {
    }
 };
 
-new function()
-{
-   $(Lightbox.init);
-};
+window.$(Lightbox.init);

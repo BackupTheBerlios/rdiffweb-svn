@@ -74,7 +74,9 @@ class rdiffAdminPage(page_main.rdiffPage):
       notify_options = email_notification.loadNotificationsTableResults(parms)
       for option in notify_options:
          if option in users:
-            self.getUserDB().setAdminMonitoredRepoMaxAge(option, notify_options[option])
+            settings = self.getUserDB().getNotificationSettings(option)
+            settings['adminMaxAge'] = notify_options[option]
+            self.getUserDB().setNotificationSettings(option, settings)
 
       return self._generatePageHtml("Successfully changed notifications.", "")
       
@@ -109,7 +111,7 @@ class rdiffAdminPage(page_main.rdiffPage):
                 "message" : message,
                 "notificationsEnabled" : notificationsEnabled,
                 "notificationsTable" : notificationsTable,
-                "userEmail" : self.getUserDB().getNotificationSettings(user)['email'],
+                "userEmail" : self.getUserDB().getNotificationSettings(self.getUsername())['email'],
                 "error" : error }
       return self.startPage("Administration") + self.compileTemplate("admin_main.html", **parms) + self.endPage()
 

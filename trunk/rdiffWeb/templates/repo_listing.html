@@ -4,7 +4,6 @@
 
 <!--StartIncludeIf:error--><p class="error">^error$</p><!--EndIncludeIf:error-->
 <!--StartIncludeIf:message--><p class="message">^message$</p><!--EndIncludeIf:message-->
-<form action="." method="POST">
 <table id="PopupTable">
    <thead>
       <tr>
@@ -18,13 +17,20 @@
    </thead>
    <tbody>
       <!--StartRepeat:repos-->
-      <tr StartIncludeIf:altRow- class="altRow" EndIncludeIf:altRow- >
+         <!--StartIncludeIf:allowRepoDeletion--><form action="." method="POST"><!--EndIncludeIf:allowRepoDeletion-->
+         <tr StartIncludeIf:altRow- class="altRow" EndIncludeIf:altRow- >
          <td class="Icon"><img src="/static/images/repo.png"></img></td>
          <td><!--StartDeleteIf:failed--><a href="^repoBrowseUrl$"><!--EndDeleteIf:failed-->^repoName$<!--StartDeleteIf:failed--></a><!--EndDeleteIf:failed--></td>
          <td>^repoDate$</td><td>^repoSize$</td>
          <td><a href="^repoHistoryUrl$">(more)</a></td>
-         <!--StartIncludeIf:allowRepoDeletion--><td><button type="submit" name="repo" value="^repoName$">Delete this backup</button></td><!--EndIncludeIf:allowRepoDeletion-->
+         <!--StartIncludeIf:allowRepoDeletion-->
+            <td>
+               <input type="hidden" name="repo" value="^repoName$">
+               <button type="submit">Delete this backup</button>
+            </td>
+         <!--EndIncludeIf:allowRepoDeletion-->
       </tr>
+         <!--StartIncludeIf:allowRepoDeletion--></form><!--EndIncludeIf:allowRepoDeletion-->
       <!--EndRepeat:repos-->
    </tbody>
 </table>
